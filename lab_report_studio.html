@@ -1,0 +1,1923 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lab Report Master Studio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+
+    body {
+      font-family: 'Roboto', Arial, sans-serif;
+      background-color: #0b1329;
+      color: #0f172a;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Print and A4 Sheet Styles */
+    .a4-sheet {
+      width: 210mm;
+      min-height: 297mm;
+      padding: 10mm 15mm 12mm 15mm;
+      margin: 16px auto;
+      background: #ffffff;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.35);
+      box-sizing: border-box;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      page-break-after: always;
+      break-after: page;
+    }
+
+    .a4-sheet:last-child {
+      page-break-after: auto;
+      break-after: auto;
+    }
+
+    /* Inline Editable Styling */
+    .editable-field {
+      border-bottom: 1px dashed #94a3b8;
+      outline: none;
+      padding: 1px 4px;
+      transition: all 0.2s;
+      display: inline-block;
+      min-width: 32px;
+    }
+    .editable-field:hover, .editable-field:focus {
+      background-color: #fef9c3;
+      border-bottom-color: #2563eb;
+      border-radius: 2px;
+    }
+
+    /* Faded / Dimmed state when toggle is OFF (screen me pheeka dikhe, print me gayab) */
+    .row-disabled {
+      opacity: 0.32;
+      background-color: #f8fafc;
+      text-decoration: line-through decoration-slate-400;
+      transition: opacity 0.2s, background-color 0.2s;
+    }
+    .row-disabled .editable-field {
+      border-bottom: none;
+    }
+
+    /* Interactive Widal Dilution Cell */
+    .widal-cell {
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s, transform 0.1s;
+    }
+    .widal-cell:hover {
+      background-color: #bae6fd !important;
+    }
+    .widal-cell:active {
+      transform: scale(0.9);
+    }
+
+    /* Toggle Switch UI */
+    .switch-ui {
+      position: relative;
+      display: inline-block;
+      width: 32px;
+      height: 18px;
+    }
+    .switch-ui input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #cbd5e1;
+      transition: .2s;
+      border-radius: 20px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 12px;
+      width: 12px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .2s;
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: #0284c7;
+    }
+    input:checked + .slider:before {
+      transform: translateX(14px);
+    }
+
+    /* Print Specific Rules */
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 8mm 12mm 10mm 12mm;
+      }
+      body {
+        background: #ffffff !important;
+        color: #000000 !important;
+      }
+      .no-print, #sidebarPanel, #topBarHeader, #shareModal {
+        display: none !important;
+      }
+      #mainContentArea {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        height: auto !important;
+        overflow: visible !important;
+      }
+      .a4-sheet {
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        width: 100% !important;
+        min-height: 280mm !important;
+      }
+      .editable-field {
+        border-bottom: none !important;
+        background: transparent !important;
+        padding: 0 !important;
+      }
+      /* OFF rows are completely removed from print layout */
+      .row-disabled {
+        display: none !important;
+      }
+      /* Hidden Doctor / DMLT blocks completely vanish in print */
+      .doctor-hidden {
+        display: none !important;
+      }
+      .dmlt-hidden {
+        display: none !important;
+      }
+      .page-content-wrapper {
+        page-break-inside: avoid;
+      }
+    }
+  </style>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.sticky{position:sticky}.inset-0{inset:0px}.top-0{top:0px}.z-20{z-index:20}.z-30{z-index:30}.z-40{z-index:40}.z-50{z-index:50}.mb-1{margin-bottom:0.25rem}.mb-1\.5{margin-bottom:0.375rem}.mb-2{margin-bottom:0.5rem}.mb-3{margin-bottom:0.75rem}.mb-4{margin-bottom:1rem}.mr-1{margin-right:0.25rem}.mr-1\.5{margin-right:0.375rem}.mt-1{margin-top:0.25rem}.mt-1\.5{margin-top:0.375rem}.mt-2{margin-top:0.5rem}.mt-2\.5{margin-top:0.625rem}.mt-4{margin-top:1rem}.mt-8{margin-top:2rem}.mt-\[2px\]{margin-top:2px}.flex{display:flex}.grid{display:grid}.hidden{display:none}.h-14{height:3.5rem}.h-4{height:1rem}.h-8{height:2rem}.h-\[100px\]{height:100px}.h-screen{height:100vh}.h-6{height:1.5rem}.max-h-48{max-height:12rem}.min-h-\[60px\]{min-height:60px}.w-1\/2{width:50%}.w-1\/3{width:33.333333%}.w-1\/4{width:25%}.w-28{width:7rem}.w-36{width:9rem}.w-4{width:1rem}.w-8{width:2rem}.w-\[15\%\]{width:15%}.w-\[18\%\]{width:18%}.w-\[25\%\]{width:25%}.w-\[390px\]{width:390px}.w-\[40px\]{width:40px}.w-\[42\%\]{width:42%}.w-full{width:100%}.w-6{width:1.5rem}.max-w-md{max-width:28rem}.flex-1{flex:1 1 0%}.shrink-0{flex-shrink:0}.border-collapse{border-collapse:collapse}.rotate-180{--tw-rotate:180deg;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.cursor-pointer{cursor:pointer}.list-inside{list-style-position:inside}.list-decimal{list-style-type:decimal}.grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.flex-col{flex-direction:column}.items-end{align-items:flex-end}.items-center{align-items:center}.items-baseline{align-items:baseline}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1{gap:0.25rem}.gap-1\.5{gap:0.375rem}.gap-2{gap:0.5rem}.gap-x-6{column-gap:1.5rem}.space-x-2 > :not([hidden]) ~ :not([hidden]){--tw-space-x-reverse:0;margin-right:calc(0.5rem * var(--tw-space-x-reverse));margin-left:calc(0.5rem * calc(1 - var(--tw-space-x-reverse)))}.space-x-2\.5 > :not([hidden]) ~ :not([hidden]){--tw-space-x-reverse:0;margin-right:calc(0.625rem * var(--tw-space-x-reverse));margin-left:calc(0.625rem * calc(1 - var(--tw-space-x-reverse)))}.space-x-3 > :not([hidden]) ~ :not([hidden]){--tw-space-x-reverse:0;margin-right:calc(0.75rem * var(--tw-space-x-reverse));margin-left:calc(0.75rem * calc(1 - var(--tw-space-x-reverse)))}.space-y-0\.5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.125rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.125rem * var(--tw-space-y-reverse))}.space-y-1 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.25rem * var(--tw-space-y-reverse))}.space-y-1\.5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.375rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.375rem * var(--tw-space-y-reverse))}.space-y-2 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.5rem * var(--tw-space-y-reverse))}.space-y-2\.5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.625rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.625rem * var(--tw-space-y-reverse))}.space-y-3 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.75rem * var(--tw-space-y-reverse))}.space-y-4 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem * var(--tw-space-y-reverse))}.divide-y > :not([hidden]) ~ :not([hidden]){--tw-divide-y-reverse:0;border-top-width:calc(1px * calc(1 - var(--tw-divide-y-reverse)));border-bottom-width:calc(1px * var(--tw-divide-y-reverse))}.divide-gray-200 > :not([hidden]) ~ :not([hidden]){--tw-divide-opacity:1;border-color:rgb(229 231 235 / var(--tw-divide-opacity, 1))}.overflow-hidden{overflow:hidden}.overflow-y-auto{overflow-y:auto}.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rounded{border-radius:0.25rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:0.5rem}.rounded-xl{border-radius:0.75rem}.border{border-width:1px}.border-b{border-bottom-width:1px}.border-b-2{border-bottom-width:2px}.border-r{border-right-width:1px}.border-t{border-top-width:1px}.border-t-2{border-top-width:2px}.border-dashed{border-style:dashed}.border-amber-500\/30{border-color:rgb(245 158 11 / 0.3)}.border-black{--tw-border-opacity:1;border-color:rgb(0 0 0 / var(--tw-border-opacity, 1))}.border-gray-200{--tw-border-opacity:1;border-color:rgb(229 231 235 / var(--tw-border-opacity, 1))}.border-gray-300{--tw-border-opacity:1;border-color:rgb(209 213 219 / var(--tw-border-opacity, 1))}.border-slate-600{--tw-border-opacity:1;border-color:rgb(71 85 105 / var(--tw-border-opacity, 1))}.border-slate-700{--tw-border-opacity:1;border-color:rgb(51 65 85 / var(--tw-border-opacity, 1))}.border-slate-700\/50{border-color:rgb(51 65 85 / 0.5)}.border-slate-700\/60{border-color:rgb(51 65 85 / 0.6)}.border-slate-700\/80{border-color:rgb(51 65 85 / 0.8)}.border-teal-500\/40{border-color:rgb(20 184 166 / 0.4)}.border-teal-500\/50{border-color:rgb(20 184 166 / 0.5)}.border-teal-600\/40{border-color:rgb(13 148 136 / 0.4)}.border-slate-800{--tw-border-opacity:1;border-color:rgb(30 41 59 / var(--tw-border-opacity, 1))}.bg-black\/70{background-color:rgb(0 0 0 / 0.7)}.bg-blue-600{--tw-bg-opacity:1;background-color:rgb(37 99 235 / var(--tw-bg-opacity, 1))}.bg-emerald-600{--tw-bg-opacity:1;background-color:rgb(5 150 105 / var(--tw-bg-opacity, 1))}.bg-gray-100{--tw-bg-opacity:1;background-color:rgb(243 244 246 / var(--tw-bg-opacity, 1))}.bg-gray-50{--tw-bg-opacity:1;background-color:rgb(249 250 251 / var(--tw-bg-opacity, 1))}.bg-slate-800{--tw-bg-opacity:1;background-color:rgb(30 41 59 / var(--tw-bg-opacity, 1))}.bg-slate-800\/95{background-color:rgb(30 41 59 / 0.95)}.bg-slate-900{--tw-bg-opacity:1;background-color:rgb(15 23 42 / var(--tw-bg-opacity, 1))}.bg-slate-900\/60{background-color:rgb(15 23 42 / 0.6)}.bg-slate-900\/80{background-color:rgb(15 23 42 / 0.8)}.bg-slate-950{--tw-bg-opacity:1;background-color:rgb(2 6 23 / var(--tw-bg-opacity, 1))}.bg-teal-500\/20{background-color:rgb(20 184 166 / 0.2)}.bg-teal-900\/60{background-color:rgb(19 78 74 / 0.6)}.bg-yellow-100{--tw-bg-opacity:1;background-color:rgb(254 249 195 / var(--tw-bg-opacity, 1))}.bg-slate-700{--tw-bg-opacity:1;background-color:rgb(51 65 85 / var(--tw-bg-opacity, 1))}.bg-slate-800\/90{background-color:rgb(30 41 59 / 0.9)}.bg-slate-900\/40{background-color:rgb(15 23 42 / 0.4)}.bg-gradient-to-b{background-image:linear-gradient(to bottom, var(--tw-gradient-stops))}.bg-gradient-to-r{background-image:linear-gradient(to right, var(--tw-gradient-stops))}.from-slate-900{--tw-gradient-from:#0f172a var(--tw-gradient-from-position);--tw-gradient-to:rgb(15 23 42 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-teal-600{--tw-gradient-from:#0d9488 var(--tw-gradient-from-position);--tw-gradient-to:rgb(13 148 136 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.to-cyan-600{--tw-gradient-to:#0891b2 var(--tw-gradient-to-position)}.to-slate-900\/80{--tw-gradient-to:rgb(15 23 42 / 0.8) var(--tw-gradient-to-position)}.p-1{padding:0.25rem}.p-2\.5{padding:0.625rem}.p-3{padding:0.75rem}.p-3\.5{padding:0.875rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.p-6{padding:1.5rem}.p-1\.5{padding:0.375rem}.px-1{padding-left:0.25rem;padding-right:0.25rem}.px-1\.5{padding-left:0.375rem;padding-right:0.375rem}.px-2{padding-left:0.5rem;padding-right:0.5rem}.px-2\.5{padding-left:0.625rem;padding-right:0.625rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-3\.5{padding-left:0.875rem;padding-right:0.875rem}.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.py-0\.5{padding-top:0.125rem;padding-bottom:0.125rem}.py-1{padding-top:0.25rem;padding-bottom:0.25rem}.py-1\.5{padding-top:0.375rem;padding-bottom:0.375rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.pb-1{padding-bottom:0.25rem}.pb-1\.5{padding-bottom:0.375rem}.pb-2\.5{padding-bottom:0.625rem}.pl-4{padding-left:1rem}.pr-1{padding-right:0.25rem}.pt-0\.5{padding-top:0.125rem}.pt-1{padding-top:0.25rem}.pt-2{padding-top:0.5rem}.pt-3{padding-top:0.75rem}.text-left{text-align:left}.text-center{text-align:center}.text-right{text-align:right}.text-\[10\.5px\]{font-size:10.5px}.text-\[10px\]{font-size:10px}.text-\[11\.5px\]{font-size:11.5px}.text-\[11px\]{font-size:11px}.text-\[12px\]{font-size:12px}.text-\[13px\]{font-size:13px}.text-\[9\.5px\]{font-size:9.5px}.text-base{font-size:1rem;line-height:1.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-bold{font-weight:700}.font-medium{font-weight:500}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.italic{font-style:italic}.leading-tight{line-height:1.25}.tracking-wide{letter-spacing:0.025em}.tracking-wider{letter-spacing:0.05em}.text-amber-300{--tw-text-opacity:1;color:rgb(252 211 77 / var(--tw-text-opacity, 1))}.text-amber-400{--tw-text-opacity:1;color:rgb(251 191 36 / var(--tw-text-opacity, 1))}.text-black{--tw-text-opacity:1;color:rgb(0 0 0 / var(--tw-text-opacity, 1))}.text-blue-900{--tw-text-opacity:1;color:rgb(30 58 138 / var(--tw-text-opacity, 1))}.text-emerald-400{--tw-text-opacity:1;color:rgb(52 211 153 / var(--tw-text-opacity, 1))}.text-emerald-700{--tw-text-opacity:1;color:rgb(4 120 87 / var(--tw-text-opacity, 1))}.text-emerald-800{--tw-text-opacity:1;color:rgb(6 95 70 / var(--tw-text-opacity, 1))}.text-gray-400{--tw-text-opacity:1;color:rgb(156 163 175 / var(--tw-text-opacity, 1))}.text-gray-500{--tw-text-opacity:1;color:rgb(107 114 128 / var(--tw-text-opacity, 1))}.text-gray-600{--tw-text-opacity:1;color:rgb(75 85 99 / var(--tw-text-opacity, 1))}.text-gray-700{--tw-text-opacity:1;color:rgb(55 65 81 / var(--tw-text-opacity, 1))}.text-gray-800{--tw-text-opacity:1;color:rgb(31 41 55 / var(--tw-text-opacity, 1))}.text-gray-900{--tw-text-opacity:1;color:rgb(17 24 39 / var(--tw-text-opacity, 1))}.text-rose-400{--tw-text-opacity:1;color:rgb(251 113 133 / var(--tw-text-opacity, 1))}.text-rose-600{--tw-text-opacity:1;color:rgb(225 29 72 / var(--tw-text-opacity, 1))}.text-slate-200{--tw-text-opacity:1;color:rgb(226 232 240 / var(--tw-text-opacity, 1))}.text-slate-300{--tw-text-opacity:1;color:rgb(203 213 225 / var(--tw-text-opacity, 1))}.text-slate-400{--tw-text-opacity:1;color:rgb(148 163 184 / var(--tw-text-opacity, 1))}.text-teal-300{--tw-text-opacity:1;color:rgb(94 234 212 / var(--tw-text-opacity, 1))}.text-teal-400{--tw-text-opacity:1;color:rgb(45 212 191 / var(--tw-text-opacity, 1))}.text-teal-500{--tw-text-opacity:1;color:rgb(20 184 166 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.text-slate-500{--tw-text-opacity:1;color:rgb(100 116 139 / var(--tw-text-opacity, 1))}.underline{-webkit-text-decoration-line:underline;text-decoration-line:underline}.placeholder-slate-500::placeholder{--tw-placeholder-opacity:1;color:rgb(100 116 139 / var(--tw-placeholder-opacity, 1))}.opacity-40{opacity:0.4}.shadow{--tw-shadow:0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 1px 3px 0 var(--tw-shadow-color), 0 1px 2px -1px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-2xl{--tw-shadow:0 25px 50px -12px rgb(0 0 0 / 0.25);--tw-shadow-colored:0 25px 50px -12px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-lg{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-md{--tw-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-xl{--tw-shadow:0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 20px 25px -5px var(--tw-shadow-color), 0 8px 10px -6px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.backdrop-blur{--tw-backdrop-blur:blur(8px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.backdrop-blur-sm{--tw-backdrop-blur:blur(4px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.transition{transition-property:color, background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-opacity{transition-property:opacity;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-transform{transition-property:transform;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.hover\:border-teal-400:hover{--tw-border-opacity:1;border-color:rgb(45 212 191 / var(--tw-border-opacity, 1))}.hover\:bg-blue-500:hover{--tw-bg-opacity:1;background-color:rgb(59 130 246 / var(--tw-bg-opacity, 1))}.hover\:bg-emerald-500:hover{--tw-bg-opacity:1;background-color:rgb(16 185 129 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-700:hover{--tw-bg-opacity:1;background-color:rgb(51 65 85 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-700\/50:hover{background-color:rgb(51 65 85 / 0.5)}.hover\:bg-slate-700\/90:hover{background-color:rgb(51 65 85 / 0.9)}.hover\:bg-slate-600:hover{--tw-bg-opacity:1;background-color:rgb(71 85 105 / var(--tw-bg-opacity, 1))}.hover\:from-teal-500:hover{--tw-gradient-from:#14b8a6 var(--tw-gradient-from-position);--tw-gradient-to:rgb(20 184 166 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.hover\:to-cyan-500:hover{--tw-gradient-to:#06b6d4 var(--tw-gradient-to-position)}.hover\:text-amber-400:hover{--tw-text-opacity:1;color:rgb(251 191 36 / var(--tw-text-opacity, 1))}.hover\:text-rose-300:hover{--tw-text-opacity:1;color:rgb(253 164 175 / var(--tw-text-opacity, 1))}.hover\:text-white:hover{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.focus\:border-teal-400:focus{--tw-border-opacity:1;border-color:rgb(45 212 191 / var(--tw-border-opacity, 1))}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}.focus\:ring-0:focus{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(0px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)}.active\:scale-95:active{--tw-scale-x:.95;--tw-scale-y:.95;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.disabled\:opacity-20:disabled{opacity:0.2}</style></head>
+<body class="h-screen flex flex-col overflow-hidden bg-slate-900">
+
+  <!-- Top Bar (Hidden in Print) -->
+  <header id="topBarHeader" class="no-print h-14 bg-slate-800 border-b border-slate-700 flex items-center justify-between px-5 shrink-0 z-40">
+    <div class="flex items-center space-x-3">
+      <div class="w-8 h-8 rounded-lg bg-teal-500/20 text-teal-400 flex items-center justify-center font-bold">
+        <i class="fa-solid fa-microscope text-base"></i>
+      </div>
+      <div>
+        <h1 class="text-sm font-bold text-white tracking-wide">Krishna Diagnostic Studio &amp; Multi-Report Generator</h1>
+        <p class="text-[11px] text-slate-400">Folder Sync • Auto-Search Patient History • Drag/Reorder Pages • Print/Share PDF</p>
+      </div>
+    </div>
+
+    <div class="flex items-center space-x-2.5">
+      <!-- Quick Save Record -->
+      <button onclick="saveCurrentPatientRecord()" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 shadow active:scale-95 transition" title="Save metadata to local database">
+        <i class="fa-solid fa-floppy-disk"></i> Save Patient
+      </button>
+
+      <!-- Share Report Button -->
+      <button onclick="openShareModal()" class="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 shadow active:scale-95 transition" title="Share via WhatsApp or Web Share">
+        <i class="fa-solid fa-share-nodes"></i> Share
+      </button>
+
+      <!-- Print / Save as PDF Button -->
+      <button onclick="window.print()" class="px-4 py-1.5 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white rounded-lg text-xs font-bold flex items-center gap-2 shadow-lg active:scale-95 transition">
+        <i class="fa-solid fa-print"></i> Print / Save PDF
+      </button>
+    </div>
+  </header>
+
+  <!-- Workspace: Left Sidebar + Right A4 Canvas -->
+  <div class="flex-1 flex overflow-hidden">
+    
+    <!-- LEFT SIDEBAR CONTROL PANEL (no-print) -->
+    <aside id="sidebarPanel" class="no-print w-[390px] bg-slate-800 border-r border-slate-700 overflow-y-auto flex flex-col shrink-0 text-slate-200">
+      
+      <!-- Panel Header -->
+      <div class="p-3.5 border-b border-slate-700/80 bg-slate-800/95 sticky top-0 z-20 backdrop-blur flex justify-between items-center">
+        <h2 class="text-xs font-bold uppercase tracking-wider text-teal-400 flex items-center gap-2">
+          <i class="fa-solid fa-sliders"></i> Master Controls
+        </h2>
+        <div class="flex items-center space-x-2">
+          <button onclick="resetDefaults()" class="text-[11px] text-slate-400 hover:text-amber-400 transition flex items-center gap-1" title="Reset all fields to sample">
+            <i class="fa-solid fa-rotate-left"></i> Reset
+          </button>
+        </div>
+      </div>
+
+      <div class="p-3.5 space-y-4 text-xs">
+        
+        <!-- SECTION 0: LOCAL FOLDER & DATABASE SYNC BOX -->
+        <div class="bg-gradient-to-b from-slate-900 to-slate-900/80 p-3 rounded-lg border border-teal-500/40 space-y-2 shadow-md">
+          <div class="flex items-center justify-between border-b border-slate-700/60 pb-1.5">
+            <span class="font-bold text-teal-300 text-[12px] flex items-center gap-1.5">
+              <i class="fa-solid fa-folder-tree text-teal-400"></i> Folder &amp; Local Database
+            </span>
+            <span id="syncStatusBadge" class="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-amber-300 border border-amber-500/30 font-medium">
+              Local Storage
+            </span>
+          </div>
+
+          <p class="text-[10.5px] text-slate-300 leading-tight">
+            Select a computer folder or use the offline database. Patient metadata and reports are auto-stored for instant re-lookup.
+          </p>
+
+          <div class="flex gap-1.5 pt-1">
+            <button onclick="connectLocalFolder()" class="flex-1 px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 border border-teal-500/50 hover:border-teal-400 text-teal-300 rounded text-[11px] font-semibold flex items-center justify-center gap-1 transition">
+              <i class="fa-solid fa-folder-open text-amber-400"></i> <span id="btnFolderLabel">Set PC Folder</span>
+            </button>
+            <button onclick="exportDatabaseJSON()" class="px-2 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-300 rounded text-[11px] font-medium" title="Backup Database as JSON">
+              <i class="fa-solid fa-download"></i> Backup
+            </button>
+            <label class="px-2 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-300 rounded text-[11px] font-medium cursor-pointer" title="Import Database">
+              <i class="fa-solid fa-upload"></i>
+              <input type="file" accept=".json" class="hidden" onchange="importDatabaseJSON(event)">
+            </label>
+          </div>
+
+          <div class="text-[10px] text-slate-400 flex justify-between items-center pt-0.5">
+            <span>Saved Records: <strong id="totalSavedRecordsCount" class="text-white">2</strong></span>
+            <button onclick="clearPatientHistory()" class="text-rose-400 hover:text-rose-300 text-[10px] underline">Clear DB</button>
+          </div>
+        </div>
+
+        <!-- SECTION 1: MASTER PATIENT DETAILS (With Live Auto-Suggest Search) -->
+        <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-700/60 space-y-2.5">
+          <div class="font-bold text-white flex items-center justify-between text-[12px] pb-1 border-b border-slate-700/50">
+            <span class="flex items-center gap-2">
+              <i class="fa-solid fa-user-injured text-teal-400"></i> Patient Demographics
+            </span>
+            <span class="text-[10px] text-teal-400 italic">Type name to auto-fill</span>
+          </div>
+
+          <!-- Patient Name with Autocomplete Datalist -->
+          <div>
+            <label class="text-[11px] text-slate-300 font-medium flex justify-between">
+              <span>Patient Name</span>
+              <span id="patientMatchHint" class="text-[10px] text-emerald-400 hidden">Matched returning patient!</span>
+            </label>
+            <div class="relative mt-1">
+              <input type="text" id="inpPatientName" list="patientDatalist" value="Mrs. Naseeb Kaur" oninput="onPatientNameInput(this.value)" placeholder="Enter name or search past patient..." class="w-full bg-slate-800 border border-slate-600 rounded px-2.5 py-1.5 text-white focus:border-teal-400 focus:outline-none font-medium placeholder-slate-500">
+              <datalist id="patientDatalist"><option value="Mrs. Naseeb Kaur" label="58 Yrs. | 98XXXXXXXX"></option><option value="Mrs. Karamdeep Kaur" label="37 Yrs. | 9315335197"></option></datalist>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="text-[11px] text-slate-400 font-medium">Age</label>
+              <input type="text" id="inpAge" value="58 Yrs." oninput="syncMasterPatientData()" class="w-full mt-1 bg-slate-800 border border-slate-600 rounded px-2.5 py-1.5 text-white focus:border-teal-400 focus:outline-none">
+            </div>
+            <div>
+              <label class="text-[11px] text-slate-400 font-medium">Gender</label>
+              <select id="inpGender" onchange="syncMasterPatientData()" class="w-full mt-1 bg-slate-800 border border-slate-600 rounded px-2 py-1.5 text-white focus:border-teal-400 focus:outline-none">
+                <option value="Female" selected="">Female</option>
+                <option value="Male">Male</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="text-[11px] text-slate-400 font-medium">Mobile No.</label>
+              <input type="text" id="inpMobile" value="98XXXXXXXX" oninput="syncMasterPatientData()" class="w-full mt-1 bg-slate-800 border border-slate-600 rounded px-2.5 py-1.5 text-white focus:border-teal-400 focus:outline-none">
+            </div>
+            <div>
+              <label class="text-[11px] text-slate-400 font-medium">Referred By</label>
+              <input type="text" id="inpRefBy" value="Dr. SELF" oninput="syncMasterPatientData()" class="w-full mt-1 bg-slate-800 border border-slate-600 rounded px-2.5 py-1.5 text-white focus:border-teal-400 focus:outline-none">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="text-[11px] text-slate-400 font-medium">Lab Accession No.</label>
+              <input type="text" id="inpLabNo" value="KCL-2026-8942" oninput="syncMasterPatientData()" class="w-full mt-1 bg-slate-800 border border-slate-600 rounded px-2.5 py-1.5 text-white focus:border-teal-400 focus:outline-none">
+            </div>
+            <div>
+              <label class="text-[11px] text-slate-400 font-medium">Date</label>
+              <input type="text" id="inpDate" value="15-04-2026" oninput="syncMasterPatientData()" class="w-full mt-1 bg-slate-800 border border-slate-600 rounded px-2.5 py-1.5 text-white focus:border-teal-400 focus:outline-none">
+            </div>
+          </div>
+
+          <div>
+            <label class="text-[11px] text-slate-400 font-medium">Specimen Type</label>
+            <input type="text" id="inpSpecimen" value="BLOOD, EDTA Whole Blood, Urine" oninput="syncMasterPatientData()" class="w-full mt-1 bg-slate-800 border border-slate-600 rounded px-2.5 py-1.5 text-white focus:border-teal-400 focus:outline-none">
+          </div>
+        </div>
+
+        <!-- SECTION 2: REPORTS MULTI-SELECT DROPDOWN & PAGE REORDERING -->
+        <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-700/60 space-y-3">
+          <div class="font-bold text-white flex items-center justify-between text-[12px] pb-1 border-b border-slate-700/50">
+            <span class="flex items-center gap-2">
+              <i class="fa-solid fa-list-check text-teal-400"></i> Reports &amp; Print Order
+            </span>
+            <span id="activeReportBadge" class="text-[10px] bg-teal-900/60 text-teal-300 px-2 py-0.5 rounded-full border border-teal-600/40 font-semibold">3 Active</span>
+          </div>
+
+          <!-- Dropdown Button to toggle checklist -->
+          <div class="relative">
+            <button type="button" onclick="toggleReportDropdown()" class="w-full bg-slate-800 hover:bg-slate-700/90 border border-slate-600 rounded px-3 py-2 text-left text-white flex items-center justify-between transition">
+              <span class="flex items-center gap-2">
+                <i class="fa-solid fa-notes-medical text-teal-400"></i>
+                <span id="selectedReportNamesSummary">3 Reports Selected</span>
+              </span>
+              <i id="dropdownArrow" class="fa-solid fa-chevron-down text-xs text-slate-400 transition-transform"></i>
+            </button>
+
+            <!-- Expandable Dropdown Container -->
+            <div id="reportDropdownMenu" class="mt-1.5 bg-slate-800 border border-slate-600 rounded-lg shadow-xl p-2.5 space-y-2 z-30 hidden">
+              <div class="text-[10.5px] text-slate-400 border-b border-slate-700 pb-1">Check reports to include in this report:</div>
+              <div class="max-h-48 overflow-y-auto space-y-1.5 pr-1">
+                <label class="flex items-center space-x-2 text-slate-200 hover:text-white cursor-pointer py-1 px-1.5 rounded hover:bg-slate-700/50">
+                  <input type="checkbox" data-sheet="sheetBiochem" checked="" onchange="onReportCheckboxChange()" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-600 focus:ring-0">
+                  <span class="text-[11.5px] font-medium">1. Biochemistry (6.0 &amp; 125.5)</span>
+                </label>
+                <label class="flex items-center space-x-2 text-slate-200 hover:text-white cursor-pointer py-1 px-1.5 rounded hover:bg-slate-700/50">
+                  <input type="checkbox" data-sheet="sheetWidal" checked="" onchange="onReportCheckboxChange()" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-600 focus:ring-0">
+                  <span class="text-[11.5px] font-medium">2. Typhoid Card &amp; Widal (+/-)</span>
+                </label>
+                <label class="flex items-center space-x-2 text-slate-200 hover:text-white cursor-pointer py-1 px-1.5 rounded hover:bg-slate-700/50">
+                  <input type="checkbox" data-sheet="sheetCBC" checked="" onchange="onReportCheckboxChange()" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-600 focus:ring-0">
+                  <span class="text-[11.5px] font-medium">3. Complete Blood Count (CBC)</span>
+                </label>
+                <label class="flex items-center space-x-2 text-slate-200 hover:text-white cursor-pointer py-1 px-1.5 rounded hover:bg-slate-700/50">
+                  <input type="checkbox" data-sheet="sheetLFTKFT" onchange="onReportCheckboxChange()" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-600 focus:ring-0">
+                  <span class="text-[11.5px] font-medium">4. Liver &amp; Kidney Profile (LFT/KFT)</span>
+                </label>
+                <label class="flex items-center space-x-2 text-slate-200 hover:text-white cursor-pointer py-1 px-1.5 rounded hover:bg-slate-700/50">
+                  <input type="checkbox" data-sheet="sheetThyroid" onchange="onReportCheckboxChange()" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-600 focus:ring-0">
+                  <span class="text-[11.5px] font-medium">5. Thyroid Profile (FT3, FT4, TSH)</span>
+                </label>
+                <label class="flex items-center space-x-2 text-slate-200 hover:text-white cursor-pointer py-1 px-1.5 rounded hover:bg-slate-700/50">
+                  <input type="checkbox" data-sheet="sheetVitamins" onchange="onReportCheckboxChange()" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-600 focus:ring-0">
+                  <span class="text-[11.5px] font-medium">6. Vitamin D &amp; B12 Profile</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Page Print Order & Move Up/Down Controls -->
+          <div class="space-y-1.5 pt-1">
+            <div class="text-[11px] font-semibold text-slate-300 flex items-center justify-between">
+              <span>Print Page Order:</span>
+              <span class="text-[10px] text-slate-400">Use ▲ / ▼ to reorder sheets</span>
+            </div>
+
+            <div id="reorderListContainer" class="space-y-1"><div class="flex items-center justify-between p-1.5 rounded border bg-slate-800/90 border-slate-700">
+          <div class="flex items-center gap-1.5 truncate">
+            <span class="text-[10px] font-bold text-teal-400 w-4">1.</span>
+            <span class="text-[11px] truncate font-medium text-slate-200">Typhoid Card &amp; Widal (+/-)</span>
+          </div>
+          <div class="flex items-center gap-1 shrink-0">
+            <button onclick="moveSheetOrder('sheetWidal', -1)" disabled="" class="w-6 h-6 rounded bg-slate-700 hover:bg-slate-600 disabled:opacity-20 flex items-center justify-center text-[10px] text-teal-300 transition" title="Move Up in Print Order">
+              <i class="fa-solid fa-chevron-up"></i>
+            </button>
+            <button onclick="moveSheetOrder('sheetWidal', 1)" class="w-6 h-6 rounded bg-slate-700 hover:bg-slate-600 disabled:opacity-20 flex items-center justify-center text-[10px] text-teal-300 transition" title="Move Down in Print Order">
+              <i class="fa-solid fa-chevron-down"></i>
+            </button>
+          </div>
+        </div><div class="flex items-center justify-between p-1.5 rounded border bg-slate-800/90 border-slate-700">
+          <div class="flex items-center gap-1.5 truncate">
+            <span class="text-[10px] font-bold text-teal-400 w-4">2.</span>
+            <span class="text-[11px] truncate font-medium text-slate-200">Biochemistry (6.0 &amp; 125.5)</span>
+          </div>
+          <div class="flex items-center gap-1 shrink-0">
+            <button onclick="moveSheetOrder('sheetBiochem', -1)" class="w-6 h-6 rounded bg-slate-700 hover:bg-slate-600 disabled:opacity-20 flex items-center justify-center text-[10px] text-teal-300 transition" title="Move Up in Print Order">
+              <i class="fa-solid fa-chevron-up"></i>
+            </button>
+            <button onclick="moveSheetOrder('sheetBiochem', 1)" class="w-6 h-6 rounded bg-slate-700 hover:bg-slate-600 disabled:opacity-20 flex items-center justify-center text-[10px] text-teal-300 transition" title="Move Down in Print Order">
+              <i class="fa-solid fa-chevron-down"></i>
+            </button>
+          </div>
+        </div><div class="flex items-center justify-between p-1.5 rounded border bg-slate-800/90 border-slate-700">
+          <div class="flex items-center gap-1.5 truncate">
+            <span class="text-[10px] font-bold text-teal-400 w-4">3.</span>
+            <span class="text-[11px] truncate font-medium text-slate-200">Complete Blood Count (CBC)</span>
+          </div>
+          <div class="flex items-center gap-1 shrink-0">
+            <button onclick="moveSheetOrder('sheetCBC', -1)" class="w-6 h-6 rounded bg-slate-700 hover:bg-slate-600 disabled:opacity-20 flex items-center justify-center text-[10px] text-teal-300 transition" title="Move Up in Print Order">
+              <i class="fa-solid fa-chevron-up"></i>
+            </button>
+            <button onclick="moveSheetOrder('sheetCBC', 1)" class="w-6 h-6 rounded bg-slate-700 hover:bg-slate-600 disabled:opacity-20 flex items-center justify-center text-[10px] text-teal-300 transition" title="Move Down in Print Order">
+              <i class="fa-solid fa-chevron-down"></i>
+            </button>
+          </div>
+        </div><div class="flex items-center justify-between p-1.5 rounded border bg-slate-900/40 border-slate-800 opacity-40 text-slate-500">
+          <div class="flex items-center gap-1.5 truncate">
+            <span class="text-[10px] font-bold text-teal-400 w-4">4.</span>
+            <span class="text-[11px] truncate font-medium text-slate-200">Liver &amp; Kidney Profile (LFT/KFT)</span>
+          </div>
+          <div class="flex items-center gap-1 shrink-0">
+            <button onclick="moveSheetOrder('sheetLFTKFT', -1)" class="w-6 h-6 rounded bg-slate-700 hover:bg-slate-600 disabled:opacity-20 flex items-center justify-center text-[10px] text-teal-300 transition" title="Move Up in Print Order">
+              <i class="fa-solid fa-chevron-up"></i>
+            </button>
+            <button onclick="moveSheetOrder('sheetLFTKFT', 1)" class="w-6 h-6 rounded bg-slate-700 hover:bg-slate-600 disabled:opacity-20 flex items-center justify-center text-[10px] text-teal-300 transition" title="Move Down in Print Order">
+              <i class="fa-solid fa-chevron-down"></i>
+            </button>
+          </div>
+        </div><div class="flex items-center justify-between p-1.5 rounded border bg-slate-900/40 border-slate-800 opacity-40 text-slate-500">
+          <div class="flex items-center gap-1.5 truncate">
+            <span class="text-[10px] font-bold text-teal-400 w-4">5.</span>
+            <span class="text-[11px] truncate font-medium text-slate-200">Thyroid Profile (FT3, FT4, TSH)</span>
+          </div>
+          <div class="flex items-center gap-1 shrink-0">
+            <button onclick="moveSheetOrder('sheetThyroid', -1)" class="w-6 h-6 rounded bg-slate-700 hover:bg-slate-600 disabled:opacity-20 flex items-center justify-center text-[10px] text-teal-300 transition" title="Move Up in Print Order">
+              <i class="fa-solid fa-chevron-up"></i>
+            </button>
+            <button onclick="moveSheetOrder('sheetThyroid', 1)" class="w-6 h-6 rounded bg-slate-700 hover:bg-slate-600 disabled:opacity-20 flex items-center justify-center text-[10px] text-teal-300 transition" title="Move Down in Print Order">
+              <i class="fa-solid fa-chevron-down"></i>
+            </button>
+          </div>
+        </div><div class="flex items-center justify-between p-1.5 rounded border bg-slate-900/40 border-slate-800 opacity-40 text-slate-500">
+          <div class="flex items-center gap-1.5 truncate">
+            <span class="text-[10px] font-bold text-teal-400 w-4">6.</span>
+            <span class="text-[11px] truncate font-medium text-slate-200">Vitamin D &amp; B12 Profile</span>
+          </div>
+          <div class="flex items-center gap-1 shrink-0">
+            <button onclick="moveSheetOrder('sheetVitamins', -1)" class="w-6 h-6 rounded bg-slate-700 hover:bg-slate-600 disabled:opacity-20 flex items-center justify-center text-[10px] text-teal-300 transition" title="Move Up in Print Order">
+              <i class="fa-solid fa-chevron-up"></i>
+            </button>
+            <button onclick="moveSheetOrder('sheetVitamins', 1)" disabled="" class="w-6 h-6 rounded bg-slate-700 hover:bg-slate-600 disabled:opacity-20 flex items-center justify-center text-[10px] text-teal-300 transition" title="Move Down in Print Order">
+              <i class="fa-solid fa-chevron-down"></i>
+            </button>
+          </div>
+        </div></div>
+          </div>
+        </div>
+
+        <!-- SECTION 3: DOCTOR'S SIGNATURE BOX (Independent Control) -->
+        <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-700/60 space-y-2.5">
+          <div class="font-bold text-white flex items-center justify-between text-[12px] pb-1 border-b border-slate-700/50">
+            <span class="flex items-center gap-2">
+              <i class="fa-solid fa-user-doctor text-teal-400"></i> Doctor Signatures
+            </span>
+            <label class="switch-ui" title="Toggle doctor signature on all reports">
+              <input type="checkbox" id="masterDocToggle" checked="" onchange="toggleMasterDoctorBlock(this.checked)">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div>
+            <label class="text-[11px] text-slate-400 font-medium">Doctor Name (Box 1)</label>
+            <input type="text" id="inpDocName" value="Dr. Manoj Garg" oninput="syncMasterDoctorData()" class="w-full mt-1 bg-slate-800 border border-slate-600 rounded px-2.5 py-1.5 text-white focus:border-teal-400 focus:outline-none font-bold">
+          </div>
+
+          <div>
+            <label class="text-[11px] text-slate-400 font-medium">Degrees &amp; Reg No. (Box 2)</label>
+            <input type="text" id="inpDocDegree" value="MBBS, M.S. (Regd. No. KMC45011)" oninput="syncMasterDoctorData()" class="w-full mt-1 bg-slate-800 border border-slate-600 rounded px-2.5 py-1.5 text-white focus:border-teal-400 focus:outline-none">
+          </div>
+        </div>
+
+        <!-- SECTION 4: D.M.L.T. SIGNATORY BOX (Separated Completely) -->
+        <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-700/60 space-y-2.5">
+          <div class="font-bold text-white flex items-center justify-between text-[12px] pb-1 border-b border-slate-700/50">
+            <span class="flex items-center gap-2">
+              <i class="fa-solid fa-signature text-teal-400"></i> D.M.L.T. Bottom-Right Box
+            </span>
+            <label class="switch-ui" title="Toggle DMLT signature on all reports">
+              <input type="checkbox" id="masterDmltToggle" checked="" onchange="toggleMasterDmltBlock(this.checked)">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div>
+            <label class="text-[11px] text-slate-400 font-medium">Signatory Title</label>
+            <input type="text" id="inpTechTitle" value="D.M.L.T." oninput="syncMasterDmltData()" class="w-full mt-1 bg-slate-800 border border-slate-600 rounded px-2.5 py-1.5 text-white focus:border-teal-400 focus:outline-none font-bold">
+          </div>
+          <div>
+            <label class="text-[11px] text-slate-400 font-medium">Sub-title / Designation</label>
+            <input type="text" id="inpTechSub" value="Laboratory In-charge" oninput="syncMasterDmltData()" class="w-full mt-1 bg-slate-800 border border-slate-600 rounded px-2.5 py-1.5 text-white focus:border-teal-400 focus:outline-none text-[11px]">
+          </div>
+        </div>
+
+      </div>
+    </aside>
+
+    <!-- RIGHT REPORT PREVIEW AREA (Prints directly) -->
+    <main id="mainContentArea" class="flex-1 overflow-y-auto bg-slate-950 p-6 flex flex-col items-center">
+      
+      <!-- Container for dynamically reorderable A4 sheets -->
+      <div id="sheetsContainer" class="w-full flex flex-col items-center">
+
+        <!-- ========================================== -->
+        <!-- REPORT 1: BIOCHEMISTRY & SEROLOGY          -->
+        <!-- ========================================== -->
+        <article id="sheetWidal" class="a4-sheet" data-report-title="Typhoid Card &amp; Widal (+/-)" style="display: flex;">
+          <div class="page-content-wrapper">
+            
+            <div class="w-full relative h-[100px]">
+              <div class="no-print absolute inset-0 border border-dashed border-gray-300 rounded flex flex-col items-center justify-center text-gray-400 text-xs">
+                <span class="font-semibold text-gray-400"><i class="fa-regular fa-image mr-1"></i> Pre-Printed Letterhead Header Space (Top 100px Blank)</span>
+              </div>
+            </div>
+
+            <div class="w-full mt-2">
+              <div class="border-t-2 border-black w-full"></div>
+              <div class="border-t border-black w-full mt-[2px]"></div>
+            </div>
+
+            <!-- Patient Demographics Section -->
+            <section class="mt-2.5 text-[12px] leading-tight text-black">
+              <div class="grid grid-cols-2 gap-x-6">
+                <div class="space-y-1">
+                  <div class="flex items-baseline">
+                    <span class="font-bold w-28 shrink-0">Patient Name</span>
+                    <span class="font-semibold mr-1.5">:</span>
+                    <span class="editable-field font-semibold flex-1 disp-pName" contenteditable="true">Mrs. Naseeb Kaur</span>
+                  </div>
+                  <div class="flex items-baseline">
+                    <span class="font-bold w-28 shrink-0">Mobile No.</span>
+                    <span class="font-semibold mr-1.5">:</span>
+                    <span class="editable-field flex-1 disp-pMobile" contenteditable="true">98XXXXXXXX</span>
+                  </div>
+                  <div class="flex items-baseline">
+                    <span class="font-bold w-28 shrink-0">Age / Gender</span>
+                    <span class="font-semibold mr-1.5">:</span>
+                    <span class="editable-field flex-1 disp-pAgeGender" contenteditable="true">58 Yrs. / Female</span>
+                  </div>
+                  <div class="flex items-baseline">
+                    <span class="font-bold w-28 shrink-0">Referred By</span>
+                    <span class="font-semibold mr-1.5">:</span>
+                    <span class="editable-field flex-1 disp-pRefBy" contenteditable="true">Dr. SELF</span>
+                  </div>
+                </div>
+                <div class="space-y-1">
+                  <div class="flex items-baseline">
+                    <span class="font-bold w-36 shrink-0">Lab Accession No.</span>
+                    <span class="font-semibold mr-1.5">:</span>
+                    <span class="editable-field flex-1 disp-pLabNo" contenteditable="true">KCL-2026-8942</span>
+                  </div>
+                  <div class="flex items-baseline">
+                    <span class="font-bold w-36 shrink-0">Date</span>
+                    <span class="font-semibold mr-1.5">:</span>
+                    <span class="editable-field flex-1 disp-pDate" contenteditable="true">15-04-2026</span>
+                  </div>
+                  <div class="flex items-baseline">
+                    <span class="font-bold w-36 shrink-0">Specimen Type</span>
+                    <span class="font-semibold mr-1.5">:</span>
+                    <span class="editable-field flex-1 disp-pSpecimen" contenteditable="true">BLOOD, EDTA Whole Blood, Urine</span>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <div class="border-t-2 border-black w-full mt-2.5 mb-2"></div>
+
+            <!-- Typhoid Card Test -->
+            <div data-row="wcard" class="mb-3 transition-opacity">
+              <div class="flex items-center justify-between bg-gray-100 p-1 font-bold text-[11px] mb-1">
+                <span>TYPHOID RAPID CARD TEST :-</span>
+                <label class="switch-ui no-print" title="Toggle section">
+                  <input type="checkbox" checked="" onchange="handleParamToggle(this, 'wcard')">
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <table class="w-full text-left text-[12px]">
+                <tbody><tr class="border-b border-gray-200">
+                  <td class="py-1 px-1 font-medium w-1/3">IgM Antibody</td>
+                  <td class="py-1 px-2 font-bold text-center text-emerald-800">
+                    <span class="editable-field" contenteditable="true">Positive</span>
+                  </td>
+                  <td class="py-1 px-2 text-right text-gray-600">Negative</td>
+                </tr>
+                <tr class="border-b border-gray-200">
+                  <td class="py-1 px-1 font-medium w-1/3">IgG Antibody</td>
+                  <td class="py-1 px-2 font-bold text-center text-emerald-800">
+                    <span class="editable-field" contenteditable="true">Positive</span>
+                  </td>
+                  <td class="py-1 px-2 text-right text-gray-600">Negative</td>
+                </tr>
+              </tbody></table>
+            </div>
+
+            <!-- Widal Agglutination Grid with Clickable +/- cells -->
+            <div data-row="wgrid" class="mb-4 transition-opacity">
+              <div class="flex items-center justify-between bg-gray-100 p-1 font-bold text-[11px] mb-1">
+                <span>WIDAL TEST / SALMONELLA TYPHI DETECTION (SLIDE METHOD)</span>
+                <label class="switch-ui no-print" title="Toggle section">
+                  <input type="checkbox" checked="" onchange="handleParamToggle(this, 'wgrid')">
+                  <span class="slider"></span>
+                </label>
+              </div>
+              
+              <p class="text-[10px] text-gray-500 mb-1.5 italic no-print">Click any cell to toggle between + (positive) and - (negative)</p>
+              
+              <table class="w-full text-center text-[11px] border border-black border-collapse">
+                <thead>
+                  <tr class="bg-gray-100 border-b border-black font-semibold text-black">
+                    <th class="py-1 px-2 text-left border-r border-black w-36">Dilution :-</th>
+                    <th class="py-1 px-2 border-r border-black">1 : 20</th>
+                    <th class="py-1 px-2 border-r border-black">1 : 40</th>
+                    <th class="py-1 px-2 border-r border-black">1 : 80</th>
+                    <th class="py-1 px-2 border-r border-black">1 : 160</th>
+                    <th class="py-1 px-2 border-r border-black">1 : 320</th>
+                    <th class="py-1 px-2">1 : 640</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="border-b border-black">
+                    <td class="py-1.5 px-2 text-left font-bold border-r border-black">S. Typhi O</td>
+                    <td class="py-1.5 px-2 border-r border-black font-bold widal-cell text-emerald-700" onclick="toggleCellSign(this)">+</td>
+                    <td class="py-1.5 px-2 border-r border-black font-bold widal-cell text-emerald-700" onclick="toggleCellSign(this)">+</td>
+                    <td class="py-1.5 px-2 border-r border-black font-bold widal-cell text-emerald-700" onclick="toggleCellSign(this)">+</td>
+                    <td class="py-1.5 px-2 border-r border-black font-bold widal-cell text-emerald-700" onclick="toggleCellSign(this)">+</td>
+                    <td class="py-1.5 px-2 border-r border-black font-bold widal-cell text-emerald-700" onclick="toggleCellSign(this)">+</td>
+                    <td class="py-1.5 px-2 font-bold widal-cell text-rose-600" onclick="toggleCellSign(this)">-</td>
+                  </tr>
+                  <tr class="border-b border-black">
+                    <td class="py-1.5 px-2 text-left font-bold border-r border-black">S. Typhi H</td>
+                    <td class="py-1.5 px-2 border-r border-black font-bold widal-cell text-emerald-700" onclick="toggleCellSign(this)">+</td>
+                    <td class="py-1.5 px-2 border-r border-black font-bold widal-cell text-emerald-700" onclick="toggleCellSign(this)">+</td>
+                    <td class="py-1.5 px-2 border-r border-black font-bold widal-cell text-emerald-700" onclick="toggleCellSign(this)">+</td>
+                    <td class="py-1.5 px-2 border-r border-black font-bold widal-cell text-emerald-700" onclick="toggleCellSign(this)">+</td>
+                    <td class="py-1.5 px-2 border-r border-black font-bold widal-cell text-rose-600" onclick="toggleCellSign(this)">-</td>
+                    <td class="py-1.5 px-2 font-bold widal-cell text-rose-600" onclick="toggleCellSign(this)">-</td>
+                  </tr>
+                  <tr class="border-b border-black">
+                    <td class="py-1.5 px-2 text-left font-bold border-r border-black">S. Paratyphi AH</td>
+                    <td class="py-1.5 px-2 border-r border-black font-bold widal-cell text-emerald-700" onclick="toggleCellSign(this)">+</td>
+                    <td class="py-1.5 px-2 border-r border-black font-bold widal-cell text-emerald-700" onclick="toggleCellSign(this)">+</td>
+                    <td class="py-1.5 px-2 border-r border-black font-bold widal-cell text-rose-600" onclick="toggleCellSign(this)">-</td>
+                    <td class="py-1.5 px-2 border-r border-black font-bold widal-cell text-rose-600" onclick="toggleCellSign(this)">-</td>
+                    <td class="py-1.5 px-2 border-r border-black font-bold widal-cell text-rose-600" onclick="toggleCellSign(this)">-</td>
+                    <td class="py-1.5 px-2 font-bold widal-cell text-rose-600" onclick="toggleCellSign(this)">-</td>
+                  </tr>
+                  <tr>
+                    <td class="py-1.5 px-2 text-left font-bold border-r border-black">S. Paratyphi BH</td>
+                    <td class="py-1.5 px-2 border-r border-black font-bold widal-cell text-emerald-700" onclick="toggleCellSign(this)">+</td>
+                    <td class="py-1.5 px-2 border-r border-black font-bold widal-cell text-emerald-700" onclick="toggleCellSign(this)">+</td>
+                    <td class="py-1.5 px-2 border-r border-black font-bold widal-cell text-rose-600" onclick="toggleCellSign(this)">-</td>
+                    <td class="py-1.5 px-2 border-r border-black font-bold widal-cell text-rose-600" onclick="toggleCellSign(this)">-</td>
+                    <td class="py-1.5 px-2 border-r border-black font-bold widal-cell text-rose-600" onclick="toggleCellSign(this)">-</td>
+                    <td class="py-1.5 px-2 font-bold widal-cell text-rose-600" onclick="toggleCellSign(this)">-</td>
+                  </tr>
+                </tbody>
+              </table>
+              <p class="text-[9.5px] text-gray-600 mt-1 italic">
+                Note: The Widal Slide Test is a rapid screening tool. Positive titers above 1:80 (O) and 1:160 (H) are clinically significant.
+              </p>
+            </div>
+
+            <!-- ESR Parameter -->
+            <div data-row="wesr" class="border-t border-gray-200 pt-2 transition-opacity">
+              <div class="flex items-center justify-between text-[12px]">
+                <div class="w-1/2">
+                  <span class="font-bold">ESR (Westergren's Method)</span>
+                </div>
+                <div class="font-bold text-center w-1/4">
+                  <span class="editable-field" contenteditable="true">25</span> mm in 1 hr
+                </div>
+                <div class="text-right text-[11px] text-gray-600 w-1/4">
+                  0-10 (Male) | 0-20 (Female)
+                </div>
+                <div class="w-8 text-right no-print">
+                  <label class="switch-ui" title="Toggle ESR">
+                    <input type="checkbox" checked="" onchange="handleParamToggle(this, 'wesr')">
+                    <span class="slider"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="text-center font-bold text-[11px] text-gray-600 mt-8 mb-2">
+              *** End of report ***
+            </div>
+          </div>
+
+          <!-- Master Controlled Footer -->
+          <footer class="mt-4 pt-2">
+            <div class="flex items-end justify-between min-h-[60px] mb-2">
+              <div class="doctor-signature-container" style="visibility: visible;">
+                <div class="text-[13px] font-bold text-black disp-docName">Dr. Manoj Garg</div>
+                <div class="text-[11px] font-semibold text-gray-800 disp-docDegree">MBBS, M.S. (Regd. No. KMC45011)</div>
+              </div>
+              <div class="dmlt-signature-container text-right" style="visibility: visible;">
+                <div class="text-[12px] font-bold text-black disp-techTitle">D.M.L.T.</div>
+                <div class="text-[10px] text-gray-500 font-medium disp-techSub">Laboratory In-charge</div>
+              </div>
+            </div>
+            <div class="border-t border-black w-full mb-1"></div>
+            <div class="text-[10px] text-gray-800 flex justify-between">
+              <span>This Report is Not Valid for Medico Legal Purpose.</span>
+              <span>All Subject To Tohana Jurisdiction only.</span>
+            </div>
+          </footer>
+        </article><article id="sheetBiochem" class="a4-sheet" data-report-title="Biochemistry (6.0 &amp; 125.5)" style="display: flex;">
+          <div class="page-content-wrapper">
+            
+            <!-- Blank area above the 2 lines for pre-printed lab letterhead -->
+            <div class="w-full relative h-[100px]">
+              <div class="no-print absolute inset-0 border border-dashed border-gray-300 rounded flex flex-col items-center justify-center text-gray-400 text-xs">
+                <span class="font-semibold text-gray-400"><i class="fa-regular fa-image mr-1"></i> Pre-Printed Letterhead Header Space (Top 100px Blank)</span>
+                <span class="text-[9.5px] text-gray-400">(Your clinic letterhead goes here. Content starts cleanly right under the double divider)</span>
+              </div>
+            </div>
+
+            <!-- Top Double Divider Lines -->
+            <div class="w-full mt-2">
+              <div class="border-t-2 border-black w-full"></div>
+              <div class="border-t border-black w-full mt-[2px]"></div>
+            </div>
+
+            <!-- Patient Demographics Section (Synced with Master Panel) -->
+            <section class="mt-2.5 text-[12px] leading-tight text-black">
+              <div class="grid grid-cols-2 gap-x-6">
+                <div class="space-y-1">
+                  <div class="flex items-baseline">
+                    <span class="font-bold w-28 shrink-0">Patient Name</span>
+                    <span class="font-semibold mr-1.5">:</span>
+                    <span class="editable-field font-semibold flex-1 disp-pName" contenteditable="true">Mrs. Naseeb Kaur</span>
+                  </div>
+                  <div class="flex items-baseline">
+                    <span class="font-bold w-28 shrink-0">Mobile No.</span>
+                    <span class="font-semibold mr-1.5">:</span>
+                    <span class="editable-field flex-1 disp-pMobile" contenteditable="true">98XXXXXXXX</span>
+                  </div>
+                  <div class="flex items-baseline">
+                    <span class="font-bold w-28 shrink-0">Age / Gender</span>
+                    <span class="font-semibold mr-1.5">:</span>
+                    <span class="editable-field flex-1 disp-pAgeGender" contenteditable="true">58 Yrs. / Female</span>
+                  </div>
+                  <div class="flex items-baseline">
+                    <span class="font-bold w-28 shrink-0">Referred By</span>
+                    <span class="font-semibold mr-1.5">:</span>
+                    <span class="editable-field flex-1 disp-pRefBy" contenteditable="true">Dr. SELF</span>
+                  </div>
+                  <div class="flex items-baseline">
+                    <span class="font-bold w-28 shrink-0">Category</span>
+                    <span class="font-semibold mr-1.5">:</span>
+                    <span class="editable-field flex-1 disp-pCategory" contenteditable="true">Regular</span>
+                  </div>
+                </div>
+
+                <div class="space-y-1">
+                  <div class="flex items-baseline">
+                    <span class="font-bold w-36 shrink-0">Lab Accession No.</span>
+                    <span class="font-semibold mr-1.5">:</span>
+                    <span class="editable-field flex-1 disp-pLabNo" contenteditable="true">KCL-2026-8942</span>
+                  </div>
+                  <div class="flex items-baseline">
+                    <span class="font-bold w-36 shrink-0">Date</span>
+                    <span class="font-semibold mr-1.5">:</span>
+                    <span class="editable-field flex-1 disp-pDate" contenteditable="true">15-04-2026</span>
+                  </div>
+                  <div class="flex items-baseline">
+                    <span class="font-bold w-36 shrink-0">Specimen Type</span>
+                    <span class="font-semibold mr-1.5">:</span>
+                    <span class="editable-field flex-1 disp-pSpecimen" contenteditable="true">BLOOD, EDTA Whole Blood, Urine</span>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <div class="border-t-2 border-black w-full mt-2.5 mb-1"></div>
+
+            <!-- Test Parameters Table -->
+            <table class="w-full text-left text-[12px] border-collapse">
+              <thead>
+                <tr class="border-b-2 border-black font-bold uppercase text-[11px] text-black">
+                  <th class="py-1 px-1 w-[42%]">Test / Investigation</th>
+                  <th class="py-1 px-2 text-center w-[18%]">Patient Value</th>
+                  <th class="py-1 px-2 text-center w-[15%]">Units</th>
+                  <th class="py-1 px-2 text-right w-[25%]">Normal Range</th>
+                  <th class="py-1 px-1 text-center w-[40px] no-print">Show</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200">
+                
+                <tr class="bg-gray-100 font-bold text-[11px]" data-row="b1">
+                  <td colspan="4" class="py-1 px-1 uppercase tracking-wide text-gray-800">
+                    <span class="editable-field" contenteditable="true">BIOCHEMISTRY</span>
+                  </td>
+                  <td class="text-center no-print">
+                    <label class="switch-ui" title="Toggle section">
+                      <input type="checkbox" checked="" onchange="handleParamToggle(this, 'b1')">
+                      <span class="slider"></span>
+                    </label>
+                  </td>
+                </tr>
+
+                <!-- Parameter: 6.0 CRP -->
+                <tr data-row="b2" class="transition-opacity">
+                  <td class="py-1 px-1 font-medium">
+                    <span class="editable-field" contenteditable="true">C-REACTIVE PROTEIN (CRP)</span>
+                  </td>
+                  <td class="py-1 px-2 text-center font-bold text-gray-900">
+                    <span class="editable-field px-2 bg-yellow-100 text-blue-900 font-bold" contenteditable="true">6.0</span>
+                  </td>
+                  <td class="py-1 px-2 text-center text-gray-700">
+                    <span class="editable-field" contenteditable="true">mg/L</span>
+                  </td>
+                  <td class="py-1 px-2 text-right text-gray-700">
+                    <span class="editable-field" contenteditable="true">&lt; 6.0 mg/L</span>
+                  </td>
+                  <td class="text-center no-print">
+                    <label class="switch-ui" title="Toggle on/off">
+                      <input type="checkbox" checked="" onchange="handleParamToggle(this, 'b2')">
+                      <span class="slider"></span>
+                    </label>
+                  </td>
+                </tr>
+
+                <!-- Parameter: 125.5 Glucose Fasting -->
+                <tr data-row="b3" class="transition-opacity">
+                  <td class="py-1 px-1 font-medium">
+                    <span class="editable-field" contenteditable="true">GLUCOSE, FASTING</span>
+                  </td>
+                  <td class="py-1 px-2 text-center font-bold text-gray-900">
+                    <span class="editable-field px-2 bg-yellow-100 text-blue-900 font-bold" contenteditable="true">125.5ghfgh</span>
+                  </td>
+                  <td class="py-1 px-2 text-center text-gray-700">
+                    <span class="editable-field" contenteditable="true">mg/dL</span>
+                  </td>
+                  <td class="py-1 px-2 text-right text-gray-700">
+                    <span class="editable-field" contenteditable="true">70.0 - 100.0</span>
+                  </td>
+                  <td class="text-center no-print">
+                    <label class="switch-ui" title="Toggle on/off">
+                      <input type="checkbox" checked="" onchange="handleParamToggle(this, 'b3')">
+                      <span class="slider"></span>
+                    </label>
+                  </td>
+                </tr>
+
+                <!-- Parameter: S. Uric Acid -->
+                <tr data-row="b4" class="transition-opacity">
+                  <td class="py-1 px-1 font-medium">
+                    <span class="editable-field" contenteditable="true">S. URIC ACID</span>
+                  </td>
+                  <td class="py-1 px-2 text-center font-bold text-gray-900">
+                    <span class="editable-field px-2" contenteditable="true">5.3</span>
+                  </td>
+                  <td class="py-1 px-2 text-center text-gray-700">
+                    <span class="editable-field" contenteditable="true">mg/dL</span>
+                  </td>
+                  <td class="py-1 px-2 text-right text-gray-700">
+                    <span class="editable-field" contenteditable="true">2.4 - 6.5 mg/dL</span>
+                  </td>
+                  <td class="text-center no-print">
+                    <label class="switch-ui" title="Toggle on/off">
+                      <input type="checkbox" checked="" onchange="handleParamToggle(this, 'b4')">
+                      <span class="slider"></span>
+                    </label>
+                  </td>
+                </tr>
+
+                <!-- Parameter: SGOT -->
+                <tr data-row="b5" class="transition-opacity">
+                  <td class="py-1 px-1 font-medium">
+                    <span class="editable-field" contenteditable="true">S. G. O. T. (AST)</span>
+                  </td>
+                  <td class="py-1 px-2 text-center font-bold text-gray-900">
+                    <span class="editable-field px-2" contenteditable="true">27.5</span>
+                  </td>
+                  <td class="py-1 px-2 text-center text-gray-700">
+                    <span class="editable-field" contenteditable="true">IU/L</span>
+                  </td>
+                  <td class="py-1 px-2 text-right text-gray-700">
+                    <span class="editable-field" contenteditable="true">5 - 40 IU/L</span>
+                  </td>
+                  <td class="text-center no-print">
+                    <label class="switch-ui" title="Toggle on/off">
+                      <input type="checkbox" checked="" onchange="handleParamToggle(this, 'b5')">
+                      <span class="slider"></span>
+                    </label>
+                  </td>
+                </tr>
+
+                <!-- Parameter: SGPT -->
+                <tr data-row="b6" class="transition-opacity">
+                  <td class="py-1 px-1 font-medium">
+                    <span class="editable-field" contenteditable="true">S. G. P. T. (ALT)</span>
+                  </td>
+                  <td class="py-1 px-2 text-center font-bold text-gray-900">
+                    <span class="editable-field px-2" contenteditable="true">20.8</span>
+                  </td>
+                  <td class="py-1 px-2 text-center text-gray-700">
+                    <span class="editable-field" contenteditable="true">IU/L</span>
+                  </td>
+                  <td class="py-1 px-2 text-right text-gray-700">
+                    <span class="editable-field" contenteditable="true">8 - 40 IU/L</span>
+                  </td>
+                  <td class="text-center no-print">
+                    <label class="switch-ui" title="Toggle on/off">
+                      <input type="checkbox" checked="" onchange="handleParamToggle(this, 'b6')">
+                      <span class="slider"></span>
+                    </label>
+                  </td>
+                </tr>
+
+                <!-- Parameter: Alkaline Phosphatase -->
+                <tr data-row="b7" class="transition-opacity">
+                  <td class="py-1 px-1 font-medium">
+                    <span class="editable-field" contenteditable="true">Alkaline Phosphatase (ALP)</span>
+                  </td>
+                  <td class="py-1 px-2 text-center font-bold text-gray-900">
+                    <span class="editable-field px-2" contenteditable="true">88.5</span>
+                  </td>
+                  <td class="py-1 px-2 text-center text-gray-700">
+                    <span class="editable-field" contenteditable="true">U/L</span>
+                  </td>
+                  <td class="py-1 px-2 text-right text-gray-700">
+                    <span class="editable-field" contenteditable="true">35.0 - 104.0</span>
+                  </td>
+                  <td class="text-center no-print">
+                    <label class="switch-ui" title="Toggle on/off">
+                      <input type="checkbox" checked="" onchange="handleParamToggle(this, 'b7')">
+                      <span class="slider"></span>
+                    </label>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="text-center font-bold text-[11px] text-gray-600 mt-8 mb-2">
+              *** End of report ***
+            </div>
+          </div>
+
+          <!-- Master Controlled Footer with SEPARATE Doctor and DMLT Blocks -->
+          <footer class="mt-4 pt-2">
+            <div class="flex items-end justify-between min-h-[60px] mb-2">
+              <!-- Separate Doctor Signature Block -->
+              <div class="doctor-signature-container" style="visibility: visible;">
+                <div class="text-[13px] font-bold text-black disp-docName">Dr. Manoj Garg</div>
+                <div class="text-[11px] font-semibold text-gray-800 disp-docDegree">MBBS, M.S. (Regd. No. KMC45011)</div>
+              </div>
+              
+              <!-- Separate D.M.L.T. Block -->
+              <div class="dmlt-signature-container text-right" style="visibility: visible;">
+                <div class="text-[12px] font-bold text-black disp-techTitle">D.M.L.T.</div>
+                <div class="text-[10px] text-gray-500 font-medium disp-techSub">Laboratory In-charge</div>
+              </div>
+            </div>
+            
+            <div class="border-t border-black w-full mb-1"></div>
+            <div class="text-[10px] text-gray-800 flex justify-between">
+              <span>This Report is Not Valid for Medico Legal Purpose.</span>
+              <span>All Subject To Tohana Jurisdiction only.</span>
+            </div>
+          </footer>
+        </article>
+
+        <!-- ========================================== -->
+        <!-- REPORT 2: TYPHOID & WIDAL AGGLUTINATION    -->
+        <!-- ========================================== -->
+        
+
+        <!-- ========================================== -->
+        <!-- REPORT 3: COMPLETE BLOOD COUNT (CBC)       -->
+        <!-- ========================================== -->
+        <article id="sheetCBC" class="a4-sheet" data-report-title="Complete Blood Count (CBC)" style="display: flex;">
+          <div class="page-content-wrapper">
+            
+            <div class="w-full relative h-[100px]">
+              <div class="no-print absolute inset-0 border border-dashed border-gray-300 rounded flex flex-col items-center justify-center text-gray-400 text-xs">
+                <span class="font-semibold text-gray-400"><i class="fa-regular fa-image mr-1"></i> Pre-Printed Letterhead Header Space (Top 100px Blank)</span>
+              </div>
+            </div>
+
+            <div class="w-full mt-2">
+              <div class="border-t-2 border-black w-full"></div>
+              <div class="border-t border-black w-full mt-[2px]"></div>
+            </div>
+
+            <!-- Patient Header -->
+            <section class="mt-2.5 text-[12px] leading-tight text-black">
+              <div class="grid grid-cols-2 gap-x-6">
+                <div class="space-y-1">
+                  <div class="flex items-baseline">
+                    <span class="font-bold w-28 shrink-0">Patient Name</span>
+                    <span class="font-semibold mr-1.5">:</span>
+                    <span class="editable-field font-semibold flex-1 disp-pName" contenteditable="true">Mrs. Naseeb Kaur</span>
+                  </div>
+                  <div class="flex items-baseline">
+                    <span class="font-bold w-28 shrink-0">Age / Gender</span>
+                    <span class="font-semibold mr-1.5">:</span>
+                    <span class="editable-field flex-1 disp-pAgeGender" contenteditable="true">58 Yrs. / Female</span>
+                  </div>
+                  <div class="flex items-baseline">
+                    <span class="font-bold w-28 shrink-0">Referred By</span>
+                    <span class="font-semibold mr-1.5">:</span>
+                    <span class="editable-field flex-1 disp-pRefBy" contenteditable="true">Dr. SELF</span>
+                  </div>
+                </div>
+                <div class="space-y-1">
+                  <div class="flex items-baseline">
+                    <span class="font-bold w-36 shrink-0">Lab Accession No.</span>
+                    <span class="font-semibold mr-1.5">:</span>
+                    <span class="editable-field flex-1 disp-pLabNo" contenteditable="true">KCL-2026-8942</span>
+                  </div>
+                  <div class="flex items-baseline">
+                    <span class="font-bold w-36 shrink-0">Date</span>
+                    <span class="font-semibold mr-1.5">:</span>
+                    <span class="editable-field flex-1 disp-pDate" contenteditable="true">15-04-2026</span>
+                  </div>
+                  <div class="flex items-baseline">
+                    <span class="font-bold w-36 shrink-0">Specimen Type</span>
+                    <span class="font-semibold mr-1.5">:</span>
+                    <span class="editable-field flex-1 disp-pSpecimen" contenteditable="true">BLOOD, EDTA Whole Blood, Urine</span>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <div class="border-t-2 border-black w-full mt-2.5 mb-1"></div>
+
+            <!-- CBC Table -->
+            <table class="w-full text-left text-[12px] border-collapse">
+              <thead>
+                <tr class="border-b-2 border-black font-bold uppercase text-[11px] text-black">
+                  <th class="py-1 px-1 w-[42%]">Test / Investigation</th>
+                  <th class="py-1 px-2 text-center w-[18%]">Patient Value</th>
+                  <th class="py-1 px-2 text-center w-[15%]">Units</th>
+                  <th class="py-1 px-2 text-right w-[25%]">Normal Range</th>
+                  <th class="py-1 px-1 text-center w-[40px] no-print">Show</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200">
+                
+                <tr class="bg-gray-100 font-bold text-[11px]">
+                  <td colspan="5" class="py-1 px-1 uppercase tracking-wide text-gray-800">COMPLETE HEMOGRAM</td>
+                </tr>
+
+                <tr data-row="c1" class="transition-opacity">
+                  <td class="py-1 px-1 font-medium"><span class="editable-field" contenteditable="true">Hemoglobin (Hb)</span></td>
+                  <td class="py-1 px-2 text-center font-bold"><span class="editable-field px-2" contenteditable="true">12.4</span></td>
+                  <td class="py-1 px-2 text-center text-gray-700">g/dL</td>
+                  <td class="py-1 px-2 text-right text-gray-700">12.0 - 15.0</td>
+                  <td class="text-center no-print">
+                    <label class="switch-ui"><input type="checkbox" checked="" onchange="handleParamToggle(this, 'c1')"><span class="slider"></span></label>
+                  </td>
+                </tr>
+
+                <tr data-row="c2" class="transition-opacity">
+                  <td class="py-1 px-1 font-medium"><span class="editable-field" contenteditable="true">Total Leukocyte Count (TLC)</span></td>
+                  <td class="py-1 px-2 text-center font-bold"><span class="editable-field px-2" contenteditable="true">6,800</span></td>
+                  <td class="py-1 px-2 text-center text-gray-700">/cumm</td>
+                  <td class="py-1 px-2 text-right text-gray-700">4,000 - 11,000</td>
+                  <td class="text-center no-print">
+                    <label class="switch-ui"><input type="checkbox" checked="" onchange="handleParamToggle(this, 'c2')"><span class="slider"></span></label>
+                  </td>
+                </tr>
+
+                <tr data-row="c3" class="transition-opacity">
+                  <td class="py-1 px-1 font-medium"><span class="editable-field" contenteditable="true">RBC Count</span></td>
+                  <td class="py-1 px-2 text-center font-bold"><span class="editable-field px-2" contenteditable="true">4.39</span></td>
+                  <td class="py-1 px-2 text-center text-gray-700">mill/mm3</td>
+                  <td class="py-1 px-2 text-right text-gray-700">3.8 - 4.8</td>
+                  <td class="text-center no-print">
+                    <label class="switch-ui"><input type="checkbox" checked="" onchange="handleParamToggle(this, 'c3')"><span class="slider"></span></label>
+                  </td>
+                </tr>
+
+                <tr data-row="c4" class="transition-opacity">
+                  <td class="py-1 px-1 font-medium"><span class="editable-field" contenteditable="true">Platelet Count</span></td>
+                  <td class="py-1 px-2 text-center font-bold"><span class="editable-field px-2" contenteditable="true">210</span></td>
+                  <td class="py-1 px-2 text-center text-gray-700">thou/mm3</td>
+                  <td class="py-1 px-2 text-right text-gray-700">150 - 450</td>
+                  <td class="text-center no-print">
+                    <label class="switch-ui"><input type="checkbox" checked="" onchange="handleParamToggle(this, 'c4')"><span class="slider"></span></label>
+                  </td>
+                </tr>
+
+                <tr class="bg-gray-50 font-bold text-[11px]">
+                  <td colspan="5" class="py-1 px-1 text-gray-700">DIFFERENTIAL LEUCOCYTE COUNT (DLC)</td>
+                </tr>
+
+                <tr data-row="c5" class="transition-opacity">
+                  <td class="py-1 px-1 font-medium pl-4"><span class="editable-field" contenteditable="true">Neutrophils</span></td>
+                  <td class="py-1 px-2 text-center font-bold"><span class="editable-field px-2" contenteditable="true">62</span></td>
+                  <td class="py-1 px-2 text-center text-gray-700">%</td>
+                  <td class="py-1 px-2 text-right text-gray-700">40 - 75</td>
+                  <td class="text-center no-print">
+                    <label class="switch-ui"><input type="checkbox" checked="" onchange="handleParamToggle(this, 'c5')"><span class="slider"></span></label>
+                  </td>
+                </tr>
+
+                <tr data-row="c6" class="transition-opacity">
+                  <td class="py-1 px-1 font-medium pl-4"><span class="editable-field" contenteditable="true">Lymphocytes</span></td>
+                  <td class="py-1 px-2 text-center font-bold"><span class="editable-field px-2" contenteditable="true">31</span></td>
+                  <td class="py-1 px-2 text-center text-gray-700">%</td>
+                  <td class="py-1 px-2 text-right text-gray-700">20 - 45</td>
+                  <td class="text-center no-print">
+                    <label class="switch-ui"><input type="checkbox" checked="" onchange="handleParamToggle(this, 'c6')"><span class="slider"></span></label>
+                  </td>
+                </tr>
+
+                <tr data-row="c7" class="transition-opacity">
+                  <td class="py-1 px-1 font-medium pl-4"><span class="editable-field" contenteditable="true">Eosinophils</span></td>
+                  <td class="py-1 px-2 text-center font-bold"><span class="editable-field px-2" contenteditable="true">03</span></td>
+                  <td class="py-1 px-2 text-center text-gray-700">%</td>
+                  <td class="py-1 px-2 text-right text-gray-700">01 - 06</td>
+                  <td class="text-center no-print">
+                    <label class="switch-ui"><input type="checkbox" checked="" onchange="handleParamToggle(this, 'c7')"><span class="slider"></span></label>
+                  </td>
+                </tr>
+
+                <tr data-row="c8" class="transition-opacity">
+                  <td class="py-1 px-1 font-medium pl-4"><span class="editable-field" contenteditable="true">Monocytes</span></td>
+                  <td class="py-1 px-2 text-center font-bold"><span class="editable-field px-2" contenteditable="true">04</span></td>
+                  <td class="py-1 px-2 text-center text-gray-700">%</td>
+                  <td class="py-1 px-2 text-right text-gray-700">02 - 10</td>
+                  <td class="text-center no-print">
+                    <label class="switch-ui"><input type="checkbox" checked="" onchange="handleParamToggle(this, 'c8')"><span class="slider"></span></label>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="text-center font-bold text-[11px] text-gray-600 mt-8 mb-2">
+              *** End of report ***
+            </div>
+          </div>
+
+          <footer class="mt-4 pt-2">
+            <div class="flex items-end justify-between min-h-[60px] mb-2">
+              <div class="doctor-signature-container" style="visibility: visible;">
+                <div class="text-[13px] font-bold text-black disp-docName">Dr. Manoj Garg</div>
+                <div class="text-[11px] font-semibold text-gray-800 disp-docDegree">MBBS, M.S. (Regd. No. KMC45011)</div>
+              </div>
+              <div class="dmlt-signature-container text-right" style="visibility: visible;">
+                <div class="text-[12px] font-bold text-black disp-techTitle">D.M.L.T.</div>
+                <div class="text-[10px] text-gray-500 font-medium disp-techSub">Laboratory In-charge</div>
+              </div>
+            </div>
+            <div class="border-t border-black w-full mb-1"></div>
+            <div class="text-[10px] text-gray-800 flex justify-between">
+              <span>This Report is Not Valid for Medico Legal Purpose.</span>
+              <span>All Subject To Tohana Jurisdiction only.</span>
+            </div>
+          </footer>
+        </article>
+
+        <!-- ========================================== -->
+        <!-- REPORT 4: LIVER & KIDNEY FUNCTION TEST     -->
+        <!-- ========================================== -->
+        <article id="sheetLFTKFT" class="a4-sheet" data-report-title="Liver &amp; Kidney Profile (LFT/KFT)" style="display: none;">
+          <div class="page-content-wrapper">
+            <div class="w-full relative h-[100px]">
+              <div class="no-print absolute inset-0 border border-dashed border-gray-300 rounded flex flex-col items-center justify-center text-gray-400 text-xs">
+                <span class="font-semibold text-gray-400"><i class="fa-regular fa-image mr-1"></i> Pre-Printed Letterhead Header Space (Top 100px Blank)</span>
+              </div>
+            </div>
+            <div class="w-full mt-2">
+              <div class="border-t-2 border-black w-full"></div>
+              <div class="border-t border-black w-full mt-[2px]"></div>
+            </div>
+            <section class="mt-2.5 text-[12px] leading-tight text-black">
+              <div class="grid grid-cols-2 gap-x-6">
+                <div class="space-y-1">
+                  <div class="flex items-baseline"><span class="font-bold w-28 shrink-0">Patient Name</span><span class="font-semibold mr-1.5">:</span><span class="editable-field font-semibold flex-1 disp-pName" contenteditable="true">Mrs. Naseeb Kaur</span></div>
+                  <div class="flex items-baseline"><span class="font-bold w-28 shrink-0">Age / Gender</span><span class="font-semibold mr-1.5">:</span><span class="editable-field flex-1 disp-pAgeGender" contenteditable="true">58 Yrs. / Female</span></div>
+                </div>
+                <div class="space-y-1">
+                  <div class="flex items-baseline"><span class="font-bold w-36 shrink-0">Lab Accession No.</span><span class="font-semibold mr-1.5">:</span><span class="editable-field flex-1 disp-pLabNo" contenteditable="true">KCL-2026-8942</span></div>
+                  <div class="flex items-baseline"><span class="font-bold w-36 shrink-0">Date</span><span class="font-semibold mr-1.5">:</span><span class="editable-field flex-1 disp-pDate" contenteditable="true">15-04-2026</span></div>
+                </div>
+              </div>
+            </section>
+            <div class="border-t-2 border-black w-full mt-2.5 mb-1"></div>
+
+            <table class="w-full text-left text-[12px] border-collapse">
+              <thead>
+                <tr class="border-b-2 border-black font-bold uppercase text-[11px] text-black">
+                  <th class="py-1 px-1 w-[42%]">Test / Investigation</th>
+                  <th class="py-1 px-2 text-center w-[18%]">Patient Value</th>
+                  <th class="py-1 px-2 text-center w-[15%]">Units</th>
+                  <th class="py-1 px-2 text-right w-[25%]">Normal Range</th>
+                  <th class="py-1 px-1 text-center w-[40px] no-print">Show</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200">
+                <tr data-row="lk1"><td class="py-1 px-1 font-medium"><span class="editable-field" contenteditable="true">S. Creatinine</span></td><td class="py-1 px-2 text-center font-bold"><span class="editable-field px-2" contenteditable="true">0.91</span></td><td class="py-1 px-2 text-center">mg/dL</td><td class="py-1 px-2 text-right">0.50 - 1.20</td><td class="text-center no-print"><label class="switch-ui"><input type="checkbox" checked="" onchange="handleParamToggle(this, 'lk1')"><span class="slider"></span></label></td></tr>
+                <tr data-row="lk2"><td class="py-1 px-1 font-medium"><span class="editable-field" contenteditable="true">Blood Urea</span></td><td class="py-1 px-2 text-center font-bold"><span class="editable-field px-2" contenteditable="true">26.1</span></td><td class="py-1 px-2 text-center">mg/dL</td><td class="py-1 px-2 text-right">13.0 - 43.0</td><td class="text-center no-print"><label class="switch-ui"><input type="checkbox" checked="" onchange="handleParamToggle(this, 'lk2')"><span class="slider"></span></label></td></tr>
+                <tr data-row="lk3"><td class="py-1 px-1 font-medium"><span class="editable-field" contenteditable="true">BUN (Blood Urea Nitrogen)</span></td><td class="py-1 px-2 text-center font-bold"><span class="editable-field px-2" contenteditable="true">12.2</span></td><td class="py-1 px-2 text-center">mg/dL</td><td class="py-1 px-2 text-right">6.0 - 20.0</td><td class="text-center no-print"><label class="switch-ui"><input type="checkbox" checked="" onchange="handleParamToggle(this, 'lk3')"><span class="slider"></span></label></td></tr>
+                <tr data-row="lk4"><td class="py-1 px-1 font-medium"><span class="editable-field" contenteditable="true">Bilirubin (Total)</span></td><td class="py-1 px-2 text-center font-bold"><span class="editable-field px-2" contenteditable="true">0.80</span></td><td class="py-1 px-2 text-center">mg/dL</td><td class="py-1 px-2 text-right">0.30 - 1.20</td><td class="text-center no-print"><label class="switch-ui"><input type="checkbox" checked="" onchange="handleParamToggle(this, 'lk4')"><span class="slider"></span></label></td></tr>
+                <tr data-row="lk5"><td class="py-1 px-1 font-medium"><span class="editable-field" contenteditable="true">Bilirubin (Direct)</span></td><td class="py-1 px-2 text-center font-bold"><span class="editable-field px-2" contenteditable="true">0.20</span></td><td class="py-1 px-2 text-center">mg/dL</td><td class="py-1 px-2 text-right">0.00 - 0.40</td><td class="text-center no-print"><label class="switch-ui"><input type="checkbox" checked="" onchange="handleParamToggle(this, 'lk5')"><span class="slider"></span></label></td></tr>
+                <tr data-row="lk6"><td class="py-1 px-1 font-medium"><span class="editable-field" contenteditable="true">Total Protein</span></td><td class="py-1 px-2 text-center font-bold"><span class="editable-field px-2" contenteditable="true">7.05</span></td><td class="py-1 px-2 text-center">g/dL</td><td class="py-1 px-2 text-right">6.0 - 8.0</td><td class="text-center no-print"><label class="switch-ui"><input type="checkbox" checked="" onchange="handleParamToggle(this, 'lk6')"><span class="slider"></span></label></td></tr>
+                <tr data-row="lk7"><td class="py-1 px-1 font-medium"><span class="editable-field" contenteditable="true">S. Albumin</span></td><td class="py-1 px-2 text-center font-bold"><span class="editable-field px-2" contenteditable="true">4.55</span></td><td class="py-1 px-2 text-center">g/dL</td><td class="py-1 px-2 text-right">3.5 - 5.2</td><td class="text-center no-print"><label class="switch-ui"><input type="checkbox" checked="" onchange="handleParamToggle(this, 'lk7')"><span class="slider"></span></label></td></tr>
+              </tbody>
+            </table>
+
+            <div class="text-center font-bold text-[11px] text-gray-600 mt-8 mb-2">*** End of report ***</div>
+          </div>
+
+          <footer class="mt-4 pt-2">
+            <div class="flex items-end justify-between min-h-[60px] mb-2">
+              <div class="doctor-signature-container" style="visibility: visible;">
+                <div class="text-[13px] font-bold text-black disp-docName">Dr. Manoj Garg</div>
+                <div class="text-[11px] font-semibold text-gray-800 disp-docDegree">MBBS, M.S. (Regd. No. KMC45011)</div>
+              </div>
+              <div class="dmlt-signature-container text-right" style="visibility: visible;">
+                <div class="text-[12px] font-bold text-black disp-techTitle">D.M.L.T.</div>
+                <div class="text-[10px] text-gray-500 font-medium disp-techSub">Laboratory In-charge</div>
+              </div>
+            </div>
+            <div class="border-t border-black w-full mb-1"></div>
+            <div class="text-[10px] text-gray-800 flex justify-between">
+              <span>This Report is Not Valid for Medico Legal Purpose.</span>
+              <span>All Subject To Tohana Jurisdiction only.</span>
+            </div>
+          </footer>
+        </article>
+
+        <!-- ========================================== -->
+        <!-- REPORT 5: THYROID PROFILE                  -->
+        <!-- ========================================== -->
+        <article id="sheetThyroid" class="a4-sheet" data-report-title="Thyroid Profile (FT3, FT4, TSH)" style="display: none;">
+          <div class="page-content-wrapper">
+            <div class="w-full relative h-[100px]">
+              <div class="no-print absolute inset-0 border border-dashed border-gray-300 rounded flex flex-col items-center justify-center text-gray-400 text-xs">
+                <span class="font-semibold text-gray-400"><i class="fa-regular fa-image mr-1"></i> Pre-Printed Letterhead Header Space</span>
+              </div>
+            </div>
+            <div class="w-full mt-2">
+              <div class="border-t-2 border-black w-full"></div>
+              <div class="border-t border-black w-full mt-[2px]"></div>
+            </div>
+            <section class="mt-2.5 text-[12px] leading-tight text-black">
+              <div class="grid grid-cols-2 gap-x-6">
+                <div class="space-y-1">
+                  <div class="flex items-baseline"><span class="font-bold w-28 shrink-0">Patient Name</span><span class="font-semibold mr-1.5">:</span><span class="editable-field font-semibold flex-1 disp-pName" contenteditable="true">Mrs. Naseeb Kaur</span></div>
+                  <div class="flex items-baseline"><span class="font-bold w-28 shrink-0">Age / Gender</span><span class="font-semibold mr-1.5">:</span><span class="editable-field flex-1 disp-pAgeGender" contenteditable="true">58 Yrs. / Female</span></div>
+                </div>
+                <div class="space-y-1">
+                  <div class="flex items-baseline"><span class="font-bold w-36 shrink-0">Lab Accession No.</span><span class="font-semibold mr-1.5">:</span><span class="editable-field flex-1 disp-pLabNo" contenteditable="true">KCL-2026-8942</span></div>
+                  <div class="flex items-baseline"><span class="font-bold w-36 shrink-0">Date</span><span class="font-semibold mr-1.5">:</span><span class="editable-field flex-1 disp-pDate" contenteditable="true">15-04-2026</span></div>
+                </div>
+              </div>
+            </section>
+            <div class="border-t-2 border-black w-full mt-2.5 mb-1"></div>
+
+            <table class="w-full text-left text-[12px] border-collapse">
+              <thead>
+                <tr class="border-b-2 border-black font-bold uppercase text-[11px] text-black">
+                  <th class="py-1 px-1 w-[42%]">Test / Investigation</th>
+                  <th class="py-1 px-2 text-center w-[18%]">Patient Value</th>
+                  <th class="py-1 px-2 text-center w-[15%]">Units</th>
+                  <th class="py-1 px-2 text-right w-[25%]">Normal Range</th>
+                  <th class="py-1 px-1 text-center w-[40px] no-print">Show</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200">
+                <tr data-row="th1"><td class="py-1 px-1 font-medium"><span class="editable-field" contenteditable="true">Free Triiodothyronine (FT3)</span></td><td class="py-1 px-2 text-center font-bold"><span class="editable-field px-2" contenteditable="true">2.50</span></td><td class="py-1 px-2 text-center">pg/mL</td><td class="py-1 px-2 text-right">2.00 - 4.40</td><td class="text-center no-print"><label class="switch-ui"><input type="checkbox" checked="" onchange="handleParamToggle(this, 'th1')"><span class="slider"></span></label></td></tr>
+                <tr data-row="th2"><td class="py-1 px-1 font-medium"><span class="editable-field" contenteditable="true">Free Thyroxine (FT4)</span></td><td class="py-1 px-2 text-center font-bold"><span class="editable-field px-2" contenteditable="true">1.00</span></td><td class="py-1 px-2 text-center">ng/dL</td><td class="py-1 px-2 text-right">0.93 - 1.70</td><td class="text-center no-print"><label class="switch-ui"><input type="checkbox" checked="" onchange="handleParamToggle(this, 'th2')"><span class="slider"></span></label></td></tr>
+                <tr data-row="th3"><td class="py-1 px-1 font-medium"><span class="editable-field" contenteditable="true">TSH, Ultrasensitive (CLIA)</span></td><td class="py-1 px-2 text-center font-bold"><span class="editable-field px-2" contenteditable="true">1.24</span></td><td class="py-1 px-2 text-center">uIU/mL</td><td class="py-1 px-2 text-right">0.27 - 4.20</td><td class="text-center no-print"><label class="switch-ui"><input type="checkbox" checked="" onchange="handleParamToggle(this, 'th3')"><span class="slider"></span></label></td></tr>
+              </tbody>
+            </table>
+
+            <div class="text-center font-bold text-[11px] text-gray-600 mt-8 mb-2">*** End of report ***</div>
+          </div>
+
+          <footer class="mt-4 pt-2">
+            <div class="flex items-end justify-between min-h-[60px] mb-2">
+              <div class="doctor-signature-container" style="visibility: visible;">
+                <div class="text-[13px] font-bold text-black disp-docName">Dr. Manoj Garg</div>
+                <div class="text-[11px] font-semibold text-gray-800 disp-docDegree">MBBS, M.S. (Regd. No. KMC45011)</div>
+              </div>
+              <div class="dmlt-signature-container text-right" style="visibility: visible;">
+                <div class="text-[12px] font-bold text-black disp-techTitle">D.M.L.T.</div>
+                <div class="text-[10px] text-gray-500 font-medium disp-techSub">Laboratory In-charge</div>
+              </div>
+            </div>
+            <div class="border-t border-black w-full mb-1"></div>
+            <div class="text-[10px] text-gray-800 flex justify-between">
+              <span>This Report is Not Valid for Medico Legal Purpose.</span>
+              <span>All Subject To Tohana Jurisdiction only.</span>
+            </div>
+          </footer>
+        </article>
+
+        <!-- ========================================== -->
+        <!-- REPORT 6: VITAMIN D & B12 PROFILE          -->
+        <!-- ========================================== -->
+        <article id="sheetVitamins" class="a4-sheet" data-report-title="Vitamin D &amp; B12 Profile" style="display: none;">
+          <div class="page-content-wrapper">
+            <div class="w-full relative h-[100px]">
+              <div class="no-print absolute inset-0 border border-dashed border-gray-300 rounded flex flex-col items-center justify-center text-gray-400 text-xs">
+                <span class="font-semibold text-gray-400"><i class="fa-regular fa-image mr-1"></i> Pre-Printed Letterhead Header Space</span>
+              </div>
+            </div>
+            <div class="w-full mt-2">
+              <div class="border-t-2 border-black w-full"></div>
+              <div class="border-t border-black w-full mt-[2px]"></div>
+            </div>
+            <section class="mt-2.5 text-[12px] leading-tight text-black">
+              <div class="grid grid-cols-2 gap-x-6">
+                <div class="space-y-1">
+                  <div class="flex items-baseline"><span class="font-bold w-28 shrink-0">Patient Name</span><span class="font-semibold mr-1.5">:</span><span class="editable-field font-semibold flex-1 disp-pName" contenteditable="true">Mrs. Naseeb Kaur</span></div>
+                  <div class="flex items-baseline"><span class="font-bold w-28 shrink-0">Age / Gender</span><span class="font-semibold mr-1.5">:</span><span class="editable-field flex-1 disp-pAgeGender" contenteditable="true">58 Yrs. / Female</span></div>
+                </div>
+                <div class="space-y-1">
+                  <div class="flex items-baseline"><span class="font-bold w-36 shrink-0">Lab Accession No.</span><span class="font-semibold mr-1.5">:</span><span class="editable-field flex-1 disp-pLabNo" contenteditable="true">KCL-2026-8942</span></div>
+                  <div class="flex items-baseline"><span class="font-bold w-36 shrink-0">Date</span><span class="font-semibold mr-1.5">:</span><span class="editable-field flex-1 disp-pDate" contenteditable="true">15-04-2026</span></div>
+                </div>
+              </div>
+            </section>
+            <div class="border-t-2 border-black w-full mt-2.5 mb-1"></div>
+
+            <table class="w-full text-left text-[12px] border-collapse">
+              <thead>
+                <tr class="border-b-2 border-black font-bold uppercase text-[11px] text-black">
+                  <th class="py-1 px-1 w-[42%]">Test / Investigation</th>
+                  <th class="py-1 px-2 text-center w-[18%]">Patient Value</th>
+                  <th class="py-1 px-2 text-center w-[15%]">Units</th>
+                  <th class="py-1 px-2 text-right w-[25%]">Normal Range</th>
+                  <th class="py-1 px-1 text-center w-[40px] no-print">Show</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200">
+                <tr data-row="vt1"><td class="py-1 px-1 font-medium"><span class="editable-field" contenteditable="true">Vitamin D, 25-Hydroxy (ECLIA)</span></td><td class="py-1 px-2 text-center font-bold"><span class="editable-field px-2" contenteditable="true">54.5</span></td><td class="py-1 px-2 text-center">nmol/L</td><td class="py-1 px-2 text-right">75.0 - 250.0</td><td class="text-center no-print"><label class="switch-ui"><input type="checkbox" checked="" onchange="handleParamToggle(this, 'vt1')"><span class="slider"></span></label></td></tr>
+                <tr data-row="vt2"><td class="py-1 px-1 font-medium"><span class="editable-field" contenteditable="true">Vitamin B12; Cyanocobalamin</span></td><td class="py-1 px-2 text-center font-bold"><span class="editable-field px-2" contenteditable="true">240.2</span></td><td class="py-1 px-2 text-center">pg/mL</td><td class="py-1 px-2 text-right">211.0 - 946.0</td><td class="text-center no-print"><label class="switch-ui"><input type="checkbox" checked="" onchange="handleParamToggle(this, 'vt2')"><span class="slider"></span></label></td></tr>
+              </tbody>
+            </table>
+
+            <div class="text-center font-bold text-[11px] text-gray-600 mt-8 mb-2">*** End of report ***</div>
+          </div>
+
+          <footer class="mt-4 pt-2">
+            <div class="flex items-end justify-between min-h-[60px] mb-2">
+              <div class="doctor-signature-container" style="visibility: visible;">
+                <div class="text-[13px] font-bold text-black disp-docName">Dr. Manoj Garg</div>
+                <div class="text-[11px] font-semibold text-gray-800 disp-docDegree">MBBS, M.S. (Regd. No. KMC45011)</div>
+              </div>
+              <div class="dmlt-signature-container text-right" style="visibility: visible;">
+                <div class="text-[12px] font-bold text-black disp-techTitle">D.M.L.T.</div>
+                <div class="text-[10px] text-gray-500 font-medium disp-techSub">Laboratory In-charge</div>
+              </div>
+            </div>
+            <div class="border-t border-black w-full mb-1"></div>
+            <div class="text-[10px] text-gray-800 flex justify-between">
+              <span>This Report is Not Valid for Medico Legal Purpose.</span>
+              <span>All Subject To Tohana Jurisdiction only.</span>
+            </div>
+          </footer>
+        </article>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- SHARE REPORT MODAL (Hidden in print) -->
+  <div id="shareModal" class="no-print fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+    <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 max-w-md w-full shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-700 pb-2.5">
+        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-share-nodes text-teal-400"></i> Share Patient Lab Report
+        </h3>
+        <button onclick="closeShareModal()" class="text-slate-400 hover:text-white">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3 text-xs text-slate-300">
+        <div>
+          <label class="text-[11px] text-slate-400 font-medium">Patient WhatsApp Mobile Number</label>
+          <div class="flex gap-2 mt-1">
+            <input type="text" id="shareMobileInput" placeholder="Enter 10-digit mobile number" class="flex-1 bg-slate-900 border border-slate-600 rounded px-2.5 py-1.5 text-white focus:border-teal-400 focus:outline-none">
+            <button onclick="shareViaWhatsApp()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded font-bold flex items-center gap-1.5 transition">
+              <i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp
+            </button>
+          </div>
+        </div>
+
+        <div class="border-t border-slate-700/80 pt-3">
+          <button onclick="triggerWebShareAPI()" class="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white rounded font-bold flex items-center justify-center gap-2 transition">
+            <i class="fa-solid fa-arrow-up-from-bracket"></i> Share via Device Share / Email
+          </button>
+        </div>
+
+        <div class="bg-slate-900/80 p-2.5 rounded border border-slate-700 text-[11px] space-y-1">
+          <div class="font-semibold text-slate-200">How to send PDF on WhatsApp:</div>
+          <ol class="list-decimal list-inside text-slate-400 space-y-0.5">
+            <li>Click <strong>Print / Save PDF</strong> in top right.</li>
+            <li>In printer dropdown, select <em>"Save as PDF"</em>.</li>
+            <li>Send the saved PDF directly to the patient via WhatsApp chat.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ==========================================
+    // 1. LOCAL DATABASE & FOLDER FILE SYSTEM
+    // ==========================================
+    const STORAGE_KEY = 'KCL_PATIENTS_DATABASE_V1';
+    let localDirectoryHandle = null;
+
+    // Load database from localStorage
+    function getStoredPatients() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    // Save database to localStorage
+    function setStoredPatients(patientsArray) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(patientsArray));
+      updatePatientDatalist();
+      updateSavedCountDisplay();
+    }
+
+    // Connect Computer Folder using Modern Browser File System Access API
+    async function connectLocalFolder() {
+      if ('showDirectoryPicker' in window) {
+        try {
+          localDirectoryHandle = await window.showDirectoryPicker();
+          document.getElementById('syncStatusBadge').textContent = 'Folder: ' + localDirectoryHandle.name;
+          document.getElementById('syncStatusBadge').className = 'text-[10px] px-2 py-0.5 rounded bg-teal-900/60 text-teal-300 border border-teal-500/40 font-semibold';
+          document.getElementById('btnFolderLabel').textContent = localDirectoryHandle.name.substring(0, 12) + '...';
+          
+          // Try to load any existing master lab report DB from the folder
+          try {
+            const fileHandle = await localDirectoryHandle.getFileHandle('patients_reports_db.json', { create: false });
+            const file = await fileHandle.getFile();
+            const text = await file.text();
+            if (text) {
+              const loaded = JSON.parse(text);
+              if (Array.isArray(loaded)) {
+                setStoredPatients(loaded);
+              }
+            }
+          } catch(err) {
+            // file not yet created in folder, will be created on first save
+          }
+        } catch (e) {
+          if (e.name !== 'AbortError') {
+            console.warn('Folder access cancelled or not allowed');
+          }
+        }
+      } else {
+        alert('File System Access API is not supported in this browser. Local Storage is active and will retain all patient records automatically.');
+      }
+    }
+
+    // Save metadata of the current patient to database & local folder
+    async function saveCurrentPatientRecord() {
+      const pName = document.getElementById('inpPatientName').value.trim();
+      if (!pName) {
+        alert('Please enter a patient name first.');
+        return;
+      }
+
+      const activeSheets = Array.from(document.querySelectorAll('.report-checkbox:checked')).map(cb => cb.dataset.sheet);
+      
+      const record = {
+        name: pName,
+        age: document.getElementById('inpAge').value,
+        gender: document.getElementById('inpGender').value,
+        mobile: document.getElementById('inpMobile').value,
+        refBy: document.getElementById('inpRefBy').value,
+        labNo: document.getElementById('inpLabNo').value,
+        date: document.getElementById('inpDate').value,
+        specimen: document.getElementById('inpSpecimen').value,
+        selectedSheets: activeSheets,
+        updatedAt: new Date().toISOString()
+      };
+
+      let patients = getStoredPatients();
+      const existingIdx = patients.findIndex(p => p.name.toLowerCase() === pName.toLowerCase());
+      if (existingIdx >= 0) {
+        patients[existingIdx] = record;
+      } else {
+        patients.unshift(record);
+      }
+
+      setStoredPatients(patients);
+
+      // If connected to computer folder, write JSON file into folder
+      if (localDirectoryHandle) {
+        try {
+          const fileHandle = await localDirectoryHandle.getFileHandle('patients_reports_db.json', { create: true });
+          const writable = await fileHandle.createWritable();
+          await writable.write(JSON.stringify(patients, null, 2));
+          await writable.close();
+        } catch(err) {
+          console.warn('Could not write to local folder:', err);
+        }
+      }
+
+      // Visual confirmation
+      const hint = document.getElementById('patientMatchHint');
+      hint.textContent = 'Saved to database!';
+      hint.classList.remove('hidden');
+      setTimeout(() => hint.classList.add('hidden'), 2500);
+    }
+
+    // Update patient autocomplete datalist
+    function updatePatientDatalist() {
+      const datalist = document.getElementById('patientDatalist');
+      if (!datalist) return;
+      datalist.innerHTML = '';
+      const list = getStoredPatients();
+      list.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.name;
+        opt.label = `${p.age || ''} | ${p.mobile || ''}`;
+        datalist.appendChild(opt);
+      });
+    }
+
+    function updateSavedCountDisplay() {
+      const countEl = document.getElementById('totalSavedRecordsCount');
+      if (countEl) countEl.textContent = getStoredPatients().length;
+    }
+
+    // Auto-search and instant fill returning patient
+    function onPatientNameInput(query) {
+      syncMasterPatientData();
+      const list = getStoredPatients();
+      const match = list.find(p => p.name.trim().toLowerCase() === query.trim().toLowerCase());
+      const hint = document.getElementById('patientMatchHint');
+
+      if (match) {
+        if (hint) {
+          hint.textContent = 'Matched returning patient!';
+          hint.classList.remove('hidden');
+        }
+        // Auto fill past demographics
+        if (match.age) document.getElementById('inpAge').value = match.age;
+        if (match.gender) document.getElementById('inpGender').value = match.gender;
+        if (match.mobile) document.getElementById('inpMobile').value = match.mobile;
+        if (match.refBy) document.getElementById('inpRefBy').value = match.refBy;
+        if (match.labNo) document.getElementById('inpLabNo').value = match.labNo;
+        if (match.specimen) document.getElementById('inpSpecimen').value = match.specimen;
+
+        // Auto select past selected reports if present
+        if (Array.isArray(match.selectedSheets)) {
+          document.querySelectorAll('.report-checkbox').forEach(cb => {
+            cb.checked = match.selectedSheets.includes(cb.dataset.sheet);
+          });
+          onReportCheckboxChange();
+        }
+
+        syncMasterPatientData();
+      } else {
+        if (hint) hint.classList.add('hidden');
+      }
+    }
+
+    // Export database JSON
+    function exportDatabaseJSON() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(getStoredPatients(), null, 2));
+      const a = document.createElement('a');
+      a.setAttribute("href", dataStr);
+      a.setAttribute("download", `KrishnaLab_Patients_Backup_${new Date().toISOString().slice(0,10)}.json`);
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+
+    // Import database JSON
+    function importDatabaseJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          if (Array.isArray(parsed)) {
+            setStoredPatients(parsed);
+            alert(`Imported ${parsed.length} patient records successfully!`);
+          } else {
+            alert('Invalid database file format.');
+          }
+        } catch(err) {
+          alert('Error parsing JSON database file.');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function clearPatientHistory() {
+      if (window.confirm && confirm('Are you sure you want to clear saved patient records?')) {
+        localStorage.removeItem(STORAGE_KEY);
+        setStoredPatients([]);
+      }
+    }
+
+    // ==========================================
+    // 2. REORDER REPORTS (MOVE UP / MOVE DOWN)
+    // ==========================================
+    function renderReorderControls() {
+      const container = document.getElementById('reorderListContainer');
+      const sheetsContainer = document.getElementById('sheetsContainer');
+      if (!container || !sheetsContainer) return;
+
+      container.innerHTML = '';
+      const sheets = Array.from(sheetsContainer.querySelectorAll('.a4-sheet'));
+
+      sheets.forEach((sheet, idx) => {
+        const isVisible = sheet.style.display !== 'none';
+        const title = sheet.getAttribute('data-report-title') || sheet.id;
+
+        const row = document.createElement('div');
+        row.className = `flex items-center justify-between p-1.5 rounded border ${isVisible ? 'bg-slate-800/90 border-slate-700' : 'bg-slate-900/40 border-slate-800 opacity-40 text-slate-500'}`;
+
+        row.innerHTML = `
+          <div class="flex items-center gap-1.5 truncate">
+            <span class="text-[10px] font-bold text-teal-400 w-4">${idx + 1}.</span>
+            <span class="text-[11px] truncate font-medium text-slate-200">${title}</span>
+          </div>
+          <div class="flex items-center gap-1 shrink-0">
+            <button onclick="moveSheetOrder('${sheet.id}', -1)" ${idx === 0 ? 'disabled' : ''} class="w-6 h-6 rounded bg-slate-700 hover:bg-slate-600 disabled:opacity-20 flex items-center justify-center text-[10px] text-teal-300 transition" title="Move Up in Print Order">
+              <i class="fa-solid fa-chevron-up"></i>
+            </button>
+            <button onclick="moveSheetOrder('${sheet.id}', 1)" ${idx === sheets.length - 1 ? 'disabled' : ''} class="w-6 h-6 rounded bg-slate-700 hover:bg-slate-600 disabled:opacity-20 flex items-center justify-center text-[10px] text-teal-300 transition" title="Move Down in Print Order">
+              <i class="fa-solid fa-chevron-down"></i>
+            </button>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function moveSheetOrder(sheetId, direction) {
+      const sheetsContainer = document.getElementById('sheetsContainer');
+      const sheet = document.getElementById(sheetId);
+      if (!sheet || !sheetsContainer) return;
+
+      if (direction === -1 && sheet.previousElementSibling) {
+        sheetsContainer.insertBefore(sheet, sheet.previousElementSibling);
+      } else if (direction === 1 && sheet.nextElementSibling) {
+        sheetsContainer.insertBefore(sheet.nextElementSibling, sheet);
+      }
+      renderReorderControls();
+    }
+
+    // ==========================================
+    // 3. MULTI-SELECT DROPDOWN & REPORT SELECTION
+    // ==========================================
+    function toggleReportDropdown() {
+      const menu = document.getElementById('reportDropdownMenu');
+      const arrow = document.getElementById('dropdownArrow');
+      if (menu) {
+        menu.classList.toggle('hidden');
+        if (arrow) arrow.classList.toggle('rotate-180');
+      }
+    }
+
+    function onReportCheckboxChange() {
+      let activeCount = 0;
+      const checkedNames = [];
+
+      document.querySelectorAll('.report-checkbox').forEach(cb => {
+        const sheet = document.getElementById(cb.dataset.sheet);
+        if (sheet) {
+          if (cb.checked) {
+            sheet.style.display = 'flex';
+            activeCount++;
+            checkedNames.push(sheet.getAttribute('data-report-title') || sheet.id);
+          } else {
+            sheet.style.display = 'none';
+          }
+        }
+      });
+
+      // Update badge count & dropdown label
+      const badge = document.getElementById('activeReportBadge');
+      if (badge) badge.textContent = `${activeCount} Active`;
+
+      const summary = document.getElementById('selectedReportNamesSummary');
+      if (summary) {
+        summary.textContent = activeCount === 0 ? 'No reports selected' : `${activeCount} Reports Selected`;
+      }
+
+      renderReorderControls();
+    }
+
+    // ==========================================
+    // 4. SEPARATE DOCTOR & D.M.L.T. SIGNATURE CONTROLS
+    // ==========================================
+    // Doctor Block
+    function syncMasterDoctorData() {
+      const docName = document.getElementById('inpDocName').value;
+      const docDeg = document.getElementById('inpDocDegree').value;
+
+      document.querySelectorAll('.disp-docName').forEach(el => el.textContent = docName);
+      document.querySelectorAll('.disp-docDegree').forEach(el => el.textContent = docDeg);
+    }
+
+    function toggleMasterDoctorBlock(show) {
+      document.querySelectorAll('.doctor-signature-container').forEach(el => {
+        if (show) {
+          el.classList.remove('doctor-hidden');
+          el.style.visibility = 'visible';
+        } else {
+          el.classList.add('doctor-hidden');
+          el.style.visibility = 'hidden';
+        }
+      });
+    }
+
+    // D.M.L.T. Block (Completely Independent)
+    function syncMasterDmltData() {
+      const techTitle = document.getElementById('inpTechTitle').value;
+      const techSub = document.getElementById('inpTechSub').value;
+
+      document.querySelectorAll('.disp-techTitle').forEach(el => el.textContent = techTitle);
+      document.querySelectorAll('.disp-techSub').forEach(el => el.textContent = techSub);
+    }
+
+    function toggleMasterDmltBlock(show) {
+      document.querySelectorAll('.dmlt-signature-container').forEach(el => {
+        if (show) {
+          el.classList.remove('dmlt-hidden');
+          el.style.visibility = 'visible';
+        } else {
+          el.classList.add('dmlt-hidden');
+          el.style.visibility = 'hidden';
+        }
+      });
+    }
+
+    // ==========================================
+    // 5. PARAMETER DIMMING TOGGLE & WIDAL CELL
+    // ==========================================
+    function handleParamToggle(checkbox, rowId) {
+      const rows = document.querySelectorAll(`[data-row="${rowId}"]`);
+      rows.forEach(r => {
+        if (checkbox.checked) {
+          r.classList.remove('row-disabled');
+        } else {
+          r.classList.add('row-disabled');
+        }
+      });
+    }
+
+    function toggleCellSign(cell) {
+      const current = cell.textContent.trim();
+      if (current === '+') {
+        cell.textContent = '-';
+        cell.classList.remove('text-emerald-700');
+        cell.classList.add('text-rose-600');
+      } else {
+        cell.textContent = '+';
+        cell.classList.remove('text-rose-600');
+        cell.classList.add('text-emerald-700');
+      }
+    }
+
+    // Sync Master Demographics
+    function syncMasterPatientData() {
+      const name = document.getElementById('inpPatientName').value;
+      const age = document.getElementById('inpAge').value;
+      const gender = document.getElementById('inpGender').value;
+      const mobile = document.getElementById('inpMobile').value;
+      const refBy = document.getElementById('inpRefBy').value;
+      const labNo = document.getElementById('inpLabNo').value;
+      const date = document.getElementById('inpDate').value;
+      const specimen = document.getElementById('inpSpecimen').value;
+
+      document.querySelectorAll('.disp-pName').forEach(el => el.textContent = name);
+      document.querySelectorAll('.disp-pAgeGender').forEach(el => el.textContent = `${age} / ${gender}`);
+      document.querySelectorAll('.disp-pMobile').forEach(el => el.textContent = mobile);
+      document.querySelectorAll('.disp-pRefBy').forEach(el => el.textContent = refBy);
+      document.querySelectorAll('.disp-pLabNo').forEach(el => el.textContent = labNo);
+      document.querySelectorAll('.disp-pDate').forEach(el => el.textContent = date);
+      document.querySelectorAll('.disp-pSpecimen').forEach(el => el.textContent = specimen);
+    }
+
+    // ==========================================
+    // 6. SHARE REPORT & WHATSAPP
+    // ==========================================
+    function openShareModal() {
+      const mob = document.getElementById('inpMobile').value.replace(/[^0-9]/g, '');
+      document.getElementById('shareMobileInput').value = mob;
+      document.getElementById('shareModal').classList.remove('hidden');
+      document.getElementById('shareModal').classList.add('flex');
+    }
+
+    function closeShareModal() {
+      document.getElementById('shareModal').classList.add('hidden');
+      document.getElementById('shareModal').classList.remove('flex');
+    }
+
+    function shareViaWhatsApp() {
+      const mobile = document.getElementById('shareMobileInput').value.trim();
+      const pName = document.getElementById('inpPatientName').value;
+      const labNo = document.getElementById('inpLabNo').value;
+      const date = document.getElementById('inpDate').value;
+
+      const message = `Hello ${pName}, your Diagnostic Lab Report (${labNo}) dated ${date} from Krishna Computerized Laboratory has been generated successfully. Please collect or check the attached PDF.`;
+      const cleanPhone = mobile.length === 10 ? '91' + mobile : mobile;
+      const url = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(message)}`;
+      window.open(url, '_blank');
+      closeShareModal();
+    }
+
+    async function triggerWebShareAPI() {
+      const pName = document.getElementById('inpPatientName').value;
+      const labNo = document.getElementById('inpLabNo').value;
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: `Lab Report - ${pName}`,
+            text: `Diagnostic Test Report for ${pName} (Accession No: ${labNo}) - Krishna Computerized Laboratory.`,
+            url: window.location.href
+          });
+          closeShareModal();
+        } catch (e) {
+          // share aborted or dismissed
+        }
+      } else {
+        alert('Web Share is not supported on this browser. You can use the WhatsApp option or Save as PDF to send directly.');
+      }
+    }
+
+    // ==========================================
+    // 7. RESET DEFAULTS
+    // ==========================================
+    function resetDefaults() {
+      document.getElementById('inpPatientName').value = 'Mrs. Naseeb Kaur';
+      document.getElementById('inpAge').value = '58 Yrs.';
+      document.getElementById('inpGender').value = 'Female';
+      document.getElementById('inpMobile').value = '98XXXXXXXX';
+      document.getElementById('inpRefBy').value = 'Dr. SELF';
+      document.getElementById('inpLabNo').value = 'KCL-2026-8942';
+      document.getElementById('inpDate').value = '15-04-2026';
+      document.getElementById('inpSpecimen').value = 'BLOOD, EDTA Whole Blood, Urine';
+
+      document.getElementById('inpDocName').value = 'Dr. Manoj Garg';
+      document.getElementById('inpDocDegree').value = 'MBBS, M.S. (Regd. No. KMC45011)';
+      document.getElementById('masterDocToggle').checked = true;
+      toggleMasterDoctorBlock(true);
+
+      document.getElementById('inpTechTitle').value = 'D.M.L.T.';
+      document.getElementById('inpTechSub').value = 'Laboratory In-charge';
+      document.getElementById('masterDmltToggle').checked = true;
+      toggleMasterDmltBlock(true);
+
+      const defaultChecks = ['sheetBiochem', 'sheetWidal', 'sheetCBC'];
+      document.querySelectorAll('.report-checkbox').forEach(cb => {
+        cb.checked = defaultChecks.includes(cb.dataset.sheet);
+      });
+      onReportCheckboxChange();
+
+      // Enable all row toggle switches
+      document.querySelectorAll('.a4-sheet .switch-ui input[type="checkbox"]').forEach(cb => {
+        cb.checked = true;
+        const row = cb.closest('[data-row]');
+        if (row) row.classList.remove('row-disabled');
+      });
+
+      syncMasterPatientData();
+      syncMasterDoctorData();
+      syncMasterDmltData();
+    }
+
+    // Initialize on window load
+    window.addEventListener('DOMContentLoaded', () => {
+      // Seed initial sample if empty
+      if (getStoredPatients().length === 0) {
+        setStoredPatients([
+          {
+            name: "Mrs. Naseeb Kaur",
+            age: "58 Yrs.",
+            gender: "Female",
+            mobile: "98XXXXXXXX",
+            refBy: "Dr. SELF",
+            labNo: "KCL-2026-8942",
+            date: "15-04-2026",
+            specimen: "BLOOD, EDTA Whole Blood",
+            selectedSheets: ["sheetBiochem", "sheetWidal", "sheetCBC"]
+          },
+          {
+            name: "Mrs. Karamdeep Kaur",
+            age: "37 Yrs.",
+            gender: "Female",
+            mobile: "9315335197",
+            refBy: "Dr. SELF",
+            labNo: "KCL-2026-8940",
+            date: "08-03-2026",
+            specimen: "BLOOD, EDTA Whole Blood, Urine",
+            selectedSheets: ["sheetWidal", "sheetBiochem"]
+          }
+        ]);
+      } else {
+        updatePatientDatalist();
+        updateSavedCountDisplay();
+      }
+
+      syncMasterPatientData();
+      syncMasterDoctorData();
+      syncMasterDmltData();
+      onReportCheckboxChange();
+    });
+  </script>
+
+</body></html>

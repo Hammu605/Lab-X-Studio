@@ -1,0 +1,41 @@
+{
+  "name": "lab-x-studio",
+  "version": "1.0.0",
+  "description": "Lab X — Professional Diagnostic Studio & Multi-Report Generator for PC",
+  "main": "main.js",
+  "author": "Krishna Diagnostic Laboratory",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder --win",
+    "dist:portable": "electron-builder --win portable"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.krishnalab.labx",
+    "productName": "Lab X Studio",
+    "directories": {
+      "output": "dist-electron"
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "icon.ico",
+      "artifactName": "${productName}-${version}-${arch}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Lab X Studio"
+    }
+  }
+}
