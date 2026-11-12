@@ -1,0 +1,124 @@
+{
+  "reportId": "urine_examination",
+  "reportTitle": "URINE ROUTINE & MICROSCOPIC EXAMINATION",
+  "category": "Clinical Pathology",
+  "enabledByDefault": true,
+  "sections": [
+    {
+      "sectionTitle": "PHYSICAL EXAMINATION",
+      "parameters": [
+        {
+          "name": "Colour",
+          "defaultValue": "Pale Yellow",
+          "units": "-",
+          "referenceRange": "Pale Yellow / Straw"
+        },
+        {
+          "name": "Appearance / Transparency",
+          "defaultValue": "Clear",
+          "units": "-",
+          "referenceRange": "Clear"
+        },
+        {
+          "name": "Specific Gravity",
+          "defaultValue": "1.020",
+          "units": "-",
+          "referenceRange": "1.005 - 1.030",
+          "low": 1.005,
+          "high": 1.030
+        },
+        {
+          "name": "Reaction (pH)",
+          "defaultValue": "6.0",
+          "units": "-",
+          "referenceRange": "4.6 - 8.0",
+          "low": 4.6,
+          "high": 8.0
+        }
+      ]
+    },
+    {
+      "sectionTitle": "CHEMICAL EXAMINATION",
+      "parameters": [
+        {
+          "name": "Urine Protein / Albumin",
+          "defaultValue": "Nil (Negative)",
+          "units": "-",
+          "referenceRange": "Nil / Negative"
+        },
+        {
+          "name": "Urine Glucose / Sugar",
+          "defaultValue": "Nil (Negative)",
+          "units": "-",
+          "referenceRange": "Nil / Negative"
+        },
+        {
+          "name": "Ketone Bodies",
+          "defaultValue": "Negative",
+          "units": "-",
+          "referenceRange": "Negative"
+        },
+        {
+          "name": "Bile Salts",
+          "defaultValue": "Negative",
+          "units": "-",
+          "referenceRange": "Negative"
+        },
+        {
+          "name": "Bile Pigments",
+          "defaultValue": "Negative",
+          "units": "-",
+          "referenceRange": "Negative"
+        },
+        {
+          "name": "Urobilinogen",
+          "defaultValue": "Normal",
+          "units": "-",
+          "referenceRange": "Normal (< 1 mg/dL)"
+        }
+      ]
+    },
+    {
+      "sectionTitle": "MICROSCOPIC EXAMINATION (Centrifuged Deposit)",
+      "parameters": [
+        {
+          "name": "Pus Cells (Leukocytes)",
+          "defaultValue": "1 - 2",
+          "units": "/ HPF",
+          "referenceRange": "0 - 5 / HPF"
+        },
+        {
+          "name": "RBCs (Erythrocytes)",
+          "defaultValue": "Nil",
+          "units": "/ HPF",
+          "referenceRange": "0 - 2 / HPF"
+        },
+        {
+          "name": "Epithelial Cells",
+          "defaultValue": "2 - 4",
+          "units": "/ HPF",
+          "referenceRange": "Occasional / Few"
+        },
+        {
+          "name": "Crystals",
+          "defaultValue": "Nil",
+          "units": "/ HPF",
+          "referenceRange": "Nil / Absent"
+        },
+        {
+          "name": "Casts",
+          "defaultValue": "Nil",
+          "units": "/ LPF",
+          "referenceRange": "Nil / Absent"
+        },
+        {
+          "name": "Bacteria / Trichomonas",
+          "defaultValue": "Absent",
+          "units": "-",
+          "referenceRange": "Absent"
+        }
+      ]
+    }
+  ],
+  "defaultImpression": "Routine and microscopic examination of urine within normal biological limits. No pathological proteinuria or active urinary sediment detected."
+}
