@@ -44,12 +44,20 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: latest
-          name: "Lab X Studio v1.0.0 (Windows .exe)"
+          name: "Lab X Studio v1.3.0 (Windows .exe)"
           body: |
-            ## Lab X Studio — Windows Executables (.exe)
+            ## Lab X Studio v1.3.0 — Windows Executables (.exe)
             
-            - **Installer**: `Lab-X-Studio-Setup-1.0.0.exe` (Complete Windows installation with Desktop shortcut)
-            - **Portable**: `Lab-X-Studio-Portable-1.0.0.exe` (Run directly without installing)
+            - **Installer**: `Lab-X-Studio-Setup-1.3.0.exe` (Complete Windows installation with Desktop shortcut)
+            - **Portable**: `Lab-X-Studio-Portable-1.3.0.exe` (Run directly without installing)
+            
+            ### What's New in v1.3.0:
+            - **Fixed all buttons and interactions**: 100% smooth tab navigation, print, save, and calculations.
+            - **In-App Auto-Update System**: Notifies and updates directly when launched.
+            - **Permanent Settings**: Clinic details and staff signatures never reset.
+            - **Page Margins Customizer**: Adjust top letterhead blank space (40-130mm) and side margins.
+            - **Returning Patient Vault**: Unique Patient ID (PID) and 1-click New Visit Report generation.
+            - **Lab Math Auto-Calculations**: Background calculation of MCV, MCH, MCHC, and Lipid profiles.
             
             Automatically compiled by GitHub Actions.
           files: dist-electron/*.exe

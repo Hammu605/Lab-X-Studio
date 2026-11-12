@@ -1580,10 +1580,10 @@
       </div>
 
       <div class="space-y-2 pt-1">
-        <a id="btnDownloadSetup" href="https://github.com/Hammu605/Lab-X-Studio/releases/tag/latest" target="_blank" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition shadow">
+        <a id="btnDownloadSetup" href="https://github.com/Hammu605/Lab-X-Studio/releases/tag/latest" target="_blank" onclick="event.preventDefault(); openExternalLink(this.href)" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition shadow">
           <i class="fa-solid fa-download"></i> Download Windows Setup (.exe)
         </a>
-        <a id="btnDownloadPortable" href="https://github.com/Hammu605/Lab-X-Studio/releases/tag/latest" target="_blank" class="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs flex items-center justify-center gap-2 transition">
+        <a id="btnDownloadPortable" href="https://github.com/Hammu605/Lab-X-Studio/releases/tag/latest" target="_blank" onclick="event.preventDefault(); openExternalLink(this.href)" class="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs flex items-center justify-center gap-2 transition">
           <i class="fa-solid fa-bolt"></i> Download Portable (.exe)
         </a>
       </div>
@@ -1808,7 +1808,7 @@
       };
       localStorage.setItem('labx_clinic_config', JSON.stringify(config));
       syncMasterClinicData();
-      showToast('Clinic Details Saved Permanently! (Won't Reset)');
+      showToast("Clinic Details Saved Permanently! (Permanent)");
     }
 
     function loadClinicSettings() {
@@ -2493,7 +2493,9 @@
 
         document.getElementById('updateBadgeBtn').classList.remove('hidden');
 
-        if (manual) {
+        // Auto popup update modal on startup
+        const dismissed = sessionStorage.getItem('labx_update_dismissed');
+        if (manual || !dismissed) {
           openUpdateModal();
         }
       } catch (e) {
@@ -2510,6 +2512,15 @@
     function closeUpdateModal() {
       document.getElementById('updateModal').classList.add('hidden');
       document.getElementById('updateModal').classList.remove('flex');
+      sessionStorage.setItem('labx_update_dismissed', 'true');
+    }
+
+    function openExternalLink(url) {
+      if (window.electronAPI && window.electronAPI.openExternal) {
+        window.electronAPI.openExternal(url);
+      } else {
+        window.open(url, '_blank');
+      }
     }
 
     // Global Keyboard Shortcuts
