@@ -3,7 +3,12 @@ name: Build Windows PC Executable (.exe)
 on:
   push:
     branches: [ master, main ]
+    tags:
+      - 'v*'
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build-windows:
@@ -29,7 +34,7 @@ jobs:
       - name: Build Windows .exe Installer & Portable
         run: pnpm run dist
 
-      - name: Upload Windows Executables (.exe)
+      - name: Upload Windows Executables (.exe Artifact)
         uses: actions/upload-artifact@v4
         with:
           name: Lab-X-Studio-Windows-EXE

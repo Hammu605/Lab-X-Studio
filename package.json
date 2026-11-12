@@ -27,7 +27,6 @@
         "nsis",
         "portable"
       ],
-      "icon": "icon.ico",
       "artifactName": "${productName}-${version}-${arch}.${ext}"
     },
     "nsis": {
