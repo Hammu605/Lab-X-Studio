@@ -3,8 +3,6 @@ name: Build Windows PC Executable (.exe)
 on:
   push:
     branches: [ master, main ]
-    tags:
-      - 'v*'
   workflow_dispatch:
 
 permissions:
@@ -21,7 +19,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Install pnpm
         uses: pnpm/action-setup@v3
@@ -33,9 +31,29 @@ jobs:
 
       - name: Build Windows .exe Installer & Portable
         run: pnpm run dist
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload Windows Executables (.exe Artifact)
         uses: actions/upload-artifact@v4
         with:
           name: Lab-X-Studio-Windows-EXE
           path: dist-electron/*.exe
+
+      - name: Create Continuous Release (.exe Download Link)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: "Lab X Studio v1.0.0 (Windows .exe)"
+          body: |
+            ## Lab X Studio — Windows Executables (.exe)
+            
+            - **Installer**: `Lab-X-Studio-Setup-1.0.0.exe` (Complete Windows installation with Desktop shortcut)
+            - **Portable**: `Lab-X-Studio-Portable-1.0.0.exe` (Run directly without installing)
+            
+            Automatically compiled by GitHub Actions.
+          files: dist-electron/*.exe
+          prerelease: false
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

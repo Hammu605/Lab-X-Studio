@@ -8,8 +8,8 @@
   "scripts": {
     "start": "electron .",
     "pack": "electron-builder --dir",
-    "dist": "electron-builder --win",
-    "dist:portable": "electron-builder --win portable"
+    "dist": "electron-builder --win --publish never",
+    "dist:portable": "electron-builder --win portable --publish never"
   },
   "dependencies": {},
   "devDependencies": {
@@ -18,23 +18,36 @@
   },
   "build": {
     "appId": "com.krishnalab.labx",
-    "productName": "Lab X Studio",
+    "productName": "Lab-X-Studio",
     "directories": {
       "output": "dist-electron"
     },
     "win": {
       "target": [
-        "nsis",
-        "portable"
-      ],
-      "artifactName": "${productName}-${version}-${arch}.${ext}"
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
     },
     "nsis": {
+      "artifactName": "${productName}-Setup-${version}.${ext}",
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "Lab X Studio"
+    },
+    "portable": {
+      "artifactName": "${productName}-Portable-${version}.${ext}"
     }
   }
 }
