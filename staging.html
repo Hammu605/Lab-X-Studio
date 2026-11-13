@@ -614,7 +614,7 @@
 
         <!-- Quick Select / Deselect All -->
         <div class="flex items-center justify-between mb-1 text-[10.5px] px-1 font-mono">
-          <button type="button" onclick="selectAllReports(true)" class="text-teal-400 hover:text-teal-300 font-semibold underline">Select All (11)</button>
+          <button type="button" onclick="selectAllReports(true)" class="text-teal-400 hover:text-teal-300 font-semibold underline">Select All (12)</button>
           <button type="button" onclick="selectAllReports(false)" class="text-slate-400 hover:text-rose-400 font-semibold underline">Clear All</button>
         </div>
 
@@ -686,14 +686,37 @@
             </span>
             <input type="checkbox" data-sheet="sheetGlucoseSignoff" onchange="onReportCheckboxChange()" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
           </label>
+          <label class="flex items-center justify-between p-2 rounded-lg bg-[#050814] border border-slate-800 hover:border-slate-700 cursor-pointer">
+            <span class="text-[11.5px] font-medium text-slate-200 flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-red-500"></span> 12. Hepatitis C Virus (HCV) Card Test
+            </span>
+            <input type="checkbox" data-sheet="sheetHCV" onchange="onReportCheckboxChange()" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
+          </label>
         </div>
 
-        <!-- NEW CUSTOM REPORT BUTTON (FROM SCRATCH) -->
-        <div class="pt-2 border-t border-slate-800">
-          <button onclick="createNewCustomReportPrompt()" class="w-full py-2.5 bg-gradient-to-r from-teal-700/80 to-cyan-700/80 hover:from-teal-600 hover:to-cyan-600 text-white rounded-lg text-xs font-bold shadow transition active:scale-98 flex items-center justify-center gap-2">
+        <!-- NEW CUSTOM REPORT & FILE UPLOAD BUTTONS -->
+        <div class="pt-2 border-t border-slate-800 space-y-2">
+          <button onclick="createNewCustomReportPrompt()" class="w-full py-2 bg-gradient-to-r from-teal-700/80 to-cyan-700/80 hover:from-teal-600 hover:to-cyan-600 text-white rounded-lg text-xs font-bold shadow transition active:scale-98 flex items-center justify-center gap-2">
             <i class="fa-solid fa-file-circle-plus text-sm"></i> Add New Custom Report (From Scratch)
           </button>
-          <p class="text-[10px] text-slate-500 mt-1 text-center">Add Urine Examination, Dengue, Semen, Stool or any custom panel</p>
+
+          <!-- UPLOAD REPORT BUTTON (.doc, .docx, .pdf) -->
+          <button onclick="triggerReportFileUpload()" class="w-full py-2 bg-gradient-to-r from-blue-700 to-indigo-700 hover:from-blue-600 hover:to-indigo-600 text-white rounded-lg text-xs font-bold shadow transition active:scale-98 flex items-center justify-center gap-2">
+            <i class="fa-solid fa-cloud-arrow-up text-sm"></i> Upload Report (.doc, .docx, .pdf)
+          </button>
+          <input type="file" id="inpReportFileUploader" accept=".doc,.docx,.pdf,.txt" onchange="handleReportFileUpload(event)" class="hidden">
+
+          <!-- Local Storage & Backup Actions -->
+          <div class="flex items-center justify-between text-[10px] px-1 font-mono pt-1 text-slate-400 border-t border-slate-800/80">
+            <button type="button" onclick="exportDataBackupFile()" class="text-teal-400 hover:text-teal-300 font-semibold flex items-center gap-1 transition">
+              <i class="fa-solid fa-floppy-disk text-[10px]"></i> Save Backup
+            </button>
+            <button type="button" onclick="document.getElementById('inpRestoreBackupFile').click()" class="text-amber-400 hover:text-amber-300 font-semibold flex items-center gap-1 transition">
+              <i class="fa-solid fa-upload text-[10px]"></i> Restore Backup
+            </button>
+            <input type="file" id="inpRestoreBackupFile" accept=".json" onchange="importDataBackupFile(event)" class="hidden">
+          </div>
+          <p class="text-[9.5px] text-slate-500 text-center">Upload any DOC, PDF or add scratch report</p>
         </div>
 
         <!-- Page Sequence Reorder -->
@@ -1019,6 +1042,114 @@
       
       <!-- Sheets Flex Container -->
       <div id="sheetsContainer" class="w-full flex flex-col items-center transition-transform">
+
+    <!-- DEDICATED TOP STUDIO RIBBON (GOOGLE DOCS / MS WORD / EXCEL STYLE) -->
+    <header id="topStudioRibbon" class="no-print sticky top-0 z-30 w-full max-w-[820px] bg-[#090e1c]/95 backdrop-blur-md border border-teal-500/40 rounded-xl shadow-2xl p-2.5 text-white mb-4 select-none">
+      
+      <!-- Top Row: Active Workspace, Dropdown Selector, Auto-Save Status, Undo, Save Backup -->
+      <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2 mb-2">
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] text-slate-400 font-mono uppercase tracking-wider">Active Workspace:</span>
+          <span id="studioActiveSheetBadge" class="text-[9.5px] bg-teal-950 text-teal-300 border border-teal-700/60 px-2 py-0.5 rounded font-bold font-mono">Page 1</span>
+          <select id="studioSheetSelector" onchange="jumpToSheet(this.value)" class="bg-[#050814] border border-slate-700 rounded px-2 py-1 text-[11px] text-teal-300 focus:outline-none focus:border-teal-400 font-semibold cursor-pointer max-w-[240px] sm:max-w-[320px] truncate">
+          </select>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <!-- Real-Time Auto-Save Indicator -->
+          <span id="autoSaveStatusBadge" class="text-[10px] text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 px-2 py-0.5 rounded flex items-center gap-1 font-mono">
+            <i class="fa-solid fa-cloud-check text-xs"></i> <span>Auto-Saved</span>
+          </span>
+
+          <!-- Global Undo Button -->
+          <button id="btnUndoGlobalRibbon" type="button" onclick="undoDeleteRow()" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded border border-slate-700 text-[11px] font-semibold flex items-center gap-1 transition" title="Undo Last Deleted Row (Ctrl+Z)">
+            <i class="fa-solid fa-rotate-left"></i> <span>Undo</span>
+          </button>
+
+          <!-- Save / Export Backup Button -->
+          <button type="button" onclick="exportDataBackupFile()" class="px-2.5 py-1 bg-teal-700 hover:bg-teal-600 text-white rounded text-[11px] font-bold flex items-center gap-1 shadow transition active:scale-95" title="Export Backup File to Computer (.json)">
+            <i class="fa-solid fa-floppy-disk"></i> <span>Save Backup</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Bottom Row: WordPad Typography + Structure Elements + Toggles -->
+      <div class="flex flex-wrap items-center justify-between gap-1.5 text-xs">
+        
+        <!-- WordPad Group -->
+        <div class="flex items-center gap-1 bg-slate-900/90 p-1 rounded-lg border border-slate-800">
+          <div class="flex gap-0.5">
+            <button id="btnFormatBold" type="button" onmousedown="event.preventDefault()" onclick="applyFormat('bold')" class="w-7 h-7 rounded bg-slate-800 text-slate-300 hover:text-white font-bold flex items-center justify-center transition border border-slate-700" title="Bold (Ctrl+B)">B</button>
+            <button id="btnFormatItalic" type="button" onmousedown="event.preventDefault()" onclick="applyFormat('italic')" class="w-7 h-7 rounded bg-slate-800 text-slate-300 hover:text-white italic font-serif flex items-center justify-center transition border border-slate-700" title="Italic (Ctrl+I)">I</button>
+            <button id="btnFormatUnderline" type="button" onmousedown="event.preventDefault()" onclick="applyFormat('underline')" class="w-7 h-7 rounded bg-slate-800 text-slate-300 hover:text-white underline flex items-center justify-center transition border border-slate-700" title="Underline (Ctrl+U)">U</button>
+            <button id="btnFormatStrike" type="button" onmousedown="event.preventDefault()" onclick="applyFormat('strikeThrough')" class="w-7 h-7 rounded bg-slate-800 text-slate-300 hover:text-white line-through text-[10px] flex items-center justify-center transition border border-slate-700" title="Strikethrough">S</button>
+          </div>
+
+          <div class="h-4 w-px bg-slate-700 mx-0.5"></div>
+
+          <!-- Size -->
+          <div class="flex items-center gap-0.5">
+            <button type="button" onmousedown="event.preventDefault()" onclick="applyFontSize('10px')" class="px-1.5 py-0.5 text-[9.5px] bg-slate-800 hover:bg-slate-700 rounded border border-slate-700 text-slate-300">10</button>
+            <button type="button" onmousedown="event.preventDefault()" onclick="applyFontSize('11px')" class="px-1.5 py-0.5 text-[10.5px] bg-slate-800 hover:bg-slate-700 rounded border border-slate-700 text-teal-300 font-bold">11</button>
+            <button type="button" onmousedown="event.preventDefault()" onclick="applyFontSize('13px')" class="px-1.5 py-0.5 text-[11px] bg-slate-800 hover:bg-slate-700 rounded border border-slate-700 text-white font-bold">13</button>
+          </div>
+
+          <div class="h-4 w-px bg-slate-700 mx-0.5"></div>
+
+          <!-- Colors -->
+          <div class="flex items-center gap-1">
+            <button type="button" onmousedown="event.preventDefault()" onclick="applyTextColor('#000000')" class="w-4 h-4 rounded-full bg-black border border-white/50 shadow hover:scale-110 transition" title="Black"></button>
+            <button type="button" onmousedown="event.preventDefault()" onclick="applyTextColor('#0f766e')" class="w-4 h-4 rounded-full bg-teal-600 border border-white/50 shadow hover:scale-110 transition" title="Teal"></button>
+            <button type="button" onmousedown="event.preventDefault()" onclick="applyTextColor('#dc2626')" class="w-4 h-4 rounded-full bg-rose-600 border border-white/50 shadow hover:scale-110 transition" title="Rose"></button>
+            <button type="button" onmousedown="event.preventDefault()" onclick="applyTextColor('#2563eb')" class="w-4 h-4 rounded-full bg-blue-600 border border-white/50 shadow hover:scale-110 transition" title="Blue"></button>
+            <button type="button" onmousedown="event.preventDefault()" onclick="applyTextColor('#7c3aed')" class="w-4 h-4 rounded-full bg-purple-600 border border-white/50 shadow hover:scale-110 transition" title="Purple"></button>
+          </div>
+
+          <div class="h-4 w-px bg-slate-700 mx-0.5"></div>
+
+          <!-- Alignments -->
+          <div class="flex gap-0.5">
+            <button type="button" onmousedown="event.preventDefault()" onclick="applyFormat('justifyLeft')" class="w-6 h-6 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-[10px]" title="Align Left"><i class="fa-solid fa-align-left"></i></button>
+            <button type="button" onmousedown="event.preventDefault()" onclick="applyFormat('justifyCenter')" class="w-6 h-6 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-[10px]" title="Align Center"><i class="fa-solid fa-align-center"></i></button>
+            <button type="button" onmousedown="event.preventDefault()" onclick="applyFormat('justifyRight')" class="w-6 h-6 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-[10px]" title="Align Right"><i class="fa-solid fa-align-right"></i></button>
+          </div>
+        </div>
+
+        <!-- Structure Add Elements -->
+        <div class="flex items-center gap-1 bg-slate-900/90 p-1 rounded-lg border border-slate-800">
+          <button type="button" onclick="studioAddParameterRow()" class="px-2 py-1 bg-teal-600 hover:bg-teal-500 text-white rounded text-[11px] font-bold flex items-center gap-1 transition active:scale-95" title="Add Parameter Row to Active Sheet">
+            <i class="fa-solid fa-circle-plus"></i> <span>+ Row</span>
+          </button>
+          <button type="button" onclick="studioAddGroupHeader()" class="px-2 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded text-[11px] font-bold flex items-center gap-1 transition active:scale-95" title="Add Section Header Bar">
+            <i class="fa-solid fa-folder-plus"></i> <span>+ Group</span>
+          </button>
+          <button type="button" onclick="studioAddCustomTextBox()" class="px-2 py-1 bg-blue-700 hover:bg-blue-600 text-white rounded text-[11px] font-bold flex items-center gap-1 transition active:scale-95" title="Add Custom Text / Note Box">
+            <i class="fa-solid fa-comment-dots"></i> <span>+ Note Box</span>
+          </button>
+          <button type="button" onclick="studioAddColumnHeaderBar()" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded text-[11px] font-semibold flex items-center gap-1 transition active:scale-95" title="Add Column Titles Sub-Bar">
+            <i class="fa-solid fa-table-cells"></i> <span>+ Sub-Header</span>
+          </button>
+        </div>
+
+        <!-- Toggles -->
+        <div class="flex items-center gap-1 bg-slate-900/90 p-1 rounded-lg border border-slate-800">
+          <button type="button" id="btnStudioNumberingMode" onclick="studioToggleNumberingMode()" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-teal-300 border border-slate-700 rounded text-[10.5px] font-semibold flex items-center gap-1 transition" title="Toggle Continuous vs Per-Group Numbering">
+            <i class="fa-solid fa-list-ol"></i> <span id="lblStudioNumbering">1..N</span>
+          </button>
+          <button type="button" id="btnStudioToggleGauges" onclick="studioToggleRangeGauges()" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded text-[10.5px] font-semibold flex items-center gap-1 transition" title="Toggle Range Visual Gauges">
+            <i class="fa-solid fa-chart-simple"></i> <span id="lblStudioGauges">Gauges</span>
+          </button>
+          <button type="button" id="btnStudioToggleFlags" onclick="studioToggleFlags()" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded text-[10.5px] font-semibold flex items-center gap-1 transition" title="Toggle Flag Column">
+            <i class="fa-solid fa-flag"></i> <span id="lblStudioFlags">Flags</span>
+          </button>
+          <button type="button" onclick="studioAddConnectedPage()" class="px-2 py-1 bg-cyan-700 hover:bg-cyan-600 text-white rounded text-[11px] font-bold flex items-center gap-1 transition active:scale-95" title="Add Connected Multi-Page">
+            <i class="fa-solid fa-file-circle-plus"></i> <span>+ Page</span>
+          </button>
+        </div>
+
+      </div>
+    </header>
+
 
         <div id="noReportsEmptyState" class="p-8 text-center bg-slate-900/60 border border-slate-800 rounded-2xl max-w-md mx-auto my-12 text-slate-300 space-y-3">
           <div class="w-12 h-12 rounded-2xl bg-teal-600/20 text-teal-400 border border-teal-500/30 flex items-center justify-center mx-auto text-xl">
@@ -4519,130 +4650,209 @@
       </footer>
     </article>
     
-      </div>
 
-    <!-- DEDICATED RIGHT STUDIO PANEL (VERTICAL WORDPAD & STRUCTURE TOOLS) -->
-    <aside id="rightStudioPanel" class="no-print sticky top-2 w-72 bg-[#090e1c] border border-teal-500/40 rounded-2xl shadow-2xl p-3 text-white flex flex-col space-y-3 shrink-0 z-30 select-none max-h-[calc(100vh-80px)] overflow-y-auto custom-scroll">
-      
-      <!-- Active Sheet Inspector Header -->
-      <div class="p-2.5 rounded-xl bg-slate-900/90 border border-teal-500/30 space-y-1">
-        <div class="flex items-center justify-between text-[11px]">
-          <span class="text-slate-400 text-[10px] font-mono uppercase tracking-wider">Active Workspace</span>
-          <span id="studioActiveSheetBadge" class="text-[9.5px] bg-teal-950 text-teal-300 border border-teal-700/60 px-1.5 py-0.5 rounded font-bold font-mono">Page 1</span>
-        </div>
-        <div id="studioActiveSheetTitle" class="text-xs font-bold text-white truncate">Complete Blood Count (CBC)</div>
-        <select id="studioSheetSelector" onchange="jumpToSheet(this.value)" class="w-full bg-[#050814] border border-slate-700 rounded p-1 text-[10.5px] text-teal-300 focus:outline-none focus:border-teal-400 font-semibold cursor-pointer">
-        </select>
-      </div>
-
-      <!-- WordPad Typography -->
-      <div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 space-y-2">
-        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
-          <span>WordPad Typography</span>
-          <span class="text-[8.5px] text-teal-400 font-mono">Live Editor</span>
-        </div>
-        
-        <!-- B, I, U, S with active highlight -->
-        <div class="grid grid-cols-4 gap-1">
-          <button id="btnFormatBold" type="button" onmousedown="event.preventDefault()" onclick="applyFormat('bold')" class="h-8 rounded-lg bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 font-bold flex items-center justify-center transition border border-slate-700" title="Bold (Ctrl+B)">B</button>
-          <button id="btnFormatItalic" type="button" onmousedown="event.preventDefault()" onclick="applyFormat('italic')" class="h-8 rounded-lg bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 italic font-serif flex items-center justify-center transition border border-slate-700" title="Italic (Ctrl+I)">I</button>
-          <button id="btnFormatUnderline" type="button" onmousedown="event.preventDefault()" onclick="applyFormat('underline')" class="h-8 rounded-lg bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 underline flex items-center justify-center transition border border-slate-700" title="Underline (Ctrl+U)">U</button>
-          <button id="btnFormatStrike" type="button" onmousedown="event.preventDefault()" onclick="applyFormat('strikeThrough')" class="h-8 rounded-lg bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 line-through text-xs flex items-center justify-center transition border border-slate-700" title="Strikethrough">S</button>
-        </div>
-
-        <!-- Font Size -->
-        <div class="flex items-center justify-between bg-slate-800/80 rounded-lg p-1 border border-slate-700 text-xs">
-          <span class="text-[10px] text-slate-400 px-1">Size:</span>
-          <div class="flex gap-1">
-            <button type="button" onmousedown="event.preventDefault()" onclick="applyFontSize('10px')" class="px-2 py-0.5 text-[10px] bg-slate-900 rounded hover:bg-slate-700 border border-slate-700">Small</button>
-            <button type="button" onmousedown="event.preventDefault()" onclick="applyFontSize('11px')" class="px-2 py-0.5 text-[10.5px] bg-slate-900 rounded hover:bg-slate-700 border border-slate-700 font-bold text-teal-300">Norm</button>
-            <button type="button" onmousedown="event.preventDefault()" onclick="applyFontSize('13px')" class="px-2 py-0.5 text-[11px] bg-slate-900 rounded hover:bg-slate-700 border border-slate-700 font-bold">Large</button>
+    <!-- SHEET: HEPATITIS C VIRUS (HCV) - TRI-DOT CARD TEST -->
+    <article id="sheetHCV" class="a4-sheet" data-report-title="HEPATITIS C VIRUS (HCV) - TRI-DOT CARD TEST" style="display: none;">
+      <div class="page-content-wrapper">
+        <div class="clinic-header-space">
+          <div class="preprinted-spacer w-full relative">
+            <div class="no-print absolute inset-0 border border-dashed border-gray-300 rounded flex flex-col items-center justify-center text-gray-400 text-xs">
+              <span class="font-semibold text-gray-400"><i class="fa-regular fa-image mr-1"></i> Pre-Printed Clinic Letterhead Space (<span class="disp-spacerHeightText">40mm</span> Blank)</span>
+            </div>
+          </div>
+          <div class="digital-header-block hidden w-full pb-2 border-b-2 border-teal-700">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-xl bg-teal-800 text-white flex items-center justify-center font-bold text-xl"><i class="fa-solid fa-microscope"></i></div>
+                <div>
+                  <h1 class="text-lg font-black tracking-wide text-teal-900 disp-clinicName">KRISHNA COMPUTERIZED LABORATORY</h1>
+                  <p class="text-[11px] font-semibold text-gray-600 disp-clinicAddress">Shalini Surgical &amp; Maternity Hospital, Medical Enclave, Chandigarh Road, Tohana (Fatehabad) • Tel: 93153-35197</p>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="text-[10px] font-mono font-bold bg-teal-100 text-teal-900 px-2 py-0.5 rounded border border-teal-300">FULLY COMPUTERIZED</div>
+                <div class="text-[9.5px] text-gray-500 mt-1">24x7 Diagnostic Services</div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Colors -->
-        <div class="flex items-center justify-between bg-slate-800/80 rounded-lg p-1.5 border border-slate-700">
-          <span class="text-[10px] text-slate-400">Color:</span>
-          <div class="flex items-center gap-1.5">
-            <button type="button" onmousedown="event.preventDefault()" onclick="applyTextColor('#000000')" class="w-5 h-5 rounded-full bg-black border border-white/40 shadow hover:scale-110 transition" title="Black"></button>
-            <button type="button" onmousedown="event.preventDefault()" onclick="applyTextColor('#0f766e')" class="w-5 h-5 rounded-full bg-teal-600 border border-white/40 shadow hover:scale-110 transition" title="Teal"></button>
-            <button type="button" onmousedown="event.preventDefault()" onclick="applyTextColor('#dc2626')" class="w-5 h-5 rounded-full bg-rose-600 border border-white/40 shadow hover:scale-110 transition" title="Rose"></button>
-            <button type="button" onmousedown="event.preventDefault()" onclick="applyTextColor('#2563eb')" class="w-5 h-5 rounded-full bg-blue-600 border border-white/40 shadow hover:scale-110 transition" title="Blue"></button>
-            <button type="button" onmousedown="event.preventDefault()" onclick="applyTextColor('#7c3aed')" class="w-5 h-5 rounded-full bg-purple-600 border border-white/40 shadow hover:scale-110 transition" title="Purple"></button>
+        <div class="w-full mt-2"><div class="border-t-2 border-black w-full"></div><div class="border-t border-black w-full mt-[2px]"></div></div>
+
+        <!-- Demographics -->
+        <section class="mt-2.5 text-[12px] leading-tight text-black">
+          <div class="grid grid-cols-2 gap-x-6">
+            <div class="space-y-1">
+              <div class="flex items-baseline"><span class="font-bold w-28 shrink-0">Patient Name</span><span class="font-semibold mr-1.5">:</span><span class="editable-field font-semibold flex-1 disp-pName" contenteditable="true">Ms. KULDEEP KAUR</span></div>
+              <div class="flex items-baseline"><span class="font-bold w-28 shrink-0">Patient ID</span><span class="font-semibold mr-1.5">:</span><span class="editable-field font-mono font-bold flex-1 disp-pId" contenteditable="true">PID-2026-4858</span></div>
+              <div class="flex items-baseline"><span class="font-bold w-28 shrink-0">Age / Gender</span><span class="font-semibold mr-1.5">:</span><span class="editable-field flex-1 disp-pAgeGender" contenteditable="true">46 Y / Female</span></div>
+              <div class="flex items-baseline"><span class="font-bold w-28 shrink-0">Referred By</span><span class="font-semibold mr-1.5">:</span><span class="editable-field flex-1 disp-pRefBy" contenteditable="true">SELF</span></div>
+            </div>
+            <div class="space-y-1">
+              <div class="flex items-baseline"><span class="font-bold w-36 shrink-0">Lab Accession No.</span><span class="font-semibold mr-1.5">:</span><span class="editable-field flex-1 font-mono font-bold disp-pLabNo" contenteditable="true">485828168</span></div>
+              <div class="flex items-baseline"><span class="font-bold w-36 shrink-0">Date &amp; Time</span><span class="font-semibold mr-1.5">:</span><span class="editable-field flex-1 disp-pDate" contenteditable="true">16-Jun-2026 10:51 AM</span></div>
+              <div class="flex items-baseline"><span class="font-bold w-36 shrink-0">Specimen Type</span><span class="font-semibold mr-1.5">:</span><span class="editable-field flex-1 disp-pSpecimen" contenteditable="true">EDTA Whole Blood &amp; Serum</span></div>
+              <div class="flex items-center pt-0.5"><span class="font-bold w-36 shrink-0">Barcode ID</span><span class="font-semibold mr-1.5">:</span><div class="barcode-holder inline-block"></div></div>
+            </div>
           </div>
+        </section>
+
+        <div class="w-full mt-2.5"><div class="border-t border-black w-full"></div><div class="border-t-2 border-black w-full mt-[2px]"></div></div>
+
+        <!-- Title Bar -->
+        <div class="mt-2 text-center bg-slate-100 py-1 rounded border border-slate-300">
+          <span class="text-xs font-black tracking-widest text-slate-800 uppercase editable-field" contenteditable="true">HEPATITIS C VIRUS (HCV) - TRI-DOT CARD TEST</span>
+          SEROLOGY / IMMUNOLOGY RAPID CARD DIAGNOSTIC PANEL
         </div>
 
-        <!-- Alignment -->
-        <div class="grid grid-cols-3 gap-1">
-          <button type="button" onmousedown="event.preventDefault()" onclick="applyFormat('justifyLeft')" class="h-7 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition border border-slate-700" title="Align Left"><i class="fa-solid fa-align-left text-xs"></i></button>
-          <button type="button" onmousedown="event.preventDefault()" onclick="applyFormat('justifyCenter')" class="h-7 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition border border-slate-700" title="Align Center"><i class="fa-solid fa-align-center text-xs"></i></button>
-          <button type="button" onmousedown="event.preventDefault()" onclick="applyFormat('justifyRight')" class="h-7 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center transition border border-slate-700" title="Align Right"><i class="fa-solid fa-align-right text-xs"></i></button>
-        </div>
-      </div>
-
-      <!-- Structure Tools -->
-      <div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 space-y-1.5">
-        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Add Elements to Sheet</div>
-        
-        <button type="button" onclick="studioAddParameterRow()" class="w-full py-1.5 bg-teal-600 hover:bg-teal-500 text-white rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 shadow transition active:scale-95">
-          <i class="fa-solid fa-circle-plus"></i> + Add Test Parameter Row
-        </button>
-
-        <button type="button" onclick="studioAddGroupHeader()" class="w-full py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 shadow transition active:scale-95" title="Insert New Section Header">
-          <i class="fa-solid fa-folder-plus"></i> + Add Group Header
-        </button>
-
-        <button type="button" onclick="studioAddCustomTextBox()" class="w-full py-1.5 bg-blue-700 hover:bg-blue-600 text-white rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 shadow transition active:scale-95" title="Insert Free-text note or clinical instruction box">
-          <i class="fa-solid fa-comment-dots"></i> + Add Custom Text / Note Box
-        </button>
-
-        <button type="button" onclick="studioAddColumnHeaderBar()" class="w-full py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg text-[11px] font-semibold flex items-center justify-center gap-1.5 transition active:scale-95" title="Insert Column Titles Sub-Bar">
-          <i class="fa-solid fa-table-cells"></i> + Add Column Header Bar
-        </button>
-      </div>
-
-      <!-- Numbering & View Toggles -->
-      <div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 space-y-1.5">
-        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Numbering &amp; View Toggles</div>
-
-        <!-- Numbering Toggle -->
-        <button type="button" id="btnStudioNumberingMode" onclick="studioToggleNumberingMode()" class="w-full py-1 bg-slate-800 hover:bg-slate-700 text-teal-300 border border-slate-700 rounded-lg text-[11px] font-semibold flex items-center justify-between px-2.5 transition active:scale-95">
-          <span class="flex items-center gap-1.5"><i class="fa-solid fa-list-ol text-xs"></i> Numbering:</span>
-          <span id="lblStudioNumbering" class="font-bold">Continuous (1..N)</span>
-        </button>
-
-        <!-- Toggle Gauges -->
-        <button type="button" id="btnStudioToggleGauges" onclick="studioToggleRangeGauges()" class="w-full py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded-lg text-[11px] flex items-center justify-between px-2.5 transition active:scale-95">
-          <span class="flex items-center gap-1.5"><i class="fa-solid fa-chart-simple text-xs"></i> Range Gauges:</span>
-          <span id="lblStudioGauges" class="font-bold text-slate-400">Off (Single Line)</span>
-        </button>
-
-        <!-- Toggle Flag Column -->
-        <button type="button" id="btnStudioToggleFlags" onclick="studioToggleFlags()" class="w-full py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded-lg text-[11px] flex items-center justify-between px-2.5 transition active:scale-95">
-          <span class="flex items-center gap-1.5"><i class="fa-solid fa-flag text-xs"></i> Flag Column:</span>
-          <span id="lblStudioFlags" class="font-bold text-emerald-400">On</span>
-        </button>
-
-        <!-- Toggle Unit Column -->
-        <button type="button" id="btnStudioToggleUnits" onclick="studioToggleUnits()" class="w-full py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded-lg text-[11px] flex items-center justify-between px-2.5 transition active:scale-95">
-          <span class="flex items-center gap-1.5"><i class="fa-solid fa-weight-hanging text-xs"></i> Unit Column:</span>
-          <span id="lblStudioUnits" class="font-bold text-emerald-400">On</span>
-        </button>
-      </div>
-
-      <!-- Multi-page & Sheet Actions -->
-      <div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 space-y-1.5">
-        <button type="button" onclick="studioAddConnectedPage()" class="w-full py-1.5 bg-cyan-700 hover:bg-cyan-600 text-white rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 shadow transition active:scale-95" title="Add Page 2, Page 3 to this active report">
-          <i class="fa-solid fa-file-circle-plus"></i> + Add Page to this Report
-        </button>
-
-        <button type="button" onclick="studioDeleteActiveSheet()" class="w-full py-1 bg-rose-950/70 hover:bg-rose-900 text-rose-300 border border-rose-800/80 rounded-lg text-[11px] font-semibold flex items-center justify-center gap-1.5 transition active:scale-95">
-          <i class="fa-solid fa-trash-can"></i> Delete Active Sheet
-        </button>
-      </div>
-
-    </aside>
+        <!-- Table -->
+        <table class="w-full text-left text-[11px] border-collapse mt-2" data-numbering-mode="continuous">
+            <thead>
+              <tr class="border-b-2 border-black text-black">
+                <th class="py-1 px-1 text-center no-print w-5 print-cb-col">
+                  <input type="checkbox" checked onchange="toggleAllRowsInTable(this)" title="Toggle all tests in table" class="accent-teal-600 w-3.5 h-3.5 cursor-pointer rounded">
+                </th>
+                <th class="py-1 px-1 font-bold text-center w-5 col-header-num"><span class="editable-field" contenteditable="true">#</span></th>
+                <th class="py-1 px-1 font-bold col-header-param"><span class="editable-field" contenteditable="true">INVESTIGATION PARAMETER</span></th>
+                <th class="py-1 px-1 font-bold text-center col-header-result"><span class="editable-field" contenteditable="true">OBSERVED VALUE</span></th>
+                <th class="py-1 px-1 font-bold text-center col-header-flag col-flag"><span class="editable-field" contenteditable="true">FLAG</span></th>
+                <th class="py-1 px-1 font-bold text-center w-20 col-header-graph col-gauge"><span class="editable-field" contenteditable="true">RANGE GAUGE</span></th>
+                <th class="py-1 px-1 font-bold text-center col-header-unit col-unit"><span class="editable-field" contenteditable="true">UNIT</span></th>
+                <th class="py-1 px-1 font-bold text-right col-header-ref"><span class="editable-field" contenteditable="true">BIOLOGICAL REF. INTERVAL</span></th>
+                <th class="py-1 px-1 font-bold text-center no-print w-6">DEL</th>
+              </tr>
+            </thead>
+          <tbody class="divide-y divide-gray-200" id="tbodyHCV">
+              <tr class="group-header-row bg-slate-100/90 font-black text-[10px] text-slate-800 tracking-wider">
+                <td class="py-0.5 px-1 text-center no-print print-cb-col"></td>
+                <td colspan="6" class="py-0.5 px-1 uppercase"><span class="editable-field" contenteditable="true">SEROLOGY & IMMUNOLOGY</span></td>
+                <td class="py-0.5 px-1 text-center no-print whitespace-nowrap"><button onclick="insertRowInGroup(this)" class="text-[9px] bg-teal-100 hover:bg-teal-200 text-teal-800 font-bold px-1.5 py-0.5 rounded border border-teal-300 shadow-sm transition"><i class="fa-solid fa-plus mr-0.5"></i>Add Row to Group</button></td>
+                <td class="py-0.5 px-1 text-center no-print"><button onclick="deleteRowWithUndo(this)" title="Delete Group Header" class="text-slate-400 hover:text-rose-600 text-[10px]"><i class="fa-solid fa-trash-can"></i></button></td>
+              </tr>
+      <tr class="hover:bg-slate-50 transition border-b border-gray-200">
+        <td class="py-1 px-1 text-center no-print w-5 print-cb-col">
+          <input type="checkbox" checked onchange="toggleRowPrint(this)" class="accent-teal-600 w-3 h-3 cursor-pointer rounded">
+        </td>
+        <td class="py-1 px-1 text-center text-gray-500 font-mono text-[10px] w-6 row-num">1</td>
+        <td class="py-1 px-1 font-semibold text-gray-900 leading-tight">
+          <span class="editable-field font-bold text-gray-900" contenteditable="true">HEPATITIS-C-VIRUS (HCV) ANTIBODIES (T1 or T2)</span>
+          <div class="text-[9px] text-gray-500 font-normal">Method: TRI-DOT Visual Rapid Card Immunoassay</div>
+        </td>
+        <td class="py-1 px-1 text-center font-bold font-mono">
+          <span class="editable-field px-2.5 py-0.5 rounded bg-rose-100 text-rose-700 border border-rose-300 font-bold text-xs inline-block" contenteditable="true">REACTIVE</span>
+        </td>
+        <td class="py-1 px-1 text-center font-bold text-[10px] col-flag">
+          <span class="editable-field text-rose-600" contenteditable="true">ABNORMAL</span>
+        </td>
+        <td class="py-1 px-1 text-center w-20 col-gauge">
+          <span class="text-[9px] text-rose-600 font-bold bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200">REACTIVE</span>
+        </td>
+        <td class="py-1 px-1 text-center text-gray-500 text-[10px] col-unit">
+          <span class="editable-field" contenteditable="true">Qualitative</span>
+        </td>
+        <td class="py-1 px-1 text-right text-gray-700 font-mono text-[10px]">
+          <span class="editable-field font-semibold text-emerald-700" contenteditable="true">NON-REACTIVE</span>
+        </td>
+        <td class="py-1 px-1 text-center no-print">
+          <button onclick="deleteRowWithUndo(this)" title="Delete Parameter (Undo available)" class="text-rose-500 hover:text-rose-700 text-[10px] transition hover:scale-110">
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
+        </td>
+      </tr>
     
+          </tbody>
+        </table>
+
+        <!-- Action Buttons Under Every Table -->
+        <div class="mt-2 text-right no-print flex items-center justify-between">
+          <span class="text-[10px] text-gray-500 font-mono">Editable Parameter Rows</span>
+          <div class="flex items-center gap-2">
+            <button onclick="addCustomRow('tbodyHCV')" class="text-xs text-teal-600 hover:text-teal-800 font-bold inline-flex items-center gap-1.5 bg-teal-50 hover:bg-teal-100 border border-teal-200 px-2.5 py-1 rounded transition shadow-sm active:scale-95">
+              <i class="fa-solid fa-circle-plus"></i> Add Test Parameter Row
+            </button>
+            <button onclick="addCustomTextBox('tbodyHCV')" class="text-xs text-indigo-600 hover:text-indigo-800 font-bold inline-flex items-center gap-1.5 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-2.5 py-1 rounded transition shadow-sm active:scale-95" title="Add multi-line custom observation or clinical note box">
+              <i class="fa-solid fa-comment-dots"></i> Add Custom Text / Note Box
+            </button>
+          </div>
+        </div>
+
+
+        <!-- ASSAY PROCEDURE & DIAGNOSTIC CARD VALIDATION -->
+        <div class="mt-4 p-3 bg-slate-50 border border-slate-300 rounded-lg text-[10.5px] text-slate-800 space-y-2">
+          <div class="flex items-center justify-between border-b border-slate-200 pb-1.5">
+            <span class="font-bold text-xs uppercase flex items-center gap-1.5 text-slate-900">
+              <i class="fa-solid fa-vial-circle-check text-teal-600"></i> Assay Procedure &amp; Diagnostic Card Kit Details
+            </span>
+            <span class="text-[9.5px] bg-teal-100 text-teal-800 border border-teal-300 px-2 py-0.5 rounded font-mono font-bold">
+              IVD Rapid Screening
+            </span>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[10px] pt-1">
+            <div class="bg-white p-2 rounded border border-slate-200">
+              <div class="text-slate-400 font-mono text-[9px] uppercase">Procedure Method</div>
+              <div class="font-bold text-slate-800"><span class="editable-field" contenteditable="true">TRI-DOT Visual Card Method</span></div>
+            </div>
+            <div class="bg-white p-2 rounded border border-slate-200">
+              <div class="text-slate-400 font-mono text-[9px] uppercase">Mfg. Lic. No.</div>
+              <div class="font-bold text-slate-800"><span class="editable-field" contenteditable="true">S-MB 1877</span></div>
+            </div>
+            <div class="bg-white p-2 rounded border border-slate-200">
+              <div class="text-slate-400 font-mono text-[9px] uppercase">Kit LOT / Batch No.</div>
+              <div class="font-bold text-slate-800 font-mono"><span class="editable-field" contenteditable="true">NK120896</span></div>
+            </div>
+            <div class="bg-white p-2 rounded border border-slate-200">
+              <div class="text-slate-400 font-mono text-[9px] uppercase">Mfg. / Exp. Date</div>
+              <div class="font-bold text-slate-800"><span class="editable-field" contenteditable="true">Aug 2019 / Sep 2021</span></div>
+            </div>
+          </div>
+
+          <!-- Interpretation & Clinical Guidance -->
+          <div class="p-2.5 bg-amber-50/80 border border-amber-200 rounded text-[9.5px] text-amber-900 space-y-1">
+            <div class="font-bold flex items-center gap-1 text-amber-800">
+              <i class="fa-solid fa-triangle-exclamation"></i> Clinical Interpretation &amp; Diagnostic Advice:
+            </div>
+            <ul class="list-disc pl-4 space-y-0.5">
+              <li><strong>REACTIVE</strong> result indicates presence of antibodies specific to Hepatitis C Virus (Core, NS3, NS4, NS5 recombinant antigens).</li>
+              <li>As per WHO and CDC guidelines, all reactive rapid card screening results must be confirmed by quantitative <strong>HCV RNA RT-PCR</strong> molecular assay before commencing therapy.</li>
+              <li>Specimen was evaluated with valid internal procedural control dot ensuring kit test viability.</li>
+            </ul>
+          </div>
+        </div>
+    
+
+        <!-- Clinical Impression / Doctor Note (Toggleable) -->
+        <div class="impression-box mt-3 p-2 bg-slate-50 border border-slate-300 rounded text-[11px] text-slate-800 leading-normal" data-sheet-id="sheetHCV">
+          <span class="font-bold text-black uppercase">Impression / Note:</span>
+          <span class="disp-doctorRemarks ml-1" contenteditable="true">SEROLOGY ALERT: HCV antibodies detected (REACTIVE). Confirmation by HCV RNA RT-PCR molecular testing recommended.</span>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <footer class="mt-4 pt-2">
+        <div class="flex items-end justify-between min-h-[55px] mb-2">
+          <div class="doctor-signature-container">
+            <div class="text-[13px] font-bold text-black disp-docName">Dr. Gurpreet Singh, M.D.</div>
+            <div class="text-[11px] font-semibold text-gray-800 disp-docDegree">Consultant Clinical Pathologist</div>
+            <div class="text-[9.5px] text-gray-500">Reg. No: PMC-48291</div>
+          </div>
+          <div class="qr-stamp-container text-center flex flex-col items-center">
+            <div class="qr-svg-holder"></div>
+            <span class="text-[8.5px] font-mono text-gray-500 mt-0.5">SCAN TO VERIFY</span>
+          </div>
+          <div class="lab-technician-container text-right">
+            <div class="text-[12px] font-bold text-gray-800 disp-staffName">Harpreet Sharma, DMLT</div>
+            <div class="text-[10px] text-gray-600">Chief Medical Lab Technologist</div>
+          </div>
+        </div>
+        <div class="border-t border-gray-400 pt-1 flex justify-between text-[9px] text-gray-500 font-mono">
+          <span>Electronic Diagnostic Report • Krishna Computerized Laboratory</span>
+          <span>End of Report</span>
+        </div>
+      </footer>
+    </article>
+    
+      </div>
     </main>
 
     <!-- D. RIGHT PAGE THUMBNAILS & SPEED STRIP -->
@@ -5030,10 +5240,6 @@
         calculateLipidProfile();
       }
       recheckFlags();
-      buildImpressionChecklist();
-      recheckFlagsAndGauges();
-      updateCbcHistogramsFromTable();
-      updateStudioSheetSelector();
     }
 
     function calculateCBCIndices() {
@@ -5077,10 +5283,6 @@
         if (mini) { mini.textContent = `${sum}% (Alert)`; mini.className = 'text-[10px] text-rose-400 font-bold'; }
       }
       recheckFlags();
-      buildImpressionChecklist();
-      recheckFlagsAndGauges();
-      updateCbcHistogramsFromTable();
-      updateStudioSheetSelector();
     }
 
     function calculateLipidProfile() {
@@ -5106,10 +5308,6 @@
         if (elRatio) elRatio.textContent = ratio;
       }
       recheckFlags();
-      buildImpressionChecklist();
-      recheckFlagsAndGauges();
-      updateCbcHistogramsFromTable();
-      updateStudioSheetSelector();
     }
 
     function runAutoCalculations() {
@@ -5117,10 +5315,6 @@
       checkDlcSum();
       calculateLipidProfile();
       recheckFlags();
-      buildImpressionChecklist();
-      recheckFlagsAndGauges();
-      updateCbcHistogramsFromTable();
-      updateStudioSheetSelector();
       showToast('All Formulas Auto-Calculated Successfully');
     }
 
@@ -5507,6 +5701,7 @@
       });
 
       updateStudioSheetSelector();
+      LabXStorageEngine.restore();
       if (activeSheets.length > 0 && !activeSheets.some(s => s.id === currentActiveSheetId)) {
         setActiveSheet(activeSheets[0].id);
       }
@@ -5517,6 +5712,7 @@
 
     function renderReorderList() {
       const container = document.getElementById('reorderListContainer');
+      if (!container) return;
       container.innerHTML = '';
       const sheets = Array.from(document.querySelectorAll('#sheetsContainer .a4-sheet'))
         .filter(sh => sh.style.display !== 'none');
@@ -6222,6 +6418,601 @@
         linePltPeak.setAttribute('y1', (45 - hPlt).toFixed(1));
       }
     }
+
+    
+    // =========================================================================
+    // LAB X STORAGE ENGINE & AUTO-SAVE (LOCAL STORAGE + BACKUP EXPORT/IMPORT)
+    // =========================================================================
+    const LabXStorageEngine = {
+      storageKey: 'LAB_X_DATABASE_V1',
+
+      save: function() {
+        try {
+          const data = {
+            timestamp: new Date().toISOString(),
+            patientHeader: {},
+            checkboxes: {},
+            editableFields: {},
+            customSheets: []
+          };
+
+          // Save patient header fields
+          document.querySelectorAll('#patientHeaderContainer .editable-field, .patient-header .editable-field').forEach((el, idx) => {
+            data.patientHeader[idx] = el.innerHTML;
+          });
+
+          // Save checkboxes
+          document.querySelectorAll('.report-checkbox').forEach(cb => {
+            const sid = cb.getAttribute('data-sheet');
+            if (sid) data.checkboxes[sid] = cb.checked;
+          });
+
+          // Save editable fields across all sheets
+          document.querySelectorAll('.a4-sheet .editable-field').forEach((el, idx) => {
+            data.editableFields[idx] = el.innerHTML;
+          });
+
+          // Save custom/uploaded sheets
+          document.querySelectorAll('.a4-sheet[data-is-custom="true"]').forEach(sh => {
+            data.customSheets.push({
+              id: sh.id,
+              title: sh.getAttribute('data-report-title') || sh.id,
+              html: sh.outerHTML
+            });
+          });
+
+          localStorage.setItem(this.storageKey, JSON.stringify(data));
+
+          const badge = document.getElementById('autoSaveStatusBadge');
+          if (badge) {
+            const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            badge.innerHTML = `<i class="fa-solid fa-cloud-check text-xs"></i> <span>Saved (${timeStr})</span>`;
+          }
+        } catch(e) {
+          console.warn("Auto-save notice:", e);
+        }
+      },
+
+      restore: function() {
+        try {
+          const raw = localStorage.getItem(this.storageKey);
+          if (!raw) return false;
+          const data = JSON.parse(raw);
+
+          // Restore custom sheets
+          if (Array.isArray(data.customSheets)) {
+            data.customSheets.forEach(cs => {
+              if (!document.getElementById(cs.id)) {
+                const container = document.getElementById('sheetsContainer');
+                if (container) {
+                  const div = document.createElement('div');
+                  div.innerHTML = cs.html;
+                  const sheetEl = div.firstElementChild;
+                  if (sheetEl) {
+                    container.appendChild(sheetEl);
+                    addReportModuleCheckbox(cs.id, cs.title, false);
+                  }
+                }
+              }
+            });
+          }
+
+          // Restore patient header
+          if (data.patientHeader) {
+            document.querySelectorAll('#patientHeaderContainer .editable-field, .patient-header .editable-field').forEach((el, idx) => {
+              if (data.patientHeader[idx] !== undefined) el.innerHTML = data.patientHeader[idx];
+            });
+          }
+
+          // Restore checkboxes
+          if (data.checkboxes) {
+            document.querySelectorAll('.report-checkbox').forEach(cb => {
+              const sid = cb.getAttribute('data-sheet');
+              if (data.checkboxes[sid] !== undefined) {
+                cb.checked = data.checkboxes[sid];
+              }
+            });
+          }
+
+          // Restore editable fields
+          if (data.editableFields) {
+            document.querySelectorAll('.a4-sheet .editable-field').forEach((el, idx) => {
+              if (data.editableFields[idx] !== undefined) el.innerHTML = data.editableFields[idx];
+            });
+          }
+
+          onReportCheckboxChange();
+          return true;
+        } catch(e) {
+          console.error("Storage restore error:", e);
+          return false;
+        }
+      }
+    };
+
+    function exportDataBackupFile() {
+      LabXStorageEngine.save();
+      const raw = localStorage.getItem(LabXStorageEngine.storageKey);
+      if (!raw) {
+        showToast("No data to export");
+        return;
+      }
+      const blob = new Blob([raw], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const dStr = new Date().toISOString().slice(0, 10);
+      a.href = url;
+      a.download = `Lab_X_Data_Backup_${dStr}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast("Backup saved to computer downloads!");
+    }
+
+    function importDataBackupFile(event) {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const json = e.target.result;
+          JSON.parse(json); // validate JSON syntax
+          localStorage.setItem(LabXStorageEngine.storageKey, json);
+          LabXStorageEngine.restore();
+          showToast("Data restored successfully from backup file!");
+        } catch(err) {
+          alert("Invalid backup file: " + err.message);
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
+    }
+
+    // Debounced real-time auto-saving on typing
+    let autoSaveDebounceTimer = null;
+    document.addEventListener('input', (e) => {
+      if (e.target.isContentEditable || e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') {
+        clearTimeout(autoSaveDebounceTimer);
+        autoSaveDebounceTimer = setTimeout(() => {
+          LabXStorageEngine.save();
+        }, 1200);
+      }
+    });
+
+    // =========================================================================
+    // DIRECT REPORT FILE UPLOADER & PARSER (.DOC, .DOCX, .PDF)
+    // =========================================================================
+    function triggerReportFileUpload() {
+      document.getElementById('inpReportFileUploader')?.click();
+    }
+
+    function handleReportFileUpload(event) {
+      const file = event.target.files?.[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const buffer = e.target.result;
+          parseAndBuildReportFromFile(file.name, buffer);
+        } catch(err) {
+          console.error("Upload parse error:", err);
+          showToast("Error parsing file: " + err.message);
+        }
+      };
+
+      if (file.name.endsWith('.txt')) {
+        reader.readAsText(file);
+      } else {
+        reader.readAsArrayBuffer(file);
+      }
+      event.target.value = '';
+    }
+
+    function extractTextFromBuffer(arrayBuffer) {
+      const bytes = new Uint8Array(arrayBuffer);
+      let text = '';
+      let current = '';
+      for (let i = 0; i < bytes.length; i++) {
+        const b = bytes[i];
+        if ((b >= 32 && b <= 126) || b === 10 || b === 13 || b === 9) {
+          current += String.fromCharCode(b);
+        } else {
+          if (current.length >= 3) text += current + String.fromCharCode(10);
+          current = '';
+        }
+      }
+      if (current.length >= 3) text += current + String.fromCharCode(10);
+      return text;
+    }
+
+    function parseAndBuildReportFromFile(fileName, buffer) {
+      let rawText = '';
+      if (typeof buffer === 'string') {
+        rawText = buffer;
+      } else {
+        rawText = extractTextFromBuffer(buffer);
+      }
+
+      console.log("Extracted text length:", rawText.length);
+
+      // Extract details
+      const details = {
+        fileName: fileName,
+        patientName: '',
+        sampleType: 'SERUM',
+        ageGender: '',
+        refBy: '',
+        collectedDate: '',
+        printedDate: '',
+        reportTitle: fileName.replace(/\\.[^/.]+$/, '').toUpperCase(),
+        method: 'TRI-DOT Visual Card Method',
+        kitLot: 'NK120896',
+        kitMfgLic: 'S-MB 1877',
+        kitMfg: 'Aug. 19',
+        kitExp: 'Sep 21',
+        isCardTest: false,
+        investigation: '',
+        result: 'REACTIVE',
+        flag: 'ABNORMAL',
+        unit: 'Qualitative',
+        refInterval: 'NON-REACTIVE'
+      };
+
+      const nameMatch = rawText.match(/Name\s*:\s*[-:]?\s*([^,\n\r\t]+?)(?=\s+Sample|\s+Age|\s+Collected|$)/i);
+      if (nameMatch) details.patientName = nameMatch[1].trim();
+
+      const sampleMatch = rawText.match(/Sample\s*Type\s*:\s*[-:]?\s*([^,\n\r\t]+?)(?=\s+Age|\s+Collected|\s+Ref|$)/i);
+      if (sampleMatch) details.sampleType = sampleMatch[1].trim();
+
+      const ageMatch = rawText.match(/Age\s*\/\s*Gender\s*:\s*[-:]?\s*([^,\n\r\t]+?)(?=\s+Collected|\s+Ref|$)/i);
+      if (ageMatch) details.ageGender = ageMatch[1].trim();
+
+      const refMatch = rawText.match(/Ref\.\s*by\s*:\s*[-:]?\s*([^,\n\r\t]+?)(?=\s+Printed|\s+Collected|$)/i);
+      if (refMatch) details.refBy = refMatch[1].trim();
+
+      const collMatch = rawText.match(/Collected\s*:\s*([0-9\/\-\.]+)/i);
+      if (collMatch) details.collectedDate = collMatch[1].trim();
+
+      const printMatch = rawText.match(/Printed\s*:\s*([0-9\/\-\.]+)/i);
+      if (printMatch) details.printedDate = printMatch[1].trim();
+
+      // Check for Card Tests (HCV, HIV, HBsAg, Rapid Test)
+      if (/HEPATITIS|HCV|HIV|HBsAg|TRI-DOT|CARD METHOD/i.test(rawText)) {
+        details.isCardTest = true;
+        const hcvMatch = rawText.match(/HEPATITIS[^\n\r]*?(?=\s+REACTIVE|\s+NON-REACTIVE|$)/i);
+        details.investigation = hcvMatch ? hcvMatch[0].trim() : 'HEPATITIS-C-VIRUS (HCV) ANTIBODIES (T1 or T2)';
+        details.reportTitle = 'HEPATITIS C VIRUS (HCV) - TRI-DOT CARD TEST';
+
+        if (/REACTIVE/i.test(rawText)) {
+          details.result = /NON-REACTIVE/i.test(rawText) && !/T1 or T2\s+REACTIVE/i.test(rawText) ? 'NON-REACTIVE' : 'REACTIVE';
+        }
+
+        const procMatch = rawText.match(/Procedure\s*:\s*([^\n\r\t]+?)(?=\s+Mfg|\s+LOT|$)/i);
+        if (procMatch) details.method = procMatch[1].trim();
+
+        const licMatch = rawText.match(/Mfg\.\s*Lic\.\s*No\.\s*([^\n\r\t]+?)(?=\s+LOT|$)/i);
+        if (licMatch) details.kitMfgLic = licMatch[1].trim();
+
+        const lotMatch = rawText.match(/LOT\.\s*([^\n\r\t]+?)(?=\s+Mfg|$)/i);
+        if (lotMatch) details.kitLot = lotMatch[1].trim();
+
+        const mfgMatch = rawText.match(/Mfg\.\s*([^\n\r\t]+?)(?=\s+Exp|$)/i);
+        if (mfgMatch) details.kitMfg = mfgMatch[1].trim();
+
+        const expMatch = rawText.match(/Exp\.\s*([^\n\r\t\x00-\x1f\x0c]{1,30})/i);
+        if (expMatch) details.kitExp = expMatch[1].trim();
+      }
+
+      // If patient name found, optionally sync to global patient header
+      if (details.patientName) {
+        const pNameEl = document.querySelector('.patient-header [data-header="patientName"]') || document.querySelector('.editable-field[title*="Name"]');
+        // Let user know
+      }
+
+      // Build unique sheet
+      const newSheetId = 'uploadedSheet_' + Date.now();
+      const newSheet = document.createElement('article');
+      newSheet.id = newSheetId;
+      newSheet.className = 'a4-sheet bg-white text-gray-900 border border-gray-300 shadow-2xl rounded-none p-5 relative select-text transition-all duration-300 flex flex-col justify-between mb-8';
+      newSheet.style.width = '794px';
+      newSheet.style.minHeight = '1123px';
+      newSheet.setAttribute('data-report-title', details.reportTitle);
+      newSheet.setAttribute('data-is-custom', 'true');
+      newSheet.style.display = 'flex';
+
+      const tbodyId = 'tbody_' + newSheetId;
+      const resultBadgeClass = details.result === 'REACTIVE' ? 'bg-rose-100 text-rose-700 border-rose-300' : 'bg-emerald-100 text-emerald-700 border-emerald-300';
+      const resultFlagClass = details.result === 'REACTIVE' ? 'text-rose-600' : 'text-emerald-600';
+
+      let bodyContentHtml = '';
+
+      if (details.isCardTest) {
+        bodyContentHtml = `
+          <div class="overflow-x-auto my-2">
+            <table class="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr class="border-b-2 border-slate-900 text-slate-800 text-[10.5px] uppercase font-bold tracking-wider">
+                  <th class="py-1 px-1 text-center no-print w-5 print-cb-col"></th>
+                  <th class="py-1 px-1 text-center w-6">#</th>
+                  <th class="py-1 px-1">INVESTIGATION</th>
+                  <th class="py-1 px-1 text-center">OBSERVED VALUE</th>
+                  <th class="py-1 px-1 text-center col-flag">FLAG</th>
+                  <th class="py-1 px-1 text-center w-20 col-gauge">STATUS</th>
+                  <th class="py-1 px-1 text-center col-unit">UNIT</th>
+                  <th class="py-1 px-1 text-right">BIOLOGICAL REF. INTERVAL</th>
+                  <th class="py-1 px-1 text-center no-print"></th>
+                </tr>
+              </thead>
+              <tbody id="${tbodyId}" class="divide-y divide-gray-200">
+                <tr class="group-header-row bg-slate-100/90 font-bold text-slate-800 border-y border-slate-300">
+                  <td class="py-0.5 px-1 text-center no-print print-cb-col"></td>
+                  <td colspan="7" class="py-0.5 px-2 uppercase tracking-wider text-[10px]">
+                    <div class="flex items-center justify-between">
+                      <span class="editable-field" contenteditable="true">SEROLOGY &amp; IMMUNOLOGY RAPID SCREENING</span>
+                      <button type="button" onclick="insertRowInGroup(this)" class="no-print text-[9.5px] px-1.5 py-0.5 bg-teal-600 hover:bg-teal-500 text-white rounded font-normal transition">
+                        <i class="fa-solid fa-plus text-[8px]"></i> Add Row to Group
+                      </button>
+                    </div>
+                  </td>
+                  <td class="py-0.5 px-1 text-center no-print">
+                    <button onclick="deleteRowWithUndo(this)" title="Delete Section" class="text-rose-500 hover:text-rose-700 text-[10px]"><i class="fa-solid fa-trash-can"></i></button>
+                  </td>
+                </tr>
+                <tr class="hover:bg-slate-50 transition border-b border-gray-200">
+                  <td class="py-1 px-1 text-center no-print w-5 print-cb-col">
+                    <input type="checkbox" checked onchange="toggleRowPrint(this)" class="accent-teal-600 w-3 h-3 cursor-pointer rounded">
+                  </td>
+                  <td class="py-1 px-1 text-center text-gray-500 font-mono text-[10px] w-6 row-num">1</td>
+                  <td class="py-1 px-1 font-semibold text-gray-900 leading-tight">
+                    <span class="editable-field font-bold text-gray-900" contenteditable="true">${details.investigation || 'HEPATITIS-C-VIRUS (HCV) ANTIBODIES'}</span>
+                    <div class="text-[9px] text-gray-500 font-normal">Method: ${details.method}</div>
+                  </td>
+                  <td class="py-1 px-1 text-center font-bold font-mono">
+                    <span class="editable-field px-2.5 py-0.5 rounded ${resultBadgeClass} border font-bold text-xs inline-block" contenteditable="true">${details.result}</span>
+                  </td>
+                  <td class="py-1 px-1 text-center font-bold text-[10px] col-flag">
+                    <span class="editable-field ${resultFlagClass}" contenteditable="true">${details.flag}</span>
+                  </td>
+                  <td class="py-1 px-1 text-center w-20 col-gauge">
+                    <span class="text-[9px] ${resultFlagClass} font-bold bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200">${details.result}</span>
+                  </td>
+                  <td class="py-1 px-1 text-center text-gray-500 text-[10px] col-unit">
+                    <span class="editable-field" contenteditable="true">${details.unit}</span>
+                  </td>
+                  <td class="py-1 px-1 text-right text-gray-700 font-mono text-[10px]">
+                    <span class="editable-field font-semibold text-emerald-700" contenteditable="true">${details.refInterval}</span>
+                  </td>
+                  <td class="py-1 px-1 text-center no-print">
+                    <button onclick="deleteRowWithUndo(this)" title="Delete Parameter (Undo available)" class="text-rose-500 hover:text-rose-700 text-[10px] transition hover:scale-110">
+                      <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- ASSAY PROCEDURE & DIAGNOSTIC CARD VALIDATION -->
+          <div class="mt-4 p-3 bg-slate-50 border border-slate-300 rounded-lg text-[10.5px] text-slate-800 space-y-2">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-1.5">
+              <span class="font-bold text-xs uppercase flex items-center gap-1.5 text-slate-900">
+                <i class="fa-solid fa-vial-circle-check text-teal-600"></i> Assay Procedure &amp; Diagnostic Card Kit Details
+              </span>
+              <span class="text-[9.5px] bg-teal-100 text-teal-800 border border-teal-300 px-2 py-0.5 rounded font-mono font-bold">
+                IVD Rapid Screening Card
+              </span>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[10px] pt-1">
+              <div class="bg-white p-2 rounded border border-slate-200">
+                <div class="text-slate-400 font-mono text-[9px] uppercase">Procedure Method</div>
+                <div class="font-bold text-slate-800"><span class="editable-field" contenteditable="true">${details.method}</span></div>
+              </div>
+              <div class="bg-white p-2 rounded border border-slate-200">
+                <div class="text-slate-400 font-mono text-[9px] uppercase">Mfg. Lic. No.</div>
+                <div class="font-bold text-slate-800"><span class="editable-field" contenteditable="true">${details.kitMfgLic}</span></div>
+              </div>
+              <div class="bg-white p-2 rounded border border-slate-200">
+                <div class="text-slate-400 font-mono text-[9px] uppercase">Kit LOT / Batch No.</div>
+                <div class="font-bold text-slate-800 font-mono"><span class="editable-field" contenteditable="true">${details.kitLot}</span></div>
+              </div>
+              <div class="bg-white p-2 rounded border border-slate-200">
+                <div class="text-slate-400 font-mono text-[9px] uppercase">Mfg. / Exp. Date</div>
+                <div class="font-bold text-slate-800"><span class="editable-field" contenteditable="true">${details.kitMfg} / ${details.kitExp}</span></div>
+              </div>
+            </div>
+
+            <div class="p-2.5 bg-amber-50/80 border border-amber-200 rounded text-[9.5px] text-amber-900 space-y-1">
+              <div class="font-bold flex items-center gap-1 text-amber-800">
+                <i class="fa-solid fa-triangle-exclamation"></i> Clinical Interpretation &amp; Diagnostic Guidance:
+              </div>
+              <ul class="list-disc pl-4 space-y-0.5">
+                <li><strong>${details.result}</strong> result indicates detection of antibodies against targeted antigens.</li>
+                <li>All reactive screening immunoassays must be confirmed by quantitative molecular RT-PCR testing.</li>
+                <li>Internal quality control dot was verified acceptable at time of readout.</li>
+              </ul>
+            </div>
+          </div>
+        `;
+      } else {
+        bodyContentHtml = `
+          <div class="overflow-x-auto my-2">
+            <table class="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr class="border-b-2 border-slate-900 text-slate-800 text-[10.5px] uppercase font-bold tracking-wider">
+                  <th class="py-1 px-1 text-center no-print w-5 print-cb-col"></th>
+                  <th class="py-1 px-1 text-center w-6">#</th>
+                  <th class="py-1 px-1">INVESTIGATION</th>
+                  <th class="py-1 px-1 text-center">OBSERVED VALUE</th>
+                  <th class="py-1 px-1 text-center col-flag">FLAG</th>
+                  <th class="py-1 px-1 text-center w-20 col-gauge">RANGE</th>
+                  <th class="py-1 px-1 text-center col-unit">UNIT</th>
+                  <th class="py-1 px-1 text-right">BIOLOGICAL REF. INTERVAL</th>
+                  <th class="py-1 px-1 text-center no-print"></th>
+                </tr>
+              </thead>
+              <tbody id="${tbodyId}" class="divide-y divide-gray-200">
+                <tr class="group-header-row bg-slate-100/90 font-bold text-slate-800 border-y border-slate-300">
+                  <td class="py-0.5 px-1 text-center no-print print-cb-col"></td>
+                  <td colspan="7" class="py-0.5 px-2 uppercase tracking-wider text-[10px]">
+                    <div class="flex items-center justify-between">
+                      <span class="editable-field" contenteditable="true">CLINICAL PARAMETERS</span>
+                      <button type="button" onclick="insertRowInGroup(this)" class="no-print text-[9.5px] px-1.5 py-0.5 bg-teal-600 hover:bg-teal-500 text-white rounded font-normal transition">
+                        <i class="fa-solid fa-plus text-[8px]"></i> Add Row to Group
+                      </button>
+                    </div>
+                  </td>
+                  <td class="py-0.5 px-1 text-center no-print">
+                    <button onclick="deleteRowWithUndo(this)" title="Delete Section" class="text-rose-500 hover:text-rose-700 text-[10px]"><i class="fa-solid fa-trash-can"></i></button>
+                  </td>
+                </tr>
+                <tr class="hover:bg-slate-50 transition border-b border-gray-200">
+                  <td class="py-1 px-1 text-center no-print w-5 print-cb-col">
+                    <input type="checkbox" checked onchange="toggleRowPrint(this)" class="accent-teal-600 w-3 h-3 cursor-pointer rounded">
+                  </td>
+                  <td class="py-1 px-1 text-center text-gray-500 font-mono text-[10px] w-6 row-num">1</td>
+                  <td class="py-1 px-1 font-semibold text-gray-900 leading-tight">
+                    <span class="editable-field font-bold text-gray-900" contenteditable="true">${details.reportTitle} PARAMETER 1</span>
+                  </td>
+                  <td class="py-1 px-1 text-center font-bold font-mono">
+                    <span class="editable-field px-2 py-0.5 rounded font-bold text-xs inline-block" contenteditable="true">10.0</span>
+                  </td>
+                  <td class="py-1 px-1 text-center font-bold text-[10px] col-flag">
+                    <span class="editable-field text-emerald-600" contenteditable="true">NORMAL</span>
+                  </td>
+                  <td class="py-1 px-1 text-center w-20 col-gauge">
+                    <span class="text-[9px] text-emerald-600 font-bold bg-emerald-50 px-1 py-0.5 rounded border border-emerald-200">NORMAL</span>
+                  </td>
+                  <td class="py-1 px-1 text-center text-gray-500 text-[10px] col-unit">
+                    <span class="editable-field" contenteditable="true">mg/dL</span>
+                  </td>
+                  <td class="py-1 px-1 text-right text-gray-700 font-mono text-[10px]">
+                    <span class="editable-field font-semibold text-gray-600" contenteditable="true">5.0 - 15.0</span>
+                  </td>
+                  <td class="py-1 px-1 text-center no-print">
+                    <button onclick="deleteRowWithUndo(this)" title="Delete Parameter (Undo available)" class="text-rose-500 hover:text-rose-700 text-[10px] transition hover:scale-110">
+                      <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+
+      newSheet.innerHTML = `
+        <div>
+          <!-- Header Bar -->
+          <div class="border-b-2 border-teal-700 pb-2 mb-3">
+            <div class="flex justify-between items-start">
+              <div>
+                <h1 class="text-xl font-bold tracking-tight text-teal-800 uppercase flex items-center gap-1.5">
+                  <i class="fa-solid fa-hospital text-teal-600"></i>
+                  <span class="editable-field" contenteditable="true">DR. LAL PATHLABS CLINICAL WORKSTATION</span>
+                </h1>
+                <p class="text-[10px] text-gray-600 font-medium">
+                  <span class="editable-field" contenteditable="true">National Reference Laboratory &amp; Diagnostic Centre</span>
+                </p>
+              </div>
+              <div class="text-right">
+                <span class="text-[10px] font-bold text-teal-700 bg-teal-50 border border-teal-200 px-2 py-0.5 rounded font-mono">
+                  ISO 15189:2012 / NABL ACCREDITED
+                </span>
+                <div class="text-[9px] text-gray-500 mt-1 font-mono disp-pageCounter">Custom Page</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Patient Demographics Bar -->
+          <div class="patient-header grid grid-cols-2 sm:grid-cols-4 gap-2 bg-slate-50 p-2.5 rounded border border-slate-200 text-[10px] mb-3">
+            <div>
+              <span class="text-gray-500 block uppercase font-mono text-[8.5px]">Patient Name</span>
+              <strong class="text-xs text-gray-900"><span class="editable-field" contenteditable="true">${details.patientName || 'PATIENT NAME'}</span></strong>
+            </div>
+            <div>
+              <span class="text-gray-500 block uppercase font-mono text-[8.5px]">Age / Sex / Sample</span>
+              <strong class="text-gray-800"><span class="editable-field" contenteditable="true">${details.ageGender || '45 Y / M'} / ${details.sampleType}</span></strong>
+            </div>
+            <div>
+              <span class="text-gray-500 block uppercase font-mono text-[8.5px]">Ref. Doctor</span>
+              <strong class="text-gray-800"><span class="editable-field" contenteditable="true">${details.refBy || 'Dr. Self / Attending Physician'}</span></strong>
+            </div>
+            <div class="text-right">
+              <span class="text-gray-500 block uppercase font-mono text-[8.5px]">Reg. / Printed Date</span>
+              <strong class="text-gray-800 font-mono"><span class="editable-field" contenteditable="true">${details.collectedDate || 'Today'} / ${details.printedDate || 'Today'}</span></strong>
+            </div>
+          </div>
+
+          <!-- Panel Title Banner -->
+          <div class="bg-gradient-to-r from-teal-800 to-teal-900 text-white px-3 py-1.5 rounded flex items-center justify-between mb-2">
+            <span class="font-bold text-xs uppercase tracking-wide">
+              <span class="editable-field" contenteditable="true">${details.reportTitle}</span>
+            </span>
+            <span class="text-[9.5px] font-mono text-teal-200 uppercase">
+              <span class="editable-field" contenteditable="true">DEPARTMENT OF SEROLOGY &amp; DIAGNOSTICS</span>
+            </span>
+          </div>
+
+          ${bodyContentHtml}
+
+        </div>
+
+        <!-- Footer / Signoff -->
+        <div class="mt-4 pt-3 border-t border-gray-300">
+          <div class="flex justify-between items-end text-[10px]">
+            <div>
+              <div class="font-bold text-gray-800"><span class="editable-field" contenteditable="true">Dr. Sunita Sharma, MD (Path)</span></div>
+              <div class="text-[9px] text-gray-500"><span class="editable-field" contenteditable="true">Consultant Pathologist &amp; Lab Director</span></div>
+            </div>
+            <div class="text-center font-mono text-[8.5px] text-gray-400">
+              *** End Of Diagnostic Report ***
+            </div>
+            <div class="text-right">
+              <div class="font-bold text-gray-800"><span class="editable-field" contenteditable="true">Dr. Arvind Mehta, MBBS, DCP</span></div>
+              <div class="text-[9px] text-gray-500"><span class="editable-field" contenteditable="true">Chief Quality Officer</span></div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Append to sheets container
+      const container = document.getElementById('sheetsContainer');
+      container.appendChild(newSheet);
+
+      // Add to Report Modules Drawer
+      addReportModuleCheckbox(newSheetId, details.reportTitle, true);
+
+      // Focus and scroll
+      setActiveSheet(newSheetId);
+      newSheet.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+      // Save to storage
+      LabXStorageEngine.save();
+      showToast(`🎉 Imported "${details.reportTitle}" successfully!`);
+    }
+
+    function addReportModuleCheckbox(sheetId, title, checked = true) {
+      const list = document.getElementById('reportCheckboxesList');
+      if (!list) return;
+
+      const count = list.querySelectorAll('label').length + 1;
+      const label = document.createElement('label');
+      label.className = "flex items-center justify-between p-2 rounded-lg bg-[#050814] border border-cyan-800/80 hover:border-cyan-600 cursor-pointer";
+      label.innerHTML = `
+        <span class="text-[11.5px] font-medium text-slate-200 flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+          <span class="font-mono text-cyan-400 text-[11px]">${count}.</span>
+          <span class="truncate max-w-[190px]">${title}</span>
+        </span>
+        <input type="checkbox" data-sheet="${sheetId}" ${checked ? 'checked' : ''} onchange="onReportCheckboxChange()" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
+      `;
+      list.appendChild(label);
+      onReportCheckboxChange();
+    }
+
 
     // ==========================================
     // REPORT SEARCH BAR & SELECT/CLEAR ALL
@@ -7101,10 +7892,6 @@
       syncMasterPatientData();
       onReportCheckboxChange();
       recheckFlags();
-      buildImpressionChecklist();
-      recheckFlagsAndGauges();
-      updateCbcHistogramsFromTable();
-      updateStudioSheetSelector();
 
       // Check for updates after 3 seconds in background (Only triggers popup if latest > current)
       setTimeout(() => checkForUpdates(false), 3000);
