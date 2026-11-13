@@ -2,7 +2,7 @@ name: Build Windows PC Executable (.exe)
 
 on:
   push:
-    branches: [ master, main ]
+    branches: [ master, main, beta ]
   workflow_dispatch:
 
 permissions:
@@ -44,20 +44,19 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: latest
-          name: "Lab X Studio v1.4.0 (Windows .exe)"
+          name: "Lab X Studio v1.5.0 (Windows .exe)"
           body: |
-            ## Lab X Studio v1.4.0 — Windows Executables (.exe)
+            ## Lab X Studio v1.5.0 — Windows Executables (.exe)
             
-            - **Installer**: `Lab-X-Studio-Setup-1.4.0.exe` (Complete Windows installation with Desktop shortcut)
-            - **Portable**: `Lab-X-Studio-Portable-1.4.0.exe` (Run directly without installing)
+            - **Installer**: `Lab-X-Studio-Setup-1.5.0.exe` (Complete Windows installation with Desktop shortcut)
+            - **Portable**: `Lab-X-Studio-Portable-1.5.0.exe` (Run directly without installing)
             
-            ### What's New in v1.4.0:
-            - **Dedicated Settings Tab (⚙️)**: Moved page margins and print layout into a clean, dedicated Settings tab.
-            - **Default Margins**: Set to 40mm (Top letterhead spacer), 14mm (Side margins), and 8mm (Bottom margin).
-            - **4 Workspace Color Themes**: Dark Workstation, Clinical Light, Midnight Navy, and Emerald Green.
-            - **Conditional Auto-Update**: Update popup only triggers when a newer release is actually available on GitHub.
-            - **Custom Report Sheet Builder from Scratch**: Create brand new diagnostic sheets from scratch (e.g., Urine Examination, Dengue Serology, Stool, etc.) with custom parameter rows and remarks.
-            - **Permanent Settings**: Clinic details, signatures, margins, and themes persist across app restarts.
+            ### What's New in v1.5.0:
+            - **12 Full Pathology Diagnostic Panels**: Complete Blood Count (CBC, 34 Parameters with reactive WBC/RBC/PLT Histograms), LFT, KFT, Vitamins, Notes, Diabetes HbA1c, Free Thyroid (FT3/FT4/TSH), Hematology Summary, Lipid Profile, ASCVD Risk Matrix, Glucose Sign-Off, and Hepatitis C Virus (HCV) Card Test.
+            - **Top Sticky Ribbon WordPad Toolbar**: Microsoft Word / Google Docs style ribbon docked above sheets for formatting (B/I/U/S, sizes, colors, alignments) and structure additions (+Row, +Group, +Note Box, +Sub-Header).
+            - **Direct Report File Uploader**: Instant client-side parser for `.doc`, `.docx`, and `.pdf` files that generates editable A4 pathology cards.
+            - **Local Database Auto-Save & Backup**: Real-time auto-saving with one-click `.json` backup file export and restore.
+            - **Default Unchecked Checkboxes**: Clean workstation start with Select All (12) and Clear All quick actions.
             
             Automatically compiled by GitHub Actions.
           files: dist-electron/*.exe
