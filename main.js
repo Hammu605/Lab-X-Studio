@@ -1,6 +1,9 @@
-const { app, BrowserWindow, ipcMain, dialog, Menu, shell } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, Menu, shell, screen } = require('electron');
 const path = require('path');
 const fs = require('fs');
+
+// Ensure Chromium & Electron start maximized on Linux and Windows
+app.commandLine.appendSwitch('start-maximized');
 
 let mainWindow;
 
@@ -10,11 +13,24 @@ function getDatabasePath() {
 }
 
 function createWindow() {
+  let initialWidth = 1280;
+  let initialHeight = 720;
+  try {
+    const primaryDisplay = screen.getPrimaryDisplay();
+    if (primaryDisplay && primaryDisplay.workAreaSize) {
+      initialWidth = Math.min(1280, primaryDisplay.workAreaSize.width);
+      initialHeight = Math.min(720, primaryDisplay.workAreaSize.height);
+    }
+  } catch (e) {
+    // Fallback safe dimensions
+  }
+
   mainWindow = new BrowserWindow({
-    width: 1400,
-    height: 900,
-    minWidth: 1024,
-    minHeight: 700,
+    width: initialWidth,
+    height: initialHeight,
+    minWidth: 800,
+    minHeight: 480,
+    show: false,
     title: "Lab X — Diagnostic Studio",
     backgroundColor: '#080e1e',
     webPreferences: {
@@ -23,6 +39,13 @@ function createWindow() {
       contextIsolation: true,
       enableRemoteModule: false
     }
+  });
+
+  mainWindow.maximize();
+
+  mainWindow.once('ready-to-show', () => {
+    mainWindow.maximize();
+    mainWindow.show();
   });
 
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {

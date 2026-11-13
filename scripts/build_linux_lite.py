@@ -8,7 +8,7 @@ INDEX_HTML = os.path.join(ROOT_DIR, 'index.html')
 DIST_DIR = os.path.join(ROOT_DIR, 'dist-electron')
 os.makedirs(DIST_DIR, exist_ok=True)
 
-VERSION = "1.5.1"
+VERSION = "1.5.2"
 PKG_NAME = "lab-x-studio-lite"
 WORK_DIR = os.path.join(DIST_DIR, "deb_work")
 shutil.rmtree(WORK_DIR, ignore_errors=True)
@@ -63,15 +63,15 @@ HTML_FILE="file:///usr/share/lab-x-studio/index.html"
 
 # Run in borderless dedicated application window mode
 if command -v chromium >/dev/null 2>&1; then
-    exec chromium --app="$HTML_FILE" --new-window --class="LabXStudio" "$@"
+    exec chromium --app="$HTML_FILE" --start-maximized --class="LabXStudio" "$@"
 elif command -v chromium-browser >/dev/null 2>&1; then
-    exec chromium-browser --app="$HTML_FILE" --new-window --class="LabXStudio" "$@"
+    exec chromium-browser --app="$HTML_FILE" --start-maximized --class="LabXStudio" "$@"
 elif command -v google-chrome >/dev/null 2>&1; then
-    exec google-chrome --app="$HTML_FILE" --new-window --class="LabXStudio" "$@"
+    exec google-chrome --app="$HTML_FILE" --start-maximized --class="LabXStudio" "$@"
 elif command -v brave-browser >/dev/null 2>&1; then
-    exec brave-browser --app="$HTML_FILE" --new-window --class="LabXStudio" "$@"
+    exec brave-browser --app="$HTML_FILE" --start-maximized --class="LabXStudio" "$@"
 elif command -v microsoft-edge >/dev/null 2>&1; then
-    exec microsoft-edge --app="$HTML_FILE" --new-window --class="LabXStudio" "$@"
+    exec microsoft-edge --app="$HTML_FILE" --start-maximized --class="LabXStudio" "$@"
 elif command -v firefox >/dev/null 2>&1; then
     exec firefox --new-window "$HTML_FILE" "$@"
 elif command -v xdg-open >/dev/null 2>&1; then
@@ -138,15 +138,15 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 HTML_FILE="file://$DIR/index.html"
 
 if command -v chromium >/dev/null 2>&1; then
-    exec chromium --app="$HTML_FILE" --new-window --class="LabXStudio" "$@"
+    exec chromium --app="$HTML_FILE" --start-maximized --class="LabXStudio" "$@"
 elif command -v chromium-browser >/dev/null 2>&1; then
-    exec chromium-browser --app="$HTML_FILE" --new-window --class="LabXStudio" "$@"
+    exec chromium-browser --app="$HTML_FILE" --start-maximized --class="LabXStudio" "$@"
 elif command -v google-chrome >/dev/null 2>&1; then
-    exec google-chrome --app="$HTML_FILE" --new-window --class="LabXStudio" "$@"
+    exec google-chrome --app="$HTML_FILE" --start-maximized --class="LabXStudio" "$@"
 elif command -v brave-browser >/dev/null 2>&1; then
-    exec brave-browser --app="$HTML_FILE" --new-window --class="LabXStudio" "$@"
+    exec brave-browser --app="$HTML_FILE" --start-maximized --class="LabXStudio" "$@"
 elif command -v microsoft-edge >/dev/null 2>&1; then
-    exec microsoft-edge --app="$HTML_FILE" --new-window --class="LabXStudio" "$@"
+    exec microsoft-edge --app="$HTML_FILE" --start-maximized --class="LabXStudio" "$@"
 elif command -v firefox >/dev/null 2>&1; then
     exec firefox --new-window "$HTML_FILE" "$@"
 elif command -v xdg-open >/dev/null 2>&1; then
