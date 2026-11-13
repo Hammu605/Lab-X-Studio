@@ -5701,7 +5701,6 @@
       });
 
       updateStudioSheetSelector();
-      LabXStorageEngine.restore();
       if (activeSheets.length > 0 && !activeSheets.some(s => s.id === currentActiveSheetId)) {
         setActiveSheet(activeSheets[0].id);
       }
@@ -6420,6 +6419,8 @@
     }
 
     
+    let isRestoringFromStorage = false;
+
     // =========================================================================
     // LAB X STORAGE ENGINE & AUTO-SAVE (LOCAL STORAGE + BACKUP EXPORT/IMPORT)
     // =========================================================================
@@ -6427,6 +6428,7 @@
       storageKey: 'LAB_X_DATABASE_V1',
 
       save: function() {
+        if (isRestoringFromStorage) return;
         try {
           const data = {
             timestamp: new Date().toISOString(),
@@ -6474,6 +6476,8 @@
       },
 
       restore: function() {
+        if (isRestoringFromStorage) return false;
+        isRestoringFromStorage = true;
         try {
           const raw = localStorage.getItem(this.storageKey);
           if (!raw) return false;
@@ -6526,6 +6530,8 @@
         } catch(e) {
           console.error("Storage restore error:", e);
           return false;
+        } finally {
+          isRestoringFromStorage = false;
         }
       }
     };
@@ -6545,34 +6551,45 @@
       a.download = `Lab_X_Data_Backup_${dStr}.json`;
       document.body.appendChild(a);
       a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      showToast("Backup saved to computer downloads!");
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 300);
+      showToast("💾 Backup file exported successfully!");
     }
 
-    function importDataBackupFile(event) {
+    function triggerImportBackupFile() {
+      document.getElementById('inpDataBackupFileUploader')?.click();
+    }
+
+    function handleImportBackupFile(event) {
       const file = event.target.files?.[0];
       if (!file) return;
+
       const reader = new FileReader();
       reader.onload = function(e) {
         try {
           const json = e.target.result;
-          JSON.parse(json); // validate JSON syntax
+          const parsed = JSON.parse(json);
+          if (!parsed || typeof parsed !== 'object') {
+            throw new Error("Invalid backup JSON format");
+          }
           localStorage.setItem(LabXStorageEngine.storageKey, json);
           LabXStorageEngine.restore();
-          showToast("Data restored successfully from backup file!");
+          showToast("🎉 Data restored from backup file!");
         } catch(err) {
-          alert("Invalid backup file: " + err.message);
+          console.error("Backup restore failed:", err);
+          showToast("Failed to restore backup: " + err.message);
         }
       };
       reader.readAsText(file);
       event.target.value = '';
     }
 
-    // Debounced real-time auto-saving on typing
+    // Auto-save debounced listener on editable fields
     let autoSaveDebounceTimer = null;
-    document.addEventListener('input', (e) => {
-      if (e.target.isContentEditable || e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') {
+    document.addEventListener('input', function(e) {
+      if (e.target && e.target.classList && e.target.classList.contains('editable-field')) {
         clearTimeout(autoSaveDebounceTimer);
         autoSaveDebounceTimer = setTimeout(() => {
           LabXStorageEngine.save();
@@ -6613,17 +6630,34 @@
     function extractTextFromBuffer(arrayBuffer) {
       const bytes = new Uint8Array(arrayBuffer);
       let text = '';
-      let current = '';
+
+      // 1. Standard 8-bit ASCII scan
+      let current8 = '';
       for (let i = 0; i < bytes.length; i++) {
         const b = bytes[i];
         if ((b >= 32 && b <= 126) || b === 10 || b === 13 || b === 9) {
-          current += String.fromCharCode(b);
+          current8 += String.fromCharCode(b);
         } else {
-          if (current.length >= 3) text += current + String.fromCharCode(10);
-          current = '';
+          if (current8.length >= 3) text += current8 + String.fromCharCode(10);
+          current8 = '';
         }
       }
-      if (current.length >= 3) text += current + String.fromCharCode(10);
+      if (current8.length >= 3) text += current8 + String.fromCharCode(10);
+
+      // 2. 16-bit UTF-16LE scan (for Word binary UCS-2 strings)
+      let current16 = '';
+      for (let i = 0; i < bytes.length - 1; i += 2) {
+        const b1 = bytes[i];
+        const b2 = bytes[i + 1];
+        if (b2 === 0 && ((b1 >= 32 && b1 <= 126) || b1 === 10 || b1 === 13 || b1 === 9)) {
+          current16 += String.fromCharCode(b1);
+        } else {
+          if (current16.length >= 3) text += current16 + String.fromCharCode(10);
+          current16 = '';
+        }
+      }
+      if (current16.length >= 3) text += current16 + String.fromCharCode(10);
+
       return text;
     }
 
@@ -6637,7 +6671,23 @@
 
       console.log("Extracted text length:", rawText.length);
 
-      // Extract details
+      // Read current clinic settings
+      const clinicName = document.getElementById('inpClinicName')?.value || 'KRISHNA COMPUTERIZED LABORATORY';
+      const clinicAddr = document.getElementById('inpClinicAddress')?.value || 'Shalini Surgical & Maternity Hospital, Medical Enclave, Chandigarh Road, Tohana (Fatehabad)';
+      const docName = document.getElementById('inpDocName')?.value || 'Dr. Gurpreet Singh, M.D.';
+      const docDegree = document.getElementById('inpDocDegree')?.value || 'Consultant Clinical Pathologist';
+      const techName = document.getElementById('inpTechTitle')?.value || 'Harpreet Sharma, DMLT';
+      const techSub = document.getElementById('inpTechSub')?.value || 'Chief Medical Lab Technologist';
+
+      // Read current patient form settings as baseline
+      let patientName = document.getElementById('inpPatientName')?.value || 'PATIENT NAME';
+      let patientId = document.getElementById('inpPatientId')?.value || 'PID-2026-4858';
+      let patientAge = document.getElementById('inpAge')?.value || '45';
+      let patientGender = document.getElementById('inpGender')?.value || 'M';
+      let patientRefBy = document.getElementById('inpRefBy')?.value || 'SELF';
+      let patientLabNo = document.getElementById('inpLabNo')?.value || '485828168';
+      let patientDate = document.getElementById('inpDate')?.value || 'Today';
+
       const details = {
         fileName: fileName,
         patientName: '',
@@ -6646,7 +6696,7 @@
         refBy: '',
         collectedDate: '',
         printedDate: '',
-        reportTitle: fileName.replace(/\\.[^/.]+$/, '').toUpperCase(),
+        reportTitle: fileName.replace(/\.[^/.]+$/, '').toUpperCase(),
         method: 'TRI-DOT Visual Card Method',
         kitLot: 'NK120896',
         kitMfgLic: 'S-MB 1877',
@@ -6660,26 +6710,39 @@
         refInterval: 'NON-REACTIVE'
       };
 
-      const nameMatch = rawText.match(/Name\s*:\s*[-:]?\s*([^,\n\r\t]+?)(?=\s+Sample|\s+Age|\s+Collected|$)/i);
-      if (nameMatch) details.patientName = nameMatch[1].trim();
+      // Match Patient Name if present in document
+      const nameMatch = rawText.match(/(?:Name|Patient\s*Name)\s*:\s*[-:]?\s*([^,\n\r\t]+?)(?=\s+Sample|\s+Age|\s+Collected|\s+Ref|$)/i);
+      if (nameMatch && nameMatch[1].trim().length > 1) {
+        details.patientName = nameMatch[1].trim();
+        patientName = details.patientName;
+      }
 
-      const sampleMatch = rawText.match(/Sample\s*Type\s*:\s*[-:]?\s*([^,\n\r\t]+?)(?=\s+Age|\s+Collected|\s+Ref|$)/i);
+      const sampleMatch = rawText.match(/Sample\s*(?:Type)?\s*:\s*[-:]?\s*([^,\n\r\t]+?)(?=\s+Age|\s+Collected|\s+Ref|$)/i);
       if (sampleMatch) details.sampleType = sampleMatch[1].trim();
 
-      const ageMatch = rawText.match(/Age\s*\/\s*Gender\s*:\s*[-:]?\s*([^,\n\r\t]+?)(?=\s+Collected|\s+Ref|$)/i);
-      if (ageMatch) details.ageGender = ageMatch[1].trim();
+      const ageMatch = rawText.match(/Age\s*\/?\s*(?:Gender|Sex)?\s*:\s*[-:]?\s*([^,\n\r\t]+?)(?=\s+Collected|\s+Ref|$)/i);
+      if (ageMatch && ageMatch[1].trim().length > 1) {
+        details.ageGender = ageMatch[1].trim();
+      } else {
+        details.ageGender = `${patientAge} Y / ${patientGender}`;
+      }
 
-      const refMatch = rawText.match(/Ref\.\s*by\s*:\s*[-:]?\s*([^,\n\r\t]+?)(?=\s+Printed|\s+Collected|$)/i);
-      if (refMatch) details.refBy = refMatch[1].trim();
+      const refMatch = rawText.match(/Ref\.?\s*(?:by|Dr\.?)?\s*:\s*[-:]?\s*([^,\n\r\t]+?)(?=\s+Printed|\s+Collected|$)/i);
+      if (refMatch && refMatch[1].trim().length > 1) {
+        details.refBy = refMatch[1].trim();
+        patientRefBy = details.refBy;
+      }
 
-      const collMatch = rawText.match(/Collected\s*:\s*([0-9\/\-\.]+)/i);
+      const collMatch = rawText.match(/(?:Collected|Date)\s*:\s*([0-9\/\-\.]+)/i);
       if (collMatch) details.collectedDate = collMatch[1].trim();
+      else details.collectedDate = patientDate;
 
       const printMatch = rawText.match(/Printed\s*:\s*([0-9\/\-\.]+)/i);
       if (printMatch) details.printedDate = printMatch[1].trim();
+      else details.printedDate = details.collectedDate;
 
-      // Check for Card Tests (HCV, HIV, HBsAg, Rapid Test)
-      if (/HEPATITIS|HCV|HIV|HBsAg|TRI-DOT|CARD METHOD/i.test(rawText)) {
+      // Check if Card Test (HCV, HIV, HBsAg, Rapid Card Method)
+      if (/HEPATITIS|HCV|HIV|HBsAg|TRI-DOT|CARD METHOD/i.test(rawText) && !/BIOCHEMISTRY|LIVER|KIDNEY|GLUCOSE|LIPID/i.test(fileName)) {
         details.isCardTest = true;
         const hcvMatch = rawText.match(/HEPATITIS[^\n\r]*?(?=\s+REACTIVE|\s+NON-REACTIVE|$)/i);
         details.investigation = hcvMatch ? hcvMatch[0].trim() : 'HEPATITIS-C-VIRUS (HCV) ANTIBODIES (T1 or T2)';
@@ -6705,30 +6768,22 @@
         if (expMatch) details.kitExp = expMatch[1].trim();
       }
 
-      // If patient name found, optionally sync to global patient header
-      if (details.patientName) {
-        const pNameEl = document.querySelector('.patient-header [data-header="patientName"]') || document.querySelector('.editable-field[title*="Name"]');
-        // Let user know
-      }
-
-      // Build unique sheet
+      // Build unique sheet ID
       const newSheetId = 'uploadedSheet_' + Date.now();
       const newSheet = document.createElement('article');
       newSheet.id = newSheetId;
-      newSheet.className = 'a4-sheet bg-white text-gray-900 border border-gray-300 shadow-2xl rounded-none p-5 relative select-text transition-all duration-300 flex flex-col justify-between mb-8';
-      newSheet.style.width = '794px';
-      newSheet.style.minHeight = '1123px';
+      newSheet.className = 'a4-sheet bg-white text-black shadow-2xl relative select-text transition-all duration-300 flex flex-col justify-between mb-8';
       newSheet.setAttribute('data-report-title', details.reportTitle);
       newSheet.setAttribute('data-is-custom', 'true');
       newSheet.style.display = 'flex';
 
       const tbodyId = 'tbody_' + newSheetId;
-      const resultBadgeClass = details.result === 'REACTIVE' ? 'bg-rose-100 text-rose-700 border-rose-300' : 'bg-emerald-100 text-emerald-700 border-emerald-300';
-      const resultFlagClass = details.result === 'REACTIVE' ? 'text-rose-600' : 'text-emerald-600';
-
       let bodyContentHtml = '';
 
       if (details.isCardTest) {
+        const resultBadgeClass = details.result === 'REACTIVE' ? 'bg-rose-100 text-rose-700 border-rose-300' : 'bg-emerald-100 text-emerald-700 border-emerald-300';
+        const resultFlagClass = details.result === 'REACTIVE' ? 'text-rose-600' : 'text-emerald-600';
+
         bodyContentHtml = `
           <div class="overflow-x-auto my-2">
             <table class="w-full text-left text-xs border-collapse">
@@ -6837,9 +6892,157 @@
           </div>
         `;
       } else {
+        // Multi-parameter clinical table parsing (Biochemistry, KFT, LFT, Lipid, etc.)
+        const noiseRegex = /^(bjbj|h_[0-9]|[a-z0-9]{1,4}|\[Content_Types\]|_rels|theme\/|word\/|Microsoft|Table|Page\s*\d+|Dr\.|Doctor|Pathologist|MBBS|MD|Reg\.?\s*No|End\s*of|Report|Date|Sample|Name|Age|Gender|Ref|Investigation|Result|Unit|Biological|Reference|Interval|Flag|Status|Method|Signature)($|\b)/i;
+        const dividerRegex = /^[-=_.\s]{4,}$/;
+        const unitRegex = /\b(mg\/dL|g\/dL|gm\/dL|gm%|U\/L|IU\/L|mmol\/L|mEq\/L|µmol\/L|umol\/L|pg\/mL|ng\/mL|ug\/dL|mcg\/dL|%|cells\/cu\.mm|cells\/cumm|cumm|fl|pg|seconds|sec|ratio|mg\/24hrs|gm\/24hrs|mIU\/mL|ng\/dL|ug\/L|Qualitative)\b/i;
+        const qualResultRegex = /\b(REACTIVE|NON-REACTIVE|POSITIVE|NEGATIVE|TRACE|NIL|PRESENT|ABSENT|NORMAL|CLEAR|HAZY|CLOUDY|YELLOW|PALE YELLOW)\b/i;
+
+        const rawLines = rawText.split(/[\r\n]+/).map(s => s.trim()).filter(s => s.length > 0 && !dividerRegex.test(s));
+        const params = [];
+
+        for (let i = 0; i < rawLines.length; i++) {
+          const line = rawLines[i];
+          if (noiseRegex.test(line) && !line.includes(":") && !unitRegex.test(line)) {
+            continue;
+          }
+
+          // Try Tab or multi-space separation
+          const parts = line.split(/\t+|\s{2,}/).map(p => p.trim()).filter(Boolean);
+          if (parts.length >= 2) {
+            let pName = parts[0];
+            let pVal = parts[1];
+            let pUnit = "";
+            let pRef = "";
+
+            if (parts.length >= 4) {
+              pUnit = parts[2];
+              pRef = parts[3];
+            } else if (parts.length === 3) {
+              if (unitRegex.test(parts[2])) {
+                pUnit = parts[2];
+              } else {
+                pRef = parts[2];
+              }
+            }
+
+            if (/^[<>]?\s*\d+(\.\d+)?$/.test(pVal) || qualResultRegex.test(pVal)) {
+              if (!noiseRegex.test(pName) && pName.length >= 2) {
+                params.push({ name: pName, val: pVal, unit: pUnit, ref: pRef });
+                continue;
+              }
+            }
+          }
+
+          // Try sequential adjacent lines: Line i is Name, Line i+1 is Value
+          if (parts.length < 2 && i + 1 < rawLines.length) {
+            const nextLine = rawLines[i + 1];
+            const nextMatch = nextLine.match(/^([<>]?\s*\d+(?:\.\d+)?|\b(?:REACTIVE|NON-REACTIVE|POSITIVE|NEGATIVE|NORMAL|TRACE|NIL|PRESENT|ABSENT)\b)(?:\s+([a-zA-Z\/\%\.\^]+))?(?:\s+([<>]?\s*[\d\.\-\–\s]+.*))?$/);
+            if (nextMatch && !noiseRegex.test(line) && line.length >= 3 && line.length < 60) {
+              params.push({
+                name: line,
+                val: nextMatch[1].trim(),
+                unit: (nextMatch[2] || "").trim(),
+                ref: (nextMatch[3] || "").trim()
+              });
+              i++;
+              continue;
+            }
+          }
+
+          // Try single line regex: "NAME [spaces] VALUE [spaces] UNIT [spaces] REF"
+          const singleMatch = line.match(/^([A-Za-z0-9\s\/\-\(\)\.\,\:\+]+?)\s+([<>]?\s*\d+(?:\.\d+)?|\b(?:REACTIVE|NON-REACTIVE|POSITIVE|NEGATIVE|NORMAL|TRACE|NIL|PRESENT|ABSENT)\b)(?:\s+([a-zA-Z\/\%\.\^]+))?(?:\s+([<>]?\s*[\d\.\-\–\s]+.*))?$/);
+          if (singleMatch) {
+            const name = singleMatch[1].trim();
+            const val = singleMatch[2].trim();
+            const unit = (singleMatch[3] || "").trim();
+            const ref = (singleMatch[4] || "").trim();
+            if (!noiseRegex.test(name) && name.length >= 2) {
+              params.push({ name, val, unit, ref });
+              continue;
+            }
+          }
+        }
+
+        // If no params detected from strict regex, fallback
+        if (params.length === 0) {
+          params.push({
+            name: `${details.reportTitle} PARAMETER 1`,
+            val: '10.0',
+            unit: 'mg/dL',
+            ref: '5.0 - 15.0'
+          });
+        }
+
+        const rowsHtml = params.map((p, idx) => {
+          let flagText = 'NORMAL';
+          let flagClass = 'text-emerald-600';
+          let needleColor = 'text-emerald-600';
+          let needlePos = 50.0;
+
+          const rangeMatch = (p.ref || '').match(/(\d+(?:\.\d+)?)\s*(?:-|–|to)\s*(\d+(?:\.\d+)?)/);
+          const fval = parseFloat(p.val);
+          if (rangeMatch && !isNaN(fval)) {
+            const low = parseFloat(rangeMatch[1]);
+            const high = parseFloat(rangeMatch[2]);
+            if (fval < low) {
+              flagText = 'LOW';
+              flagClass = 'text-amber-600 font-bold';
+              needleColor = 'text-amber-600';
+              needlePos = 18.0;
+            } else if (fval > high) {
+              flagText = 'HIGH';
+              flagClass = 'text-rose-600 font-bold';
+              needleColor = 'text-rose-600';
+              needlePos = 82.0;
+            }
+          }
+
+          return `
+            <tr class="hover:bg-slate-50 transition border-b border-gray-200">
+              <td class="py-1 px-1 text-center no-print w-5 print-cb-col">
+                <input type="checkbox" checked onchange="toggleRowPrint(this)" class="accent-teal-600 w-3 h-3 cursor-pointer rounded">
+              </td>
+              <td class="py-1 px-1 text-center text-gray-500 font-mono text-[10px] w-6 row-num-cell">${idx + 1}</td>
+              <td class="py-1 px-1 font-bold text-gray-900 leading-tight">
+                <span class="editable-field font-bold text-gray-900" contenteditable="true">${p.name}</span>
+              </td>
+              <td class="py-1 px-1 text-center font-bold font-mono">
+                <span class="editable-field param-val px-2 py-0.5 rounded font-bold text-xs inline-block" contenteditable="true" onblur="recheckFlagsAndGauges()">${p.val}</span>
+              </td>
+              <td class="py-1 px-1 text-center font-bold text-[10px] col-flag flag-cell">
+                <span class="editable-field ${flagClass}" contenteditable="true">${flagText}</span>
+              </td>
+              <td class="py-1 px-1 text-center w-20 col-gauge">
+                <div class="visual-gauge-container w-20 mx-auto select-none">
+                  <div class="gauge-bar h-1 w-full rounded-full flex overflow-hidden bg-gray-200">
+                    <div class="gauge-low bg-amber-400" style="width: 25%;"></div>
+                    <div class="gauge-normal bg-emerald-500" style="width: 50%;"></div>
+                    <div class="gauge-high bg-rose-500" style="width: 25%;"></div>
+                  </div>
+                  <div class="gauge-needle-wrap relative h-2.5 w-full">
+                    <div class="gauge-needle absolute text-[7.5px] -translate-x-1/2 font-bold ${needleColor} transition-all duration-300" style="left: ${needlePos}%;">▼</div>
+                  </div>
+                </div>
+              </td>
+              <td class="py-1 px-1 text-center text-gray-500 text-[10px] col-unit">
+                <span class="editable-field" contenteditable="true">${p.unit || ''}</span>
+              </td>
+              <td class="py-1 px-1 text-right text-gray-700 font-mono text-[10px]">
+                <span class="editable-field font-semibold text-gray-600" contenteditable="true">${p.ref || ''}</span>
+              </td>
+              <td class="py-1 px-1 text-center no-print">
+                <button onclick="deleteRowWithUndo(this)" title="Delete Parameter (Undo available)" class="text-rose-500 hover:text-rose-700 text-[10px] transition hover:scale-110">
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+
         bodyContentHtml = `
           <div class="overflow-x-auto my-2">
-            <table class="w-full text-left text-xs border-collapse">
+            <table class="w-full text-left text-xs border-collapse" data-numbering-mode="continuous">
               <thead>
                 <tr class="border-b-2 border-slate-900 text-slate-800 text-[10.5px] uppercase font-bold tracking-wider">
                   <th class="py-1 px-1 text-center no-print w-5 print-cb-col"></th>
@@ -6858,7 +7061,7 @@
                   <td class="py-0.5 px-1 text-center no-print print-cb-col"></td>
                   <td colspan="7" class="py-0.5 px-2 uppercase tracking-wider text-[10px]">
                     <div class="flex items-center justify-between">
-                      <span class="editable-field" contenteditable="true">CLINICAL PARAMETERS</span>
+                      <span class="editable-field" contenteditable="true">CLINICAL PARAMETERS / BIOCHEMISTRY (${params.length} PARAMETERS)</span>
                       <button type="button" onclick="insertRowInGroup(this)" class="no-print text-[9.5px] px-1.5 py-0.5 bg-teal-600 hover:bg-teal-500 text-white rounded font-normal transition">
                         <i class="fa-solid fa-plus text-[8px]"></i> Add Row to Group
                       </button>
@@ -6868,35 +7071,7 @@
                     <button onclick="deleteRowWithUndo(this)" title="Delete Section" class="text-rose-500 hover:text-rose-700 text-[10px]"><i class="fa-solid fa-trash-can"></i></button>
                   </td>
                 </tr>
-                <tr class="hover:bg-slate-50 transition border-b border-gray-200">
-                  <td class="py-1 px-1 text-center no-print w-5 print-cb-col">
-                    <input type="checkbox" checked onchange="toggleRowPrint(this)" class="accent-teal-600 w-3 h-3 cursor-pointer rounded">
-                  </td>
-                  <td class="py-1 px-1 text-center text-gray-500 font-mono text-[10px] w-6 row-num">1</td>
-                  <td class="py-1 px-1 font-semibold text-gray-900 leading-tight">
-                    <span class="editable-field font-bold text-gray-900" contenteditable="true">${details.reportTitle} PARAMETER 1</span>
-                  </td>
-                  <td class="py-1 px-1 text-center font-bold font-mono">
-                    <span class="editable-field px-2 py-0.5 rounded font-bold text-xs inline-block" contenteditable="true">10.0</span>
-                  </td>
-                  <td class="py-1 px-1 text-center font-bold text-[10px] col-flag">
-                    <span class="editable-field text-emerald-600" contenteditable="true">NORMAL</span>
-                  </td>
-                  <td class="py-1 px-1 text-center w-20 col-gauge">
-                    <span class="text-[9px] text-emerald-600 font-bold bg-emerald-50 px-1 py-0.5 rounded border border-emerald-200">NORMAL</span>
-                  </td>
-                  <td class="py-1 px-1 text-center text-gray-500 text-[10px] col-unit">
-                    <span class="editable-field" contenteditable="true">mg/dL</span>
-                  </td>
-                  <td class="py-1 px-1 text-right text-gray-700 font-mono text-[10px]">
-                    <span class="editable-field font-semibold text-gray-600" contenteditable="true">5.0 - 15.0</span>
-                  </td>
-                  <td class="py-1 px-1 text-center no-print">
-                    <button onclick="deleteRowWithUndo(this)" title="Delete Parameter (Undo available)" class="text-rose-500 hover:text-rose-700 text-[10px] transition hover:scale-110">
-                      <i class="fa-solid fa-trash-can"></i>
-                    </button>
-                  </td>
-                </tr>
+                ${rowsHtml}
               </tbody>
             </table>
           </div>
@@ -6904,78 +7079,85 @@
       }
 
       newSheet.innerHTML = `
-        <div>
-          <!-- Header Bar -->
-          <div class="border-b-2 border-teal-700 pb-2 mb-3">
-            <div class="flex justify-between items-start">
-              <div>
-                <h1 class="text-xl font-bold tracking-tight text-teal-800 uppercase flex items-center gap-1.5">
-                  <i class="fa-solid fa-hospital text-teal-600"></i>
-                  <span class="editable-field" contenteditable="true">DR. LAL PATHLABS CLINICAL WORKSTATION</span>
-                </h1>
-                <p class="text-[10px] text-gray-600 font-medium">
-                  <span class="editable-field" contenteditable="true">National Reference Laboratory &amp; Diagnostic Centre</span>
-                </p>
-              </div>
-              <div class="text-right">
-                <span class="text-[10px] font-bold text-teal-700 bg-teal-50 border border-teal-200 px-2 py-0.5 rounded font-mono">
-                  ISO 15189:2012 / NABL ACCREDITED
-                </span>
-                <div class="text-[9px] text-gray-500 mt-1 font-mono disp-pageCounter">Custom Page</div>
+        <div class="page-content-wrapper">
+          <!-- 1. CLINIC HEADER SPACE (RESPECTS 40MM PREPRINTED OR DIGITAL HEADER) -->
+          <div class="clinic-header-space">
+            <div class="preprinted-spacer w-full relative">
+              <div class="no-print absolute inset-0 border border-dashed border-gray-300 rounded flex flex-col items-center justify-center text-gray-400 text-xs">
+                <span class="font-semibold text-gray-400"><i class="fa-regular fa-image mr-1"></i> Pre-Printed Clinic Letterhead Space (<span class="disp-spacerHeightText">40mm</span> Blank)</span>
               </div>
             </div>
-          </div>
-
-          <!-- Patient Demographics Bar -->
-          <div class="patient-header grid grid-cols-2 sm:grid-cols-4 gap-2 bg-slate-50 p-2.5 rounded border border-slate-200 text-[10px] mb-3">
-            <div>
-              <span class="text-gray-500 block uppercase font-mono text-[8.5px]">Patient Name</span>
-              <strong class="text-xs text-gray-900"><span class="editable-field" contenteditable="true">${details.patientName || 'PATIENT NAME'}</span></strong>
-            </div>
-            <div>
-              <span class="text-gray-500 block uppercase font-mono text-[8.5px]">Age / Sex / Sample</span>
-              <strong class="text-gray-800"><span class="editable-field" contenteditable="true">${details.ageGender || '45 Y / M'} / ${details.sampleType}</span></strong>
-            </div>
-            <div>
-              <span class="text-gray-500 block uppercase font-mono text-[8.5px]">Ref. Doctor</span>
-              <strong class="text-gray-800"><span class="editable-field" contenteditable="true">${details.refBy || 'Dr. Self / Attending Physician'}</span></strong>
-            </div>
-            <div class="text-right">
-              <span class="text-gray-500 block uppercase font-mono text-[8.5px]">Reg. / Printed Date</span>
-              <strong class="text-gray-800 font-mono"><span class="editable-field" contenteditable="true">${details.collectedDate || 'Today'} / ${details.printedDate || 'Today'}</span></strong>
+            <div class="digital-header-block hidden w-full pb-2 border-b-2 border-teal-700">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-12 h-12 rounded-xl bg-teal-800 text-white flex items-center justify-center font-bold text-xl"><i class="fa-solid fa-microscope"></i></div>
+                  <div>
+                    <h1 class="text-lg font-black tracking-wide text-teal-900 disp-clinicName">${clinicName}</h1>
+                    <p class="text-[11px] font-semibold text-gray-600 disp-clinicAddress">${clinicAddr}</p>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <div class="text-[10px] font-mono font-bold bg-teal-100 text-teal-900 px-2 py-0.5 rounded border border-teal-300">FULLY COMPUTERIZED</div>
+                  <div class="text-[9.5px] text-gray-500 mt-1">24x7 Diagnostic Services</div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <!-- Panel Title Banner -->
-          <div class="bg-gradient-to-r from-teal-800 to-teal-900 text-white px-3 py-1.5 rounded flex items-center justify-between mb-2">
-            <span class="font-bold text-xs uppercase tracking-wide">
-              <span class="editable-field" contenteditable="true">${details.reportTitle}</span>
-            </span>
-            <span class="text-[9.5px] font-mono text-teal-200 uppercase">
-              <span class="editable-field" contenteditable="true">DEPARTMENT OF SEROLOGY &amp; DIAGNOSTICS</span>
-            </span>
+          <div class="w-full mt-2"><div class="border-t-2 border-black w-full"></div><div class="border-t border-black w-full mt-[2px]"></div></div>
+
+          <!-- 2. PATIENT DEMOGRAPHICS (DYNAMICALLY BOUND) -->
+          <section class="mt-2.5 text-[12px] leading-tight text-black">
+            <div class="grid grid-cols-2 gap-x-6">
+              <div class="space-y-1">
+                <div class="flex items-baseline"><span class="font-bold w-28 shrink-0">Patient Name</span><span class="font-semibold mr-1.5">:</span><span class="editable-field font-semibold flex-1 disp-pName" contenteditable="true">${patientName}</span></div>
+                <div class="flex items-baseline"><span class="font-bold w-28 shrink-0">Patient ID</span><span class="font-semibold mr-1.5">:</span><span class="editable-field font-mono font-bold flex-1 disp-pId" contenteditable="true">${patientId}</span></div>
+                <div class="flex items-baseline"><span class="font-bold w-28 shrink-0">Age / Gender</span><span class="font-semibold mr-1.5">:</span><span class="editable-field flex-1 disp-pAgeGender" contenteditable="true">${details.ageGender}</span></div>
+                <div class="flex items-baseline"><span class="font-bold w-28 shrink-0">Referred By</span><span class="font-semibold mr-1.5">:</span><span class="editable-field flex-1 disp-pRefBy" contenteditable="true">${patientRefBy}</span></div>
+              </div>
+              <div class="space-y-1">
+                <div class="flex items-baseline"><span class="font-bold w-36 shrink-0">Lab Accession No.</span><span class="font-semibold mr-1.5">:</span><span class="editable-field flex-1 font-mono font-bold disp-pLabNo" contenteditable="true">${patientLabNo}</span></div>
+                <div class="flex items-baseline"><span class="font-bold w-36 shrink-0">Date &amp; Time</span><span class="font-semibold mr-1.5">:</span><span class="editable-field flex-1 disp-pDate" contenteditable="true">${details.collectedDate}</span></div>
+                <div class="flex items-baseline"><span class="font-bold w-36 shrink-0">Specimen Type</span><span class="font-semibold mr-1.5">:</span><span class="editable-field flex-1 disp-pSpecimen" contenteditable="true">${details.sampleType}</span></div>
+                <div class="flex items-center pt-0.5"><span class="font-bold w-36 shrink-0">Barcode ID</span><span class="font-semibold mr-1.5">:</span><div class="barcode-holder inline-block"></div></div>
+              </div>
+            </div>
+          </section>
+
+          <div class="w-full mt-2.5"><div class="border-t border-black w-full"></div><div class="border-t-2 border-black w-full mt-[2px]"></div></div>
+
+          <!-- 3. PANEL TITLE BANNER -->
+          <div class="mt-2 text-center bg-slate-100 py-1 rounded border border-slate-300">
+            <span class="text-xs font-black tracking-widest text-slate-800 uppercase editable-field" contenteditable="true">${details.reportTitle}</span>
+            <div class="text-[9.5px] font-mono text-teal-700 font-semibold">${details.isCardTest ? 'IVD RAPID IMMUNODIAGNOSTIC SCREENING CARD' : 'DEPARTMENT OF CLINICAL PATHOLOGY & BIOCHEMISTRY'}</div>
           </div>
 
+          <!-- 4. TABLE CONTENT -->
           ${bodyContentHtml}
-
         </div>
 
-        <!-- Footer / Signoff -->
-        <div class="mt-4 pt-3 border-t border-gray-300">
-          <div class="flex justify-between items-end text-[10px]">
-            <div>
-              <div class="font-bold text-gray-800"><span class="editable-field" contenteditable="true">Dr. Sunita Sharma, MD (Path)</span></div>
-              <div class="text-[9px] text-gray-500"><span class="editable-field" contenteditable="true">Consultant Pathologist &amp; Lab Director</span></div>
+        <!-- 5. THREE-COLUMN SIGNATURE FOOTER -->
+        <footer class="mt-4 pt-2">
+          <div class="flex items-end justify-between min-h-[55px] mb-2">
+            <div class="doctor-signature-container">
+              <div class="text-[13px] font-bold text-black disp-docName">${docName}</div>
+              <div class="text-[11px] font-semibold text-gray-800 disp-docDegree">${docDegree}</div>
+              <div class="text-[9.5px] text-gray-500">Reg. No: PMC-48291</div>
             </div>
-            <div class="text-center font-mono text-[8.5px] text-gray-400">
-              *** End Of Diagnostic Report ***
+            <div class="qr-stamp-container text-center flex flex-col items-center">
+              <div class="qr-svg-holder"></div>
+              <span class="text-[8.5px] font-mono text-gray-500 mt-0.5">SCAN TO VERIFY</span>
             </div>
-            <div class="text-right">
-              <div class="font-bold text-gray-800"><span class="editable-field" contenteditable="true">Dr. Arvind Mehta, MBBS, DCP</span></div>
-              <div class="text-[9px] text-gray-500"><span class="editable-field" contenteditable="true">Chief Quality Officer</span></div>
+            <div class="lab-technician-container text-right">
+              <div class="text-[12px] font-bold text-gray-800 disp-staffName">${techName}</div>
+              <div class="text-[10px] text-gray-600">${techSub}</div>
             </div>
           </div>
-        </div>
+          <div class="border-t border-gray-400 pt-1 flex justify-between text-[9px] text-gray-500 font-mono">
+            <span class="disp-clinicFooter">Electronic Diagnostic Report • <span class="disp-clinicName">${clinicName}</span></span>
+            <span class="disp-pageCounter">Custom Page</span>
+          </div>
+        </footer>
       `;
 
       // Append to sheets container
@@ -6988,6 +7170,18 @@
       // Focus and scroll
       setActiveSheet(newSheetId);
       newSheet.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+      // Synchronize master bindings & mode
+      if (typeof syncMasterClinicData === 'function') syncMasterClinicData();
+      if (typeof syncMasterPatientData === 'function') syncMasterPatientData();
+      if (typeof syncMasterDoctorData === 'function') syncMasterDoctorData();
+      if (typeof syncMasterDmltData === 'function') syncMasterDmltData();
+      if (typeof recheckFlagsAndGauges === 'function') recheckFlagsAndGauges();
+      if (typeof letterheadMode !== 'undefined') {
+        const isPre = letterheadMode === 'preprinted';
+        newSheet.querySelectorAll('.preprinted-spacer').forEach(el => el.classList.toggle('hidden', !isPre));
+        newSheet.querySelectorAll('.digital-header-block').forEach(el => el.classList.toggle('hidden', isPre));
+      }
 
       // Save to storage
       LabXStorageEngine.save();
@@ -7010,9 +7204,10 @@
         <input type="checkbox" data-sheet="${sheetId}" ${checked ? 'checked' : ''} onchange="onReportCheckboxChange()" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
       `;
       list.appendChild(label);
-      onReportCheckboxChange();
+      if (!isRestoringFromStorage) {
+        onReportCheckboxChange();
+      }
     }
-
 
     // ==========================================
     // REPORT SEARCH BAR & SELECT/CLEAR ALL

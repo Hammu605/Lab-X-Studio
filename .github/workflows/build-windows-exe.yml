@@ -1,4 +1,4 @@
-name: Build Windows PC Executable (.exe)
+name: Build Cross-Platform PC Release (Windows .exe & Linux .AppImage)
 
 on:
   push:
@@ -11,7 +11,6 @@ permissions:
 jobs:
   build-windows:
     runs-on: windows-latest
-
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -34,32 +33,86 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload Windows Executables (.exe Artifact)
+      - name: Upload Windows Executables Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Lab-X-Studio-Windows-EXE
+          name: Lab-X-Studio-Windows
           path: dist-electron/*.exe
 
-      - name: Create Continuous Release (.exe Download Link)
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Build Linux .AppImage & .deb
+        run: pnpm run dist:linux
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Linux Packages Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Lab-X-Studio-Linux
+          path: |
+            dist-electron/*.AppImage
+            dist-electron/*.deb
+
+  release:
+    needs: [build-windows, build-linux]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Windows Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: Lab-X-Studio-Windows
+          path: release-dist
+
+      - name: Download Linux Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: Lab-X-Studio-Linux
+          path: release-dist
+
+      - name: List Release Files
+        run: ls -lh release-dist
+
+      - name: Create Continuous Release (Windows .exe & Linux .AppImage)
         uses: softprops/action-gh-release@v2
         with:
           tag_name: latest
-          name: "Lab X Studio v1.5.0 (Windows .exe)"
+          name: "Lab X Studio v1.5.1 (Windows .exe & Linux .AppImage)"
           body: |
-            ## Lab X Studio v1.5.0 — Windows Executables (.exe)
-            
-            - **Installer**: `Lab-X-Studio-Setup-1.5.0.exe` (Complete Windows installation with Desktop shortcut)
-            - **Portable**: `Lab-X-Studio-Portable-1.5.0.exe` (Run directly without installing)
-            
-            ### What's New in v1.5.0:
-            - **12 Full Pathology Diagnostic Panels**: Complete Blood Count (CBC, 34 Parameters with reactive WBC/RBC/PLT Histograms), LFT, KFT, Vitamins, Notes, Diabetes HbA1c, Free Thyroid (FT3/FT4/TSH), Hematology Summary, Lipid Profile, ASCVD Risk Matrix, Glucose Sign-Off, and Hepatitis C Virus (HCV) Card Test.
-            - **Top Sticky Ribbon WordPad Toolbar**: Microsoft Word / Google Docs style ribbon docked above sheets for formatting (B/I/U/S, sizes, colors, alignments) and structure additions (+Row, +Group, +Note Box, +Sub-Header).
-            - **Direct Report File Uploader**: Instant client-side parser for `.doc`, `.docx`, and `.pdf` files that generates editable A4 pathology cards.
-            - **Local Database Auto-Save & Backup**: Real-time auto-saving with one-click `.json` backup file export and restore.
-            - **Default Unchecked Checkboxes**: Clean workstation start with Select All (12) and Clear All quick actions.
-            
+            ## Lab X Studio v1.5.1 — Cross-Platform Release (Windows & Linux)
+
+            ### 📦 Download Links:
+            - **Windows Installer**: `Lab-X-Studio-Setup-1.5.1.exe` (Complete Windows installation with Desktop shortcut)
+            - **Windows Portable**: `Lab-X-Studio-Portable-1.5.1.exe` (Standalone portable execution without installation)
+            - **Linux / Kali Linux AppImage**: `Lab-X-Studio-1.5.1.AppImage` (Run directly on Kali Linux / Ubuntu / Debian with `chmod +x`)
+            - **Debian / Ubuntu Package**: `Lab-X-Studio-1.5.1.deb` (Native package installation via `sudo dpkg -i`)
+
+            ### 🚀 What's New & Fixed in v1.5.1:
+            - **Fixed Startup Freeze & Hang**: Eliminated infinite recursion loop on checkbox toggles and page load. App starts instantly and buttons remain responsive.
+            - **Comprehensive Multi-Parameter DOC/DOCX Parser**: Uploading clinical biochemistry files now accurately extracts all 10–20+ parameters (investigation, observed value, unit, reference interval, and range gauge) instead of stopping at 1.
+            - **Dynamic Clinic Header Inheritance**: Uploaded custom reports now inherit the user's active laboratory name, address, and doctor/technician signature stamps.
+            - **40mm Top Letterhead Spacer**: Restored the 40mm preprinted letterhead spacer on all custom and uploaded sheets.
+            - **Dual-Boot Ready**: Tested and packaged for seamless operation on Windows and Kali Linux from shared partitions.
+
             Automatically compiled by GitHub Actions.
-          files: dist-electron/*.exe
+          files: release-dist/*
           prerelease: false
           make_latest: true
         env:

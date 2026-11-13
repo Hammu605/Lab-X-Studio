@@ -1,6 +1,6 @@
 {
   "name": "lab-x-studio",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "Lab X — Professional Diagnostic Studio & Multi-Report Generator for PC",
   "main": "main.js",
   "author": "Krishna Diagnostic Laboratory",
@@ -9,7 +9,8 @@
     "start": "electron .",
     "pack": "electron-builder --dir",
     "dist": "electron-builder --win --publish never",
-    "dist:portable": "electron-builder --win portable --publish never"
+    "dist:portable": "electron-builder --win portable --publish never",
+    "dist:linux": "electron-builder --linux --publish never"
   },
   "dependencies": {},
   "devDependencies": {
@@ -37,6 +38,14 @@
           ]
         }
       ]
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Office",
+      "artifactName": "${productName}-${version}.${ext}"
     },
     "nsis": {
       "artifactName": "${productName}-Setup-${version}.${ext}",
