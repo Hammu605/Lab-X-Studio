@@ -20,6 +20,11 @@
   "build": {
     "appId": "com.krishnalab.labx",
     "productName": "Lab-X-Studio",
+    "compression": "maximum",
+    "files": [
+      "index.html",
+      "main.js"
+    ],
     "directories": {
       "output": "dist-electron"
     },
