@@ -3,7 +3,7 @@
   "version": "1.5.1",
   "description": "Lab X — Professional Diagnostic Studio & Multi-Report Generator for PC",
   "main": "main.js",
-  "author": "Krishna Diagnostic Laboratory",
+  "author": "Krishna Diagnostic Laboratory <support@krishnalab.com>",
   "license": "MIT",
   "scripts": {
     "start": "electron .",
@@ -44,6 +44,7 @@
         "AppImage",
         "deb"
       ],
+      "maintainer": "Krishna Diagnostic Laboratory <support@krishnalab.com>",
       "category": "Office",
       "artifactName": "${productName}-${version}.${ext}"
     },
