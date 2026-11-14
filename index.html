@@ -258,21 +258,24 @@
         size: A4 portrait;
         margin: 0;
       }
-      body {
+      html, body {
         background: #ffffff !important;
         color: #000000 !important;
         overflow: visible !important;
+        height: auto !important;
+        max-height: none !important;
       }
-      .no-print, #topRibbonBar, #leftNavRail, #dockDrawerPanel, #rightPageNavigator, #shareModal, #toastNotification, #updateModal {
+      .no-print, #topRibbonBar, #leftNavRail, #dockDrawerPanel, #rightPageNavigator, #shareModal, #toastNotification, #updateModal, #customPromptModal {
         display: none !important;
       }
-      #mainContentArea {
+      div, main, #mainContentArea, #sheetsContainer {
+        overflow: visible !important;
+        height: auto !important;
+        max-height: none !important;
         margin: 0 !important;
         padding: 0 !important;
-        width: 100% !important;
-        height: auto !important;
-        overflow: visible !important;
         background: transparent !important;
+        width: 100% !important;
       }
       .a4-sheet {
         margin: 0 !important;
@@ -281,6 +284,14 @@
         width: 100% !important;
         min-height: 297mm !important;
         transform: none !important;
+        page-break-after: always !important;
+        break-after: page !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
+      .a4-sheet:last-of-type {
+        page-break-after: auto !important;
+        break-after: auto !important;
       }
       .editable-field {
         border-bottom: none !important;
@@ -383,7 +394,7 @@
         <div>
           <div class="flex items-center gap-2">
             <span class="font-extrabold text-sm tracking-wider bg-gradient-to-r from-teal-300 via-cyan-200 to-white bg-clip-text text-transparent">LAB X</span>
-            <span class="text-[9px] font-mono uppercase bg-teal-950/80 text-teal-400 border border-teal-800/60 px-1.5 py-0.5 rounded font-semibold tracking-wider">PRO v1.0.0</span>
+            <span id="headerAppVersion" class="text-[9px] font-mono uppercase bg-teal-950/80 text-teal-400 border border-teal-800/60 px-1.5 py-0.5 rounded font-semibold tracking-wider">PRO v1.1.1</span>
             <!-- Live Update Available Badge (Only shown when new update exists) -->
             <button id="updateBadgeBtn" onclick="openUpdateModal()" class="hidden animate-pulse px-2 py-0.5 rounded-full bg-rose-500/20 border border-rose-500/40 text-[9.5px] font-bold text-rose-300 hover:bg-rose-500/30 transition flex items-center gap-1">
               <i class="fa-solid fa-circle-arrow-up text-rose-400"></i>
@@ -665,79 +676,79 @@
             <button type="button" onclick="selectAllReports(false)" class="text-slate-400 hover:text-rose-400 font-semibold underline">Clear All</button>
           </div>
 
-          <!-- 12 Clean Checkboxes (UNCHECKED BY DEFAULT) -->
+          <!-- 12 Clean Checkboxes (CBC Checked by Default) -->
           <div class="space-y-1.5 max-h-[340px] overflow-y-auto pr-1" id="reportCheckboxesList">
             <label class="flex items-center justify-between p-2 rounded-lg bg-[#050814] border border-slate-800 hover:border-slate-700 cursor-pointer">
               <span class="text-[11.5px] font-medium text-slate-200 flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-rose-400"></span> 1. Complete Blood Count (CBC, 34 Parameters)
               </span>
-              <input type="checkbox" data-sheet="sheetCBC" onchange="onReportCheckboxChange()" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
+              <input type="checkbox" data-sheet="sheetCBC" checked onchange="onReportCheckboxChange('sheetCBC')" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
             </label>
             <label class="flex items-center justify-between p-2 rounded-lg bg-[#050814] border border-slate-800 hover:border-slate-700 cursor-pointer">
               <span class="text-[11.5px] font-medium text-slate-200 flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-amber-400"></span> 2. Liver Function Test, Serum (LFT)
               </span>
-              <input type="checkbox" data-sheet="sheetLFT" onchange="onReportCheckboxChange()" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
+              <input type="checkbox" data-sheet="sheetLFT" onchange="onReportCheckboxChange('sheetLFT')" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
             </label>
             <label class="flex items-center justify-between p-2 rounded-lg bg-[#050814] border border-slate-800 hover:border-slate-700 cursor-pointer">
               <span class="text-[11.5px] font-medium text-slate-200 flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-cyan-400"></span> 3. Kidney Function &amp; Electrolytes (KFT)
               </span>
-              <input type="checkbox" data-sheet="sheetKFT" onchange="onReportCheckboxChange()" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
+              <input type="checkbox" data-sheet="sheetKFT" onchange="onReportCheckboxChange('sheetKFT')" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
             </label>
             <label class="flex items-center justify-between p-2 rounded-lg bg-[#050814] border border-slate-800 hover:border-slate-700 cursor-pointer">
               <span class="text-[11.5px] font-medium text-slate-200 flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-purple-400"></span> 4. Vitamin B12 &amp; Vitamin D (25-OH)
               </span>
-              <input type="checkbox" data-sheet="sheetVitamins" onchange="onReportCheckboxChange()" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
+              <input type="checkbox" data-sheet="sheetVitamins" onchange="onReportCheckboxChange('sheetVitamins')" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
             </label>
             <label class="flex items-center justify-between p-2 rounded-lg bg-[#050814] border border-slate-800 hover:border-slate-700 cursor-pointer">
               <span class="text-[11.5px] font-medium text-slate-200 flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-purple-300"></span> 5. Vitamin D Clinical Guidelines
               </span>
-              <input type="checkbox" data-sheet="sheetVitaminNotes" onchange="onReportCheckboxChange()" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
+              <input type="checkbox" data-sheet="sheetVitaminNotes" onchange="onReportCheckboxChange('sheetVitaminNotes')" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
             </label>
             <label class="flex items-center justify-between p-2 rounded-lg bg-[#050814] border border-slate-800 hover:border-slate-700 cursor-pointer">
               <span class="text-[11.5px] font-medium text-slate-200 flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-emerald-400"></span> 6. HbA1c HPLC &amp; Glycemic Panel
               </span>
-              <input type="checkbox" data-sheet="sheetDiabetes" onchange="onReportCheckboxChange()" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
+              <input type="checkbox" data-sheet="sheetDiabetes" onchange="onReportCheckboxChange('sheetDiabetes')" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
             </label>
             <label class="flex items-center justify-between p-2 rounded-lg bg-[#050814] border border-slate-800 hover:border-slate-700 cursor-pointer">
               <span class="text-[11.5px] font-medium text-slate-200 flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-blue-400"></span> 7. Free Thyroid Profile (FT3, FT4, TSH)
               </span>
-              <input type="checkbox" data-sheet="sheetThyroid" onchange="onReportCheckboxChange()" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
+              <input type="checkbox" data-sheet="sheetThyroid" onchange="onReportCheckboxChange('sheetThyroid')" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
             </label>
             <label class="flex items-center justify-between p-2 rounded-lg bg-[#050814] border border-slate-800 hover:border-slate-700 cursor-pointer">
               <span class="text-[11.5px] font-medium text-slate-200 flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-rose-300"></span> 8. Hematology Mentzer Evaluation
               </span>
-              <input type="checkbox" data-sheet="sheetHemaSummary" onchange="onReportCheckboxChange()" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
+              <input type="checkbox" data-sheet="sheetHemaSummary" onchange="onReportCheckboxChange('sheetHemaSummary')" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
             </label>
             <label class="flex items-center justify-between p-2 rounded-lg bg-[#050814] border border-slate-800 hover:border-slate-700 cursor-pointer">
               <span class="text-[11.5px] font-medium text-slate-200 flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-yellow-400"></span> 9. Lipid Profile Basic, Serum
               </span>
-              <input type="checkbox" data-sheet="sheetLipid" onchange="onReportCheckboxChange()" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
+              <input type="checkbox" data-sheet="sheetLipid" onchange="onReportCheckboxChange('sheetLipid')" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
             </label>
             <label class="flex items-center justify-between p-2 rounded-lg bg-[#050814] border border-slate-800 hover:border-slate-700 cursor-pointer">
               <span class="text-[11.5px] font-medium text-slate-200 flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-red-400"></span> 10. ASCVD Cardiovascular Risk Matrix
               </span>
-              <input type="checkbox" data-sheet="sheetASCVD" onchange="onReportCheckboxChange()" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
+              <input type="checkbox" data-sheet="sheetASCVD" onchange="onReportCheckboxChange('sheetASCVD')" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
             </label>
             <label class="flex items-center justify-between p-2 rounded-lg bg-[#050814] border border-slate-800 hover:border-slate-700 cursor-pointer">
               <span class="text-[11.5px] font-medium text-slate-200 flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-teal-400"></span> 11. Glucose Fasting &amp; Sign-off
               </span>
-              <input type="checkbox" data-sheet="sheetGlucoseSignoff" onchange="onReportCheckboxChange()" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
+              <input type="checkbox" data-sheet="sheetGlucoseSignoff" onchange="onReportCheckboxChange('sheetGlucoseSignoff')" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
             </label>
             <label class="flex items-center justify-between p-2 rounded-lg bg-[#050814] border border-slate-800 hover:border-slate-700 cursor-pointer">
               <span class="text-[11.5px] font-medium text-slate-200 flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-red-500"></span> 12. Hepatitis C Virus (HCV) Card Test
               </span>
-              <input type="checkbox" data-sheet="sheetHCV" onchange="onReportCheckboxChange()" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
+              <input type="checkbox" data-sheet="sheetHCV" onchange="onReportCheckboxChange('sheetHCV')" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
             </label>
           </div>
         </div>
@@ -1034,7 +1045,7 @@
           <h2 class="text-xs font-bold uppercase tracking-wider text-teal-400 flex items-center gap-2">
             <i class="fa-solid fa-gear"></i> App Settings &amp; Themes
           </h2>
-          <span class="text-[10px] text-slate-400 font-mono">v1.0.0</span>
+          <span id="settingsAppVersion" class="text-[10px] text-slate-400 font-mono">v1.1.1</span>
         </div>
 
         <!-- 1. COLOR THEMES -->
@@ -1108,7 +1119,7 @@
         <div class="p-3 bg-[#050814] border border-slate-800 rounded-xl space-y-2">
           <div class="flex items-center justify-between">
             <span class="text-xs text-slate-400">Software Build:</span>
-            <span class="text-xs font-mono font-bold text-teal-400">v1.0.0 (Official Stable)</span>
+            <span id="buildAppVersion" class="text-xs font-mono font-bold text-teal-400">v1.1.1 (Official Stable)</span>
           </div>
           <button onclick="checkForUpdates(true)" class="w-full py-2 bg-[#0b1020] hover:bg-slate-800 border border-slate-700 rounded-lg text-slate-300 hover:text-white text-xs font-semibold flex items-center justify-center gap-2 transition">
             <i class="fa-solid fa-rotate text-xs text-cyan-400"></i> Check for Updates on GitHub
@@ -1224,7 +1235,7 @@
     </header>
 
 
-        <div id="noReportsEmptyState" class="p-8 text-center bg-slate-900/60 border border-slate-800 rounded-2xl max-w-md mx-auto my-12 text-slate-300 space-y-3">
+        <div id="noReportsEmptyState" style="display: none;" class="p-8 text-center bg-slate-900/60 border border-slate-800 rounded-2xl max-w-md mx-auto my-12 text-slate-300 space-y-3">
           <div class="w-12 h-12 rounded-2xl bg-teal-600/20 text-teal-400 border border-teal-500/30 flex items-center justify-center mx-auto text-xl">
             <i class="fa-solid fa-flask-vial"></i>
           </div>
@@ -1239,7 +1250,7 @@
     
 
     <!-- SHEET: COMPLETE BLOOD COUNT &amp; AUTOMATED HEMATOLOGY -->
-    <article id="sheetCBC" class="a4-sheet" data-report-title="COMPLETE BLOOD COUNT &amp; AUTOMATED HEMATOLOGY" style="display: none;">
+    <article id="sheetCBC" class="a4-sheet" data-report-title="COMPLETE BLOOD COUNT &amp; AUTOMATED HEMATOLOGY" style="display: flex;">
       <div class="page-content-wrapper">
         <div class="clinic-header-space">
           <div class="preprinted-spacer w-full relative">
@@ -4948,8 +4959,8 @@
       <span id="statTotalPatients">2 Registered Patients</span>
     </div>
     <div class="flex items-center gap-3 font-mono text-[9.5px] text-slate-500">
-      <button onclick="checkForUpdates(true)" class="hover:text-teal-400 transition flex items-center gap-1">
-        <i class="fa-solid fa-code-branch text-[9px]"></i> Version 1.0.0
+      <button id="footerAppVersion" onclick="checkForUpdates(true)" class="hover:text-teal-400 transition flex items-center gap-1">
+        <i class="fa-solid fa-code-branch text-[9px]"></i> Version 1.1.1
       </button>
       <span>•</span>
       <span>Ctrl+P: Print</span>
@@ -4983,22 +4994,32 @@
       <div class="p-3 bg-[#050814] border border-slate-800 rounded-xl space-y-2">
         <div class="flex items-center justify-between">
           <span class="text-xs text-slate-400">Latest Version:</span>
-          <span id="updateReleaseTag" class="text-xs font-mono font-bold text-teal-400">v1.0.0</span>
+          <span id="updateReleaseTag" class="text-xs font-mono font-bold text-teal-400">v1.1.1</span>
         </div>
         <div class="text-[11px] text-slate-300 leading-relaxed" id="updateReleaseNotes">
           New features and improvements are available.
         </div>
       </div>
 
+      <!-- Download notice with instructions -->
+      <div id="updateDownloadNotice" class="hidden p-3 bg-emerald-950/70 border border-emerald-500/40 rounded-xl text-xs text-emerald-200 space-y-1">
+        <div class="font-bold flex items-center gap-1.5 text-emerald-300">
+          <i class="fa-solid fa-circle-check text-sm text-emerald-400"></i> फ़ाइल डाउनलोड होना शुरू हो गई है!
+        </div>
+        <p class="text-[11px] text-emerald-100/90 leading-relaxed">
+          डाउनलोड पूरा होने के बाद अपने कंप्यूटर के <strong>Downloads</strong> फ़ोल्डर में जाकर फ़ाइल पर क्लिक करके इंस्टॉल करें। पुराना ऐप बंद करके दोबारा खोलते ही नया वर्शन चालू हो जाएगा।
+        </p>
+      </div>
+
       <div class="space-y-2 pt-1">
-        <a id="btnDownloadLinux" href="https://github.com/Hammu605/Lab-X-Studio/releases/tag/latest" target="_blank" onclick="event.preventDefault(); openExternalLink(this.href)" class="w-full py-2.5 rounded-xl bg-purple-900/60 hover:bg-purple-800 text-purple-200 border border-purple-500/40 font-bold text-xs flex items-center justify-center gap-2 transition shadow">
-          <i class="fa-brands fa-linux text-base"></i> Download Linux Lite (.deb / ~48 KB)
+        <a id="btnDownloadLinux" href="https://github.com/Hammu605/Lab-X-Studio/releases/tag/latest" target="_blank" onclick="event.preventDefault(); onDownloadUpdateClick(this.href, 'linux')" class="w-full py-2.5 rounded-xl bg-purple-900/60 hover:bg-purple-800 text-purple-200 border border-purple-500/40 font-bold text-xs flex items-center justify-center gap-2 transition shadow">
+          <i class="fa-brands fa-linux text-base"></i> <span id="lblDownloadLinux">Download Linux Lite (.deb / ~48 KB)</span>
         </a>
-        <a id="btnDownloadSetup" href="https://github.com/Hammu605/Lab-X-Studio/releases/tag/latest" target="_blank" onclick="event.preventDefault(); openExternalLink(this.href)" class="w-full py-2 rounded-xl bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition shadow">
-          <i class="fa-solid fa-download"></i> Download Windows Setup (.exe)
+        <a id="btnDownloadSetup" href="https://github.com/Hammu605/Lab-X-Studio/releases/tag/latest" target="_blank" onclick="event.preventDefault(); onDownloadUpdateClick(this.href, 'setup')" class="w-full py-2 rounded-xl bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition shadow">
+          <i class="fa-solid fa-download"></i> <span id="lblDownloadSetup">Download Windows Setup (.exe)</span>
         </a>
-        <a id="btnDownloadPortable" href="https://github.com/Hammu605/Lab-X-Studio/releases/tag/latest" target="_blank" onclick="event.preventDefault(); openExternalLink(this.href)" class="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs flex items-center justify-center gap-2 transition">
-          <i class="fa-solid fa-bolt"></i> Download Portable (.exe)
+        <a id="btnDownloadPortable" href="https://github.com/Hammu605/Lab-X-Studio/releases/tag/latest" target="_blank" onclick="event.preventDefault(); onDownloadUpdateClick(this.href, 'portable')" class="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs flex items-center justify-center gap-2 transition">
+          <i class="fa-solid fa-bolt"></i> <span id="lblDownloadPortable">Download Portable (.exe)</span>
         </a>
       </div>
       
@@ -5008,12 +5029,12 @@
     </div>
   </div>
 
-  <!-- WHATSAPP SHARE MODAL -->
+  <!-- MULTI-CHANNEL SHARE MODAL (WHATSAPP, TELEGRAM, EMAIL) -->
   <div id="shareModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
     <div class="bg-[#0b1020] border border-slate-700 rounded-2xl w-full max-w-sm p-5 shadow-2xl space-y-4">
       <div class="flex items-center justify-between border-b border-slate-800 pb-2">
         <h3 class="text-sm font-bold text-white flex items-center gap-2">
-          <i class="fa-brands fa-whatsapp text-emerald-400"></i> Dispatch Report via WhatsApp
+          <i class="fa-solid fa-share-nodes text-teal-400"></i> Dispatch &amp; Share Report
         </h3>
         <button onclick="closeShareModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
       </div>
@@ -5024,12 +5045,54 @@
           <input type="tel" id="shareMobileInput" placeholder="98XXXXXXXX" class="w-full bg-transparent px-2.5 py-1.5 text-sm text-white focus:outline-none font-semibold">
         </div>
       </div>
-      <div class="flex items-center gap-2 pt-2">
-        <button onclick="shareViaWhatsApp()" class="flex-1 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition shadow">
-          <i class="fa-brands fa-whatsapp text-sm"></i> Send WhatsApp
+      <div>
+        <label class="text-xs text-slate-400 font-medium">Patient / Doctor Email (Optional):</label>
+        <input type="email" id="shareEmailInput" placeholder="patient@example.com" class="w-full mt-1 bg-[#050814] border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none">
+      </div>
+      <div class="space-y-2 pt-1">
+        <button onclick="shareViaWhatsApp()" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition shadow">
+          <i class="fa-brands fa-whatsapp text-sm"></i> Share via WhatsApp
         </button>
-        <button onclick="closeShareModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs">
+        <button onclick="shareViaTelegram()" class="w-full py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition shadow">
+          <i class="fa-brands fa-telegram text-sm"></i> Share via Telegram
+        </button>
+        <button onclick="shareViaEmail()" class="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs flex items-center justify-center gap-2 transition">
+          <i class="fa-solid fa-envelope text-sm"></i> Share via Email
+        </button>
+      </div>
+      <div class="text-center pt-1">
+        <button onclick="closeShareModal()" class="text-xs text-slate-400 hover:text-slate-300">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CUSTOM IN-APP PROMPT MODAL (REPLACES UNSUPPORTED WINDOW.PROMPT IN ELECTRON) -->
+  <div id="customPromptModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div class="bg-[#0b1020] border border-cyan-500/50 rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-teal-500/20 text-teal-400 border border-teal-500/40 flex items-center justify-center">
+            <i class="fa-solid fa-pen-to-square text-base"></i>
+          </div>
+          <div>
+            <h3 id="customPromptTitle" class="text-sm font-bold text-white">Enter Report Title</h3>
+            <p id="customPromptSubtitle" class="text-[11px] text-slate-400">Specify name for your new report sheet</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeCustomPrompt(null)" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-sm"></i></button>
+      </div>
+
+      <div class="space-y-2">
+        <label class="text-xs text-slate-300 font-medium">Report Title / Name:</label>
+        <input type="text" id="customPromptInput" class="w-full bg-[#050814] border border-slate-700 focus:border-teal-400 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none font-semibold transition" placeholder="e.g. URINE ROUTINE &amp; MICROSCOPIC">
+      </div>
+
+      <div class="flex items-center justify-end gap-2.5 pt-2">
+        <button type="button" onclick="closeCustomPrompt(null)" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition">
           Cancel
+        </button>
+        <button type="button" onclick="confirmCustomPrompt()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white font-bold text-xs flex items-center gap-1.5 transition shadow">
+          <i class="fa-solid fa-check"></i> Continue / OK
         </button>
       </div>
     </div>
@@ -5045,7 +5108,7 @@
   <!-- 5. JAVASCRIPT WORKSTATION ENGINE -->
   <!-- ========================================== -->
   <script>
-    const APP_CURRENT_VERSION = "1.1.0";
+    const APP_CURRENT_VERSION = "1.1.1";
     let currentZoom = 1.0;
     let letterheadMode = 'preprinted'; // 'preprinted' or 'digital'
     let isLiveAutoCalcEnabled = true;
@@ -5093,6 +5156,83 @@
         toast.classList.remove('opacity-100', 'translate-y-0');
         toast.classList.add('opacity-0', 'translate-y-3');
       }, 2500);
+    }
+
+    // Custom In-App Modal Prompt Engine (Electron & Chromium Compatible)
+    let customPromptResolve = null;
+
+    function showCustomPrompt(title, defaultValue = '', placeholder = '', subtitle = '') {
+      return new Promise((resolve) => {
+        customPromptResolve = resolve;
+        const modal = document.getElementById('customPromptModal');
+        const titleEl = document.getElementById('customPromptTitle');
+        const subEl = document.getElementById('customPromptSubtitle');
+        const inputEl = document.getElementById('customPromptInput');
+
+        if (titleEl) titleEl.textContent = title || 'Enter Report Title';
+        if (subEl) subEl.textContent = subtitle || 'Specify name for your new report sheet';
+        if (inputEl) {
+          inputEl.value = defaultValue || '';
+          inputEl.placeholder = placeholder || 'e.g. SPECIAL INVESTIGATION REPORT';
+        }
+
+        if (modal) {
+          modal.classList.remove('hidden');
+          modal.classList.add('flex');
+          setTimeout(() => {
+            if (inputEl) {
+              inputEl.focus();
+              inputEl.select();
+            }
+          }, 60);
+        }
+      });
+    }
+
+    function closeCustomPrompt(result = null) {
+      const modal = document.getElementById('customPromptModal');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+      if (customPromptResolve) {
+        customPromptResolve(result);
+        customPromptResolve = null;
+      }
+    }
+
+    function confirmCustomPrompt() {
+      const inputEl = document.getElementById('customPromptInput');
+      const val = inputEl ? inputEl.value.trim() : '';
+      closeCustomPrompt(val);
+    }
+
+    // Enter & Escape key handlers for custom in-app prompt
+    document.addEventListener('keydown', (e) => {
+      const modal = document.getElementById('customPromptModal');
+      if (modal && !modal.classList.contains('hidden')) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          confirmCustomPrompt();
+        } else if (e.key === 'Escape') {
+          e.preventDefault();
+          closeCustomPrompt(null);
+        }
+      }
+    });
+
+    // Synchronize App Version Display Everywhere
+    function syncAppVersionDisplay() {
+      const headerVer = document.getElementById('headerAppVersion');
+      if (headerVer) headerVer.textContent = `PRO v${APP_CURRENT_VERSION}`;
+      const settingsVer = document.getElementById('settingsAppVersion');
+      if (settingsVer) settingsVer.textContent = `v${APP_CURRENT_VERSION}`;
+      const buildVer = document.getElementById('buildAppVersion');
+      if (buildVer) buildVer.textContent = `v${APP_CURRENT_VERSION} (Official Stable)`;
+      const footerVer = document.getElementById('footerAppVersion');
+      if (footerVer) footerVer.innerHTML = `<i class="fa-solid fa-code-branch text-[9px]"></i> Version ${APP_CURRENT_VERSION}`;
+      const updateTag = document.getElementById('updateReleaseTag');
+      if (updateTag) updateTag.textContent = `v${APP_CURRENT_VERSION}`;
     }
 
     // Tab Switching
@@ -5748,7 +5888,16 @@
     }
 
     // Reports Checkbox & Reordering
-    function onReportCheckboxChange() {
+    function onReportCheckboxChange(targetSheetId = null) {
+      const allCheckboxes = Array.from(document.querySelectorAll('.report-checkbox'));
+      
+      // Safety: If no checkboxes are checked, ensure sheetCBC is checked by default
+      const anyChecked = allCheckboxes.some(cb => cb.checked);
+      if (!anyChecked && allCheckboxes.length > 0) {
+        const cbcCb = document.querySelector('.report-checkbox[data-sheet="sheetCBC"]');
+        if (cbcCb) cbcCb.checked = true;
+      }
+
       const activeSheets = [];
       document.querySelectorAll('.report-checkbox').forEach(cb => {
         const sheetId = cb.getAttribute('data-sheet');
@@ -5769,8 +5918,10 @@
         else emptyState.style.display = 'none';
       }
 
-      document.getElementById('activeCountBadge').textContent = `${activeSheets.length} Active`;
-      document.getElementById('statActivePages').textContent = `${activeSheets.length} Pages Active`;
+      const badge = document.getElementById('activeCountBadge');
+      if (badge) badge.textContent = `${activeSheets.length} Active`;
+      const statPages = document.getElementById('statActivePages');
+      if (statPages) statPages.textContent = `${activeSheets.length} Pages Active`;
 
       activeSheets.forEach((sh, idx) => {
         const counter = sh.querySelector('.disp-pageCounter');
@@ -5778,7 +5929,17 @@
       });
 
       updateStudioSheetSelector();
-      if (activeSheets.length > 0 && !activeSheets.some(s => s.id === currentActiveSheetId)) {
+
+      if (targetSheetId) {
+        const targetCb = document.querySelector(`.report-checkbox[data-sheet="${targetSheetId}"]`);
+        if (targetCb && targetCb.checked) {
+          const targetSheet = document.getElementById(targetSheetId);
+          if (targetSheet) {
+            setActiveSheet(targetSheetId);
+            targetSheet.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }
+      } else if (activeSheets.length > 0 && !activeSheets.some(s => s.id === currentActiveSheetId)) {
         setActiveSheet(activeSheets[0].id);
       }
 
@@ -5859,8 +6020,8 @@
     // ==========================================
     // CREATE BRAND NEW CUSTOM REPORT (FROM SCRATCH)
     // ==========================================
-    function createNewCustomReportPrompt() {
-      const defaultName = prompt("Enter Report Title (e.g., URINE ROUTINE & MICROSCOPIC, DENGUE SEROLOGY):", "SPECIAL INVESTIGATION REPORT");
+    async function createNewCustomReportPrompt() {
+      const defaultName = await showCustomPrompt("Create Custom Report (From Scratch)", "SPECIAL INVESTIGATION REPORT", "e.g. URINE ROUTINE & MICROSCOPIC, DENGUE SEROLOGY", "Type a title for your custom A4 report sheet");
       if (!defaultName || !defaultName.trim()) return;
       addNewCustomReportSheet(defaultName.trim());
     }
@@ -6074,9 +6235,11 @@
       reader.readAsText(file);
     }
 
-    // Share & WhatsApp
+    // Share & Multi-Channel Dispatch (WhatsApp, Telegram, Email)
     function openShareModal() {
-      const mob = document.getElementById('inpMobile').value.replace(/[^0-9]/g, '');
+      const mob = (document.getElementById('inpMobile')?.value || '').replace(/[^0-9]/g, '');
+      const emailField = document.getElementById('shareEmailInput');
+      if (emailField && !emailField.value) emailField.value = '';
       document.getElementById('shareMobileInput').value = mob;
       document.getElementById('shareModal').classList.remove('hidden');
       document.getElementById('shareModal').classList.add('flex');
@@ -6086,15 +6249,52 @@
       document.getElementById('shareModal').classList.remove('flex');
     }
     function shareViaWhatsApp() {
-      const mobile = document.getElementById('shareMobileInput').value.trim();
-      const pName = document.getElementById('inpPatientName').value;
-      const labNo = document.getElementById('inpLabNo').value;
-      const date = document.getElementById('inpDate').value;
+      const mobile = (document.getElementById('shareMobileInput')?.value || '').trim();
+      const pName = document.getElementById('inpPatientName')?.value || 'Patient';
+      const labNo = document.getElementById('inpLabNo')?.value || '';
+      const date = document.getElementById('inpDate')?.value || '';
       const message = `Hello ${pName}, your Diagnostic Test Report (${labNo}) dated ${date} from Krishna Computerized Laboratory has been prepared and verified. Please find your report copy attached.`;
       const cleanPhone = mobile.length === 10 ? '91' + mobile : mobile;
-      const url = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(message)}`;
-      window.open(url, '_blank');
+      const url = cleanPhone ? `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(message)}` : `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
+      openExternalLink(url);
       closeShareModal();
+    }
+    function shareViaTelegram() {
+      const pName = document.getElementById('inpPatientName')?.value || 'Patient';
+      const labNo = document.getElementById('inpLabNo')?.value || '';
+      const date = document.getElementById('inpDate')?.value || '';
+      const message = `Diagnostic Test Report for ${pName} (${labNo}) dated ${date} - Krishna Computerized Laboratory`;
+      const url = `https://t.me/share/url?url=${encodeURIComponent('https://krishnalab.local')}&text=${encodeURIComponent(message)}`;
+      openExternalLink(url);
+      closeShareModal();
+    }
+    function shareViaEmail() {
+      const email = document.getElementById('shareEmailInput')?.value.trim() || '';
+      const pName = document.getElementById('inpPatientName')?.value || 'Patient';
+      const labNo = document.getElementById('inpLabNo')?.value || '';
+      const date = document.getElementById('inpDate')?.value || '';
+      const subject = encodeURIComponent(`Diagnostic Laboratory Report - ${pName} [${labNo}]`);
+      const body = encodeURIComponent(`Dear ${pName},\n\nPlease find your diagnostic test report from Krishna Computerized Laboratory.\n\nPatient Name: ${pName}\nLab Accession No: ${labNo}\nDate: ${date}\nStatus: Clinically Verified & Released\n\nThank you.\nKrishna Computerized Laboratory`);
+      const url = `mailto:${email}?subject=${subject}&body=${body}`;
+      openExternalLink(url);
+      closeShareModal();
+    }
+
+    function onDownloadUpdateClick(url, type) {
+      openExternalLink(url);
+      const notice = document.getElementById('updateDownloadNotice');
+      if (notice) notice.classList.remove('hidden');
+
+      if (type === 'linux') {
+        const lbl = document.getElementById('lblDownloadLinux');
+        if (lbl) lbl.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400 mr-1"></i> Download Started! Re-download`;
+      } else if (type === 'setup') {
+        const lbl = document.getElementById('lblDownloadSetup');
+        if (lbl) lbl.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400 mr-1"></i> Download Started! Re-download`;
+      } else if (type === 'portable') {
+        const lbl = document.getElementById('lblDownloadPortable');
+        if (lbl) lbl.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400 mr-1"></i> Download Started! Re-download`;
+      }
     }
 
     // Print
@@ -7114,7 +7314,7 @@
       let patientDate = document.getElementById('inpDate')?.value || 'Today';
 
       const defaultTitle = fileName.replace(/\.[^/.]+$/, '').replace(/[_\-]+/g, ' ').toUpperCase();
-      const enteredTitle = prompt("Enter Report Title (e.g. URINE ROUTINE EXAMINATION, DENGUE SEROLOGY):", defaultTitle);
+      const enteredTitle = await showCustomPrompt("Import Report Title", defaultTitle, "e.g. URINE ROUTINE EXAMINATION, DENGUE SEROLOGY", "Confirm or customize the title for this imported file");
       const chosenTitle = (enteredTitle && enteredTitle.trim()) ? enteredTitle.trim().toUpperCase() : defaultTitle;
 
       const details = {
@@ -8117,8 +8317,16 @@
     const LabXCustomStudio = {
       groupCounter: 0,
 
-      createNewReportPrompt(defaultName = null) {
-        const userTitle = defaultName || prompt("Enter Custom Report Title (e.g., URINE ROUTINE EXAMINATION, DENGUE SEROLOGY):", "SPECIAL INVESTIGATION REPORT");
+      async createNewReportPrompt(defaultName = null) {
+        let userTitle = defaultName;
+        if (!userTitle) {
+          userTitle = await showCustomPrompt(
+            "Create Custom Report (From Scratch)",
+            "SPECIAL INVESTIGATION REPORT",
+            "e.g. URINE ROUTINE EXAMINATION, DENGUE SEROLOGY",
+            "Enter report title for your new blank A4 sheet"
+          );
+        }
         if (!userTitle || !userTitle.trim()) return;
 
         this.groupCounter++;
@@ -8540,6 +8748,7 @@
 
     // Initialize on Page Load
     window.addEventListener('DOMContentLoaded', () => {
+      syncAppVersionDisplay();
       loadAppTheme();
       loadPrintMargins();
       loadClinicSettings();

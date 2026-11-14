@@ -107,24 +107,23 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: latest
-          name: "Lab X Studio v1.1.0 (Official Stable Release)"
+          name: "Lab X Studio v1.1.1 (Official Stable Release)"
           body: |
-            ## Lab X Studio v1.1.0 — Official Cross-Platform Release (Windows & Linux)
+            ## Lab X Studio v1.1.1 — Official Cross-Platform Release (Windows & Linux)
 
             ### 📦 Download Links:
-            - **⚡ Linux Ultra-Lite Installer (Recommended for Kali Linux / Debian / Ubuntu)**: `Lab-X-Studio-Linux-Lite-1.1.0.deb` (**Only ~48 KB!** Auto-maximizes to screen, instant install with Desktop shortcut via `sudo dpkg -i`)
-            - **⚡ Linux Ultra-Lite Portable**: `Lab-X-Studio-Linux-Portable-1.1.0.tar.gz` (**Only ~67 KB!** Extract and run `./run.sh` anywhere without installing)
-            - **Linux Self-Contained AppImage**: `Lab-X-Studio-1.1.0.AppImage` (Bundled standalone runtime)
-            - **Windows Installer**: `Lab-X-Studio-Setup-1.1.0.exe` (Complete Windows installation with Desktop shortcut)
-            - **Windows Portable**: `Lab-X-Studio-Portable-1.1.0.exe` (Standalone portable execution without installation)
+            - **⚡ Linux Ultra-Lite Installer (Recommended for Kali Linux / Debian / Ubuntu)**: `Lab-X-Studio-Linux-Lite-1.1.1.deb` (**Only ~48 KB!** Auto-maximizes to screen, instant install with Desktop shortcut via `sudo dpkg -i`)
+            - **⚡ Linux Ultra-Lite Portable**: `Lab-X-Studio-Linux-Portable-1.1.1.tar.gz` (**Only ~67 KB!** Extract and run `./run.sh` anywhere without installing)
+            - **Linux Self-Contained AppImage**: `Lab-X-Studio-1.1.1.AppImage` (Bundled standalone runtime)
+            - **Windows Installer**: `Lab-X-Studio-Setup-1.1.1.exe` (Complete Windows installation with Desktop shortcut)
+            - **Windows Portable**: `Lab-X-Studio-Portable-1.1.1.exe` (Standalone portable execution without installation)
 
-            ### 🚀 What's New in v1.1.0:
-            - **Table # Column Quick-Add Button**: Direct `+` icon on every table header to insert Parameter Rows, Section Headers, Sub-Header Bars, or Notes with 1 click.
-            - **Save Buttons Clarified with Subtitles**: Transparent, clear English subtitles on every Save button (Save Report, Save to Library, Export Backup) so there is zero confusion.
-            - **Dedicated Scratch & Upload Sections**: Distinct sections with badges (`Scratch से बना हुआ`, `Upload से बना हुआ`), prompt for report title on creation/upload, and instant `[Export JSON]` button for every template.
-            - **Universal Report Search**: Instant real-time search across Pre-Default, Scratch, and Uploaded clinical modules simultaneously.
-            - **Rock-Solid WordPad Formatter**: Reliable Bold, Italic, Underline, and Color formatting on selected text or active cells.
-            - **Full Restart & Reload Persistence**: Every custom report, template, patient record, and table modification reloads seamlessly upon app restart.
+            ### 🚀 What's New in v1.1.1:
+            - **Fixed Electron `prompt() is not supported` Error**: Completely replaced browser prompt with a native, non-blocking custom in-app modal. Word/DOCX/PDF file imports and Scratch creation now work flawlessly!
+            - **CBC Active & Displayed by Default**: Complete Blood Count (CBC, 34 Parameters) is checked and displayed immediately upon launch, so you never see an empty screen.
+            - **Smooth Multi-Page Printing**: Fixed printing CSS container overflow and page-break rules so multi-page clinical reports (3-4+ sheets) print seamlessly without clipping or 1-page limits.
+            - **Expanded Multi-Channel Sharing**: Added direct sharing via **Telegram** and **Email** alongside WhatsApp with formatted test accession details.
+            - **Dynamic Version & In-App Update Notifications**: Updated download buttons to provide clear feedback and step-by-step installation instructions for the Downloads folder, with dynamic version numbers across all UI screens.
 
             Automatically compiled by GitHub Actions.
           files: release-dist/*
