@@ -111,7 +111,7 @@ function createWindow() {
             dialog.showMessageBox(mainWindow, {
               type: 'info',
               title: 'About Lab X Studio',
-              message: 'Lab X Studio v1.0\nProfessional Diagnostic Studio & LIS\nDesigned for Krishna Computerized Laboratory.',
+              message: 'Lab X Studio v1.0.0\nProfessional Diagnostic Studio & LIS\nDesigned for Krishna Computerized Laboratory.',
               buttons: ['OK']
             });
           }

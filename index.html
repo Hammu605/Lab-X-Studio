@@ -167,6 +167,37 @@
       border-bottom: none;
     }
 
+    /* Table Header Strict Single-Line Alignment */
+    table thead tr th {
+      white-space: nowrap !important;
+      vertical-align: middle !important;
+      line-height: 1.25 !important;
+      font-size: 10px !important;
+      letter-spacing: 0.03em !important;
+    }
+    table thead tr {
+      height: 26px !important;
+    }
+
+    /* Drag & Drop Row Reorder Styles */
+    tbody tr[draggable="true"] {
+      cursor: grab;
+      transition: background-color 0.15s ease, opacity 0.15s ease;
+    }
+    tbody tr[draggable="true"]:active {
+      cursor: grabbing;
+    }
+    tbody tr.drag-row-active {
+      opacity: 0.45;
+      background-color: #f0fdfa !important;
+    }
+    tbody tr.drag-over-top {
+      border-top: 2px solid #0d9488 !important;
+    }
+    tbody tr.drag-over-bottom {
+      border-bottom: 2px solid #0d9488 !important;
+    }
+
     /* Widal Matrix Cells */
     .widal-cell {
       cursor: pointer;
@@ -352,7 +383,7 @@
         <div>
           <div class="flex items-center gap-2">
             <span class="font-extrabold text-sm tracking-wider bg-gradient-to-r from-teal-300 via-cyan-200 to-white bg-clip-text text-transparent">LAB X</span>
-            <span class="text-[9px] font-mono uppercase bg-teal-950/80 text-teal-400 border border-teal-800/60 px-1.5 py-0.5 rounded font-semibold tracking-wider">PRO v1.5.2</span>
+            <span class="text-[9px] font-mono uppercase bg-teal-950/80 text-teal-400 border border-teal-800/60 px-1.5 py-0.5 rounded font-semibold tracking-wider">PRO v1.0.0</span>
             <!-- Live Update Available Badge (Only shown when new update exists) -->
             <button id="updateBadgeBtn" onclick="openUpdateModal()" class="hidden animate-pulse px-2 py-0.5 rounded-full bg-rose-500/20 border border-rose-500/40 text-[9.5px] font-bold text-rose-300 hover:bg-rose-500/30 transition flex items-center gap-1">
               <i class="fa-solid fa-circle-arrow-up text-rose-400"></i>
@@ -604,110 +635,153 @@
           <span id="activeCountBadge" class="text-[10px] bg-teal-950 text-teal-300 border border-teal-700/60 px-2 py-0.5 rounded-full font-semibold">3 Active</span>
         </div>
 
-        <p class="text-[11px] text-slate-400">Toggle active test panels in this report:</p>
-
-        <!-- Search Bar for Report Modules -->
-        <div class="relative mb-2">
-          <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-xs text-slate-500"></i>
-          <input type="text" id="inpSearchReports" oninput="filterReportModulesList(this.value)" placeholder="Search report name or number (e.g. 1, cbc, lft, lipid)..." class="w-full bg-[#050814] border border-slate-700 rounded-lg pl-8 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-teal-500 font-medium">
+        <!-- 3 SEGMENT CATEGORY BUTTONS -->
+        <div class="grid grid-cols-3 gap-1 bg-[#050814] p-1 rounded-xl border border-slate-800 text-[10.5px] font-bold mb-3 select-none">
+          <button id="btnCat_predefault" type="button" onclick="switchReportCategory('predefault')" class="py-1.5 px-1 rounded-lg text-center transition bg-teal-600 text-white shadow flex flex-col items-center justify-center gap-0.5">
+            <i class="fa-solid fa-flask text-xs"></i>
+            <span>Pre-Default</span>
+          </button>
+          <button id="btnCat_scratch" type="button" onclick="switchReportCategory('scratch')" class="py-1.5 px-1 rounded-lg text-center transition text-slate-400 hover:text-white flex flex-col items-center justify-center gap-0.5">
+            <i class="fa-solid fa-file-pen text-xs"></i>
+            <span>Scratch (<span id="countScratch">0</span>)</span>
+          </button>
+          <button id="btnCat_uploaded" type="button" onclick="switchReportCategory('uploaded')" class="py-1.5 px-1 rounded-lg text-center transition text-slate-400 hover:text-white flex flex-col items-center justify-center gap-0.5">
+            <i class="fa-solid fa-cloud-arrow-up text-xs"></i>
+            <span>Uploaded (<span id="countUploaded">0</span>)</span>
+          </button>
         </div>
 
-        <!-- Quick Select / Deselect All -->
-        <div class="flex items-center justify-between mb-1 text-[10.5px] px-1 font-mono">
-          <button type="button" onclick="selectAllReports(true)" class="text-teal-400 hover:text-teal-300 font-semibold underline">Select All (12)</button>
-          <button type="button" onclick="selectAllReports(false)" class="text-slate-400 hover:text-rose-400 font-semibold underline">Clear All</button>
+        <!-- CATEGORY 1: PRE-DEFAULT BUILT-IN HARDCODED TESTS -->
+        <div id="secCat_predefault" class="space-y-3">
+          <!-- Search Bar for Report Modules -->
+          <div class="relative mb-2">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-xs text-slate-500"></i>
+            <input type="text" id="inpSearchReports" oninput="filterReportModulesList(this.value)" placeholder="Search report name or number (e.g. 1, cbc, lft, lipid)..." class="w-full bg-[#050814] border border-slate-700 rounded-lg pl-8 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-teal-500 font-medium">
+          </div>
+
+          <!-- Quick Select / Deselect All -->
+          <div class="flex items-center justify-between mb-1 text-[10.5px] px-1 font-mono">
+            <button type="button" onclick="selectAllReports(true)" class="text-teal-400 hover:text-teal-300 font-semibold underline">Select All (12)</button>
+            <button type="button" onclick="selectAllReports(false)" class="text-slate-400 hover:text-rose-400 font-semibold underline">Clear All</button>
+          </div>
+
+          <!-- 12 Clean Checkboxes (UNCHECKED BY DEFAULT) -->
+          <div class="space-y-1.5 max-h-[340px] overflow-y-auto pr-1" id="reportCheckboxesList">
+            <label class="flex items-center justify-between p-2 rounded-lg bg-[#050814] border border-slate-800 hover:border-slate-700 cursor-pointer">
+              <span class="text-[11.5px] font-medium text-slate-200 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-rose-400"></span> 1. Complete Blood Count (CBC, 34 Parameters)
+              </span>
+              <input type="checkbox" data-sheet="sheetCBC" onchange="onReportCheckboxChange()" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
+            </label>
+            <label class="flex items-center justify-between p-2 rounded-lg bg-[#050814] border border-slate-800 hover:border-slate-700 cursor-pointer">
+              <span class="text-[11.5px] font-medium text-slate-200 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-amber-400"></span> 2. Liver Function Test, Serum (LFT)
+              </span>
+              <input type="checkbox" data-sheet="sheetLFT" onchange="onReportCheckboxChange()" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
+            </label>
+            <label class="flex items-center justify-between p-2 rounded-lg bg-[#050814] border border-slate-800 hover:border-slate-700 cursor-pointer">
+              <span class="text-[11.5px] font-medium text-slate-200 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-cyan-400"></span> 3. Kidney Function &amp; Electrolytes (KFT)
+              </span>
+              <input type="checkbox" data-sheet="sheetKFT" onchange="onReportCheckboxChange()" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
+            </label>
+            <label class="flex items-center justify-between p-2 rounded-lg bg-[#050814] border border-slate-800 hover:border-slate-700 cursor-pointer">
+              <span class="text-[11.5px] font-medium text-slate-200 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-purple-400"></span> 4. Vitamin B12 &amp; Vitamin D (25-OH)
+              </span>
+              <input type="checkbox" data-sheet="sheetVitamins" onchange="onReportCheckboxChange()" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
+            </label>
+            <label class="flex items-center justify-between p-2 rounded-lg bg-[#050814] border border-slate-800 hover:border-slate-700 cursor-pointer">
+              <span class="text-[11.5px] font-medium text-slate-200 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-purple-300"></span> 5. Vitamin D Clinical Guidelines
+              </span>
+              <input type="checkbox" data-sheet="sheetVitaminNotes" onchange="onReportCheckboxChange()" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
+            </label>
+            <label class="flex items-center justify-between p-2 rounded-lg bg-[#050814] border border-slate-800 hover:border-slate-700 cursor-pointer">
+              <span class="text-[11.5px] font-medium text-slate-200 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-400"></span> 6. HbA1c HPLC &amp; Glycemic Panel
+              </span>
+              <input type="checkbox" data-sheet="sheetDiabetes" onchange="onReportCheckboxChange()" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
+            </label>
+            <label class="flex items-center justify-between p-2 rounded-lg bg-[#050814] border border-slate-800 hover:border-slate-700 cursor-pointer">
+              <span class="text-[11.5px] font-medium text-slate-200 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-blue-400"></span> 7. Free Thyroid Profile (FT3, FT4, TSH)
+              </span>
+              <input type="checkbox" data-sheet="sheetThyroid" onchange="onReportCheckboxChange()" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
+            </label>
+            <label class="flex items-center justify-between p-2 rounded-lg bg-[#050814] border border-slate-800 hover:border-slate-700 cursor-pointer">
+              <span class="text-[11.5px] font-medium text-slate-200 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-rose-300"></span> 8. Hematology Mentzer Evaluation
+              </span>
+              <input type="checkbox" data-sheet="sheetHemaSummary" onchange="onReportCheckboxChange()" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
+            </label>
+            <label class="flex items-center justify-between p-2 rounded-lg bg-[#050814] border border-slate-800 hover:border-slate-700 cursor-pointer">
+              <span class="text-[11.5px] font-medium text-slate-200 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-yellow-400"></span> 9. Lipid Profile Basic, Serum
+              </span>
+              <input type="checkbox" data-sheet="sheetLipid" onchange="onReportCheckboxChange()" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
+            </label>
+            <label class="flex items-center justify-between p-2 rounded-lg bg-[#050814] border border-slate-800 hover:border-slate-700 cursor-pointer">
+              <span class="text-[11.5px] font-medium text-slate-200 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-red-400"></span> 10. ASCVD Cardiovascular Risk Matrix
+              </span>
+              <input type="checkbox" data-sheet="sheetASCVD" onchange="onReportCheckboxChange()" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
+            </label>
+            <label class="flex items-center justify-between p-2 rounded-lg bg-[#050814] border border-slate-800 hover:border-slate-700 cursor-pointer">
+              <span class="text-[11.5px] font-medium text-slate-200 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-teal-400"></span> 11. Glucose Fasting &amp; Sign-off
+              </span>
+              <input type="checkbox" data-sheet="sheetGlucoseSignoff" onchange="onReportCheckboxChange()" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
+            </label>
+            <label class="flex items-center justify-between p-2 rounded-lg bg-[#050814] border border-slate-800 hover:border-slate-700 cursor-pointer">
+              <span class="text-[11.5px] font-medium text-slate-200 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-red-500"></span> 12. Hepatitis C Virus (HCV) Card Test
+              </span>
+              <input type="checkbox" data-sheet="sheetHCV" onchange="onReportCheckboxChange()" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
+            </label>
+          </div>
         </div>
 
-        <!-- 11 Clean Checkboxes (UNCHECKED BY DEFAULT) -->
-        <div class="space-y-1.5 max-h-[360px] overflow-y-auto pr-1" id="reportCheckboxesList">
-          <label class="flex items-center justify-between p-2 rounded-lg bg-[#050814] border border-slate-800 hover:border-slate-700 cursor-pointer">
-            <span class="text-[11.5px] font-medium text-slate-200 flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-rose-400"></span> 1. Complete Blood Count (CBC, 34 Parameters)
-            </span>
-            <input type="checkbox" data-sheet="sheetCBC" onchange="onReportCheckboxChange()" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
-          </label>
-          <label class="flex items-center justify-between p-2 rounded-lg bg-[#050814] border border-slate-800 hover:border-slate-700 cursor-pointer">
-            <span class="text-[11.5px] font-medium text-slate-200 flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-amber-400"></span> 2. Liver Function Test, Serum (LFT)
-            </span>
-            <input type="checkbox" data-sheet="sheetLFT" onchange="onReportCheckboxChange()" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
-          </label>
-          <label class="flex items-center justify-between p-2 rounded-lg bg-[#050814] border border-slate-800 hover:border-slate-700 cursor-pointer">
-            <span class="text-[11.5px] font-medium text-slate-200 flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-cyan-400"></span> 3. Kidney Function &amp; Electrolytes (KFT)
-            </span>
-            <input type="checkbox" data-sheet="sheetKFT" onchange="onReportCheckboxChange()" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
-          </label>
-          <label class="flex items-center justify-between p-2 rounded-lg bg-[#050814] border border-slate-800 hover:border-slate-700 cursor-pointer">
-            <span class="text-[11.5px] font-medium text-slate-200 flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-purple-400"></span> 4. Vitamin B12 &amp; Vitamin D (25-OH)
-            </span>
-            <input type="checkbox" data-sheet="sheetVitamins" onchange="onReportCheckboxChange()" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
-          </label>
-          <label class="flex items-center justify-between p-2 rounded-lg bg-[#050814] border border-slate-800 hover:border-slate-700 cursor-pointer">
-            <span class="text-[11.5px] font-medium text-slate-200 flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-purple-300"></span> 5. Vitamin D Clinical Guidelines
-            </span>
-            <input type="checkbox" data-sheet="sheetVitaminNotes" onchange="onReportCheckboxChange()" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
-          </label>
-          <label class="flex items-center justify-between p-2 rounded-lg bg-[#050814] border border-slate-800 hover:border-slate-700 cursor-pointer">
-            <span class="text-[11.5px] font-medium text-slate-200 flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-emerald-400"></span> 6. HbA1c HPLC &amp; Glycemic Panel
-            </span>
-            <input type="checkbox" data-sheet="sheetDiabetes" onchange="onReportCheckboxChange()" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
-          </label>
-          <label class="flex items-center justify-between p-2 rounded-lg bg-[#050814] border border-slate-800 hover:border-slate-700 cursor-pointer">
-            <span class="text-[11.5px] font-medium text-slate-200 flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-blue-400"></span> 7. Free Thyroid Profile (FT3, FT4, TSH)
-            </span>
-            <input type="checkbox" data-sheet="sheetThyroid" onchange="onReportCheckboxChange()" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
-          </label>
-          <label class="flex items-center justify-between p-2 rounded-lg bg-[#050814] border border-slate-800 hover:border-slate-700 cursor-pointer">
-            <span class="text-[11.5px] font-medium text-slate-200 flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-rose-300"></span> 8. Hematology Mentzer Evaluation
-            </span>
-            <input type="checkbox" data-sheet="sheetHemaSummary" onchange="onReportCheckboxChange()" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
-          </label>
-          <label class="flex items-center justify-between p-2 rounded-lg bg-[#050814] border border-slate-800 hover:border-slate-700 cursor-pointer">
-            <span class="text-[11.5px] font-medium text-slate-200 flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-yellow-400"></span> 9. Lipid Profile Basic, Serum
-            </span>
-            <input type="checkbox" data-sheet="sheetLipid" onchange="onReportCheckboxChange()" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
-          </label>
-          <label class="flex items-center justify-between p-2 rounded-lg bg-[#050814] border border-slate-800 hover:border-slate-700 cursor-pointer">
-            <span class="text-[11.5px] font-medium text-slate-200 flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-red-400"></span> 10. ASCVD Cardiovascular Risk Matrix
-            </span>
-            <input type="checkbox" data-sheet="sheetASCVD" onchange="onReportCheckboxChange()" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
-          </label>
-          <label class="flex items-center justify-between p-2 rounded-lg bg-[#050814] border border-slate-800 hover:border-slate-700 cursor-pointer">
-            <span class="text-[11.5px] font-medium text-slate-200 flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-teal-400"></span> 11. Glucose Fasting &amp; Sign-off
-            </span>
-            <input type="checkbox" data-sheet="sheetGlucoseSignoff" onchange="onReportCheckboxChange()" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
-          </label>
-          <label class="flex items-center justify-between p-2 rounded-lg bg-[#050814] border border-slate-800 hover:border-slate-700 cursor-pointer">
-            <span class="text-[11.5px] font-medium text-slate-200 flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-red-500"></span> 12. Hepatitis C Virus (HCV) Card Test
-            </span>
-            <input type="checkbox" data-sheet="sheetHCV" onchange="onReportCheckboxChange()" class="report-checkbox w-4 h-4 rounded text-teal-500 bg-slate-900 border-slate-700">
-          </label>
-        </div>
-
-        <!-- NEW CUSTOM REPORT & FILE UPLOAD BUTTONS -->
-        <div class="pt-2 border-t border-slate-800 space-y-2">
-          <button onclick="createNewCustomReportPrompt()" class="w-full py-2 bg-gradient-to-r from-teal-700/80 to-cyan-700/80 hover:from-teal-600 hover:to-cyan-600 text-white rounded-lg text-xs font-bold shadow transition active:scale-98 flex items-center justify-center gap-2">
+        <!-- CATEGORY 2: SCRATCH CUSTOM REPORTS (FROM ZERO) -->
+        <div id="secCat_scratch" class="space-y-3 hidden">
+          <button type="button" onclick="createNewCustomReportPrompt()" class="w-full py-2.5 bg-gradient-to-r from-teal-700 to-cyan-700 hover:from-teal-600 hover:to-cyan-600 text-white rounded-lg text-xs font-bold shadow transition active:scale-98 flex items-center justify-center gap-2">
             <i class="fa-solid fa-file-circle-plus text-sm"></i> Add New Custom Report (From Scratch)
           </button>
 
-          <!-- UPLOAD REPORT BUTTON (.doc, .docx, .pdf) -->
-          <button onclick="triggerReportFileUpload()" class="w-full py-2 bg-gradient-to-r from-blue-700 to-indigo-700 hover:from-blue-600 hover:to-indigo-600 text-white rounded-lg text-xs font-bold shadow transition active:scale-98 flex items-center justify-center gap-2">
-            <i class="fa-solid fa-cloud-arrow-up text-sm"></i> Upload Report (.doc, .docx, .pdf)
+          <div class="text-[10px] font-mono text-slate-400 flex items-center justify-between px-1">
+            <span>MY SCRATCH TEMPLATES:</span>
+            <span id="lblScratchCount" class="text-teal-400 font-bold">0 Templates</span>
+          </div>
+
+          <div id="scratchTemplatesListContainer" class="space-y-1.5 max-h-[300px] overflow-y-auto pr-1">
+            <!-- Dynamically populated scratch templates -->
+          </div>
+        </div>
+
+        <!-- CATEGORY 3: UPLOADED REPORTS (.DOC, .DOCX, .PDF) -->
+        <div id="secCat_uploaded" class="space-y-3 hidden">
+          <button type="button" onclick="triggerReportFileUpload()" class="w-full py-2.5 bg-gradient-to-r from-blue-700 to-indigo-700 hover:from-blue-600 hover:to-indigo-600 text-white rounded-lg text-xs font-bold shadow transition active:scale-98 flex items-center justify-center gap-2">
+            <i class="fa-solid fa-cloud-arrow-up text-sm"></i> Upload Word / DOCX / PDF
           </button>
           <input type="file" id="inpReportFileUploader" accept=".doc,.docx,.pdf,.txt" onchange="handleReportFileUpload(event)" class="hidden">
 
-          <!-- Local Storage & Backup Actions -->
-          <div class="flex items-center justify-between text-[10px] px-1 font-mono pt-1 text-slate-400 border-t border-slate-800/80">
+          <button type="button" onclick="saveCurrentSheetToLibrary()" class="w-full py-2 bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 border border-emerald-600/50 rounded-lg text-xs font-bold shadow transition flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-floppy-disk text-xs"></i> Save Active Sheet to Library
+          </button>
+
+          <div class="text-[10px] font-mono text-slate-400 flex items-center justify-between px-1">
+            <span>UPLOADED CLINICAL REPORTS:</span>
+            <span id="lblUploadedCount" class="text-blue-400 font-bold">0 Reports</span>
+          </div>
+
+          <div id="uploadedTemplatesListContainer" class="space-y-1.5 max-h-[260px] overflow-y-auto pr-1">
+            <!-- Dynamically populated uploaded reports -->
+          </div>
+        </div>
+
+        <!-- COMMON FOOTER: BACKUP & RESTORE -->
+        <div class="pt-2 border-t border-slate-800 space-y-2">
+          <div class="flex items-center justify-between text-[10.5px] px-1 font-mono text-slate-400">
             <button type="button" onclick="exportDataBackupFile()" class="text-teal-400 hover:text-teal-300 font-semibold flex items-center gap-1 transition">
               <i class="fa-solid fa-floppy-disk text-[10px]"></i> Save Backup
             </button>
@@ -716,7 +790,6 @@
             </button>
             <input type="file" id="inpRestoreBackupFile" accept=".json" onchange="importDataBackupFile(event)" class="hidden">
           </div>
-          <p class="text-[9.5px] text-slate-500 text-center">Upload any DOC, PDF or add scratch report</p>
         </div>
 
         <!-- Page Sequence Reorder -->
@@ -953,7 +1026,7 @@
           <h2 class="text-xs font-bold uppercase tracking-wider text-teal-400 flex items-center gap-2">
             <i class="fa-solid fa-gear"></i> App Settings &amp; Themes
           </h2>
-          <span class="text-[10px] text-slate-400 font-mono">v1.5.2</span>
+          <span class="text-[10px] text-slate-400 font-mono">v1.0.0</span>
         </div>
 
         <!-- 1. COLOR THEMES -->
@@ -1027,7 +1100,7 @@
         <div class="p-3 bg-[#050814] border border-slate-800 rounded-xl space-y-2">
           <div class="flex items-center justify-between">
             <span class="text-xs text-slate-400">Software Build:</span>
-            <span class="text-xs font-mono font-bold text-teal-400">v1.5.2 (Cross-Platform)</span>
+            <span class="text-xs font-mono font-bold text-teal-400">v1.0.0 (Official Stable)</span>
           </div>
           <button onclick="checkForUpdates(true)" class="w-full py-2 bg-[#0b1020] hover:bg-slate-800 border border-slate-700 rounded-lg text-slate-300 hover:text-white text-xs font-semibold flex items-center justify-center gap-2 transition">
             <i class="fa-solid fa-rotate text-xs text-cyan-400"></i> Check for Updates on GitHub
@@ -4876,7 +4949,7 @@
     </div>
     <div class="flex items-center gap-3 font-mono text-[9.5px] text-slate-500">
       <button onclick="checkForUpdates(true)" class="hover:text-teal-400 transition flex items-center gap-1">
-        <i class="fa-solid fa-code-branch text-[9px]"></i> Version 1.4.0
+        <i class="fa-solid fa-code-branch text-[9px]"></i> Version 1.0.0
       </button>
       <span>•</span>
       <span>Ctrl+P: Print</span>
@@ -4910,7 +4983,7 @@
       <div class="p-3 bg-[#050814] border border-slate-800 rounded-xl space-y-2">
         <div class="flex items-center justify-between">
           <span class="text-xs text-slate-400">Latest Version:</span>
-          <span id="updateReleaseTag" class="text-xs font-mono font-bold text-teal-400">v1.5.2</span>
+          <span id="updateReleaseTag" class="text-xs font-mono font-bold text-teal-400">v1.0.0</span>
         </div>
         <div class="text-[11px] text-slate-300 leading-relaxed" id="updateReleaseNotes">
           New features and improvements are available.
@@ -4969,7 +5042,7 @@
   <!-- 5. JAVASCRIPT WORKSTATION ENGINE -->
   <!-- ========================================== -->
   <script>
-    const APP_CURRENT_VERSION = "1.4.0";
+    const APP_CURRENT_VERSION = "1.0.0";
     let currentZoom = 1.0;
     let letterheadMode = 'preprinted'; // 'preprinted' or 'digital'
     let isLiveAutoCalcEnabled = true;
@@ -6598,31 +6671,341 @@
     });
 
     // =========================================================================
-    // DIRECT REPORT FILE UPLOADER & PARSER (.DOC, .DOCX, .PDF)
+    // 1. REPORT CATEGORIES & TEMPLATE LIBRARY SYSTEM (PRE-DEFAULT / SCRATCH / UPLOADED)
+    // =========================================================================
+    let currentReportCategory = 'predefault';
+
+    function switchReportCategory(cat) {
+      currentReportCategory = cat;
+      ['predefault', 'scratch', 'uploaded'].forEach(c => {
+        const btn = document.getElementById('btnCat_' + c);
+        const sec = document.getElementById('secCat_' + c);
+        if (c === cat) {
+          btn?.classList.add('bg-teal-600', 'text-white', 'shadow');
+          btn?.classList.remove('text-slate-400');
+          sec?.classList.remove('hidden');
+        } else {
+          btn?.classList.remove('bg-teal-600', 'text-white', 'shadow');
+          btn?.classList.add('text-slate-400');
+          sec?.classList.add('hidden');
+        }
+      });
+      renderCustomTemplatesList();
+    }
+
+    function getSavedCustomTemplates() {
+      try {
+        const raw = localStorage.getItem('labx_custom_templates');
+        return raw ? JSON.parse(raw) : [];
+      } catch(e) { return []; }
+    }
+
+    function saveCustomTemplates(arr) {
+      try {
+        localStorage.setItem('labx_custom_templates', JSON.stringify(arr));
+      } catch(e) {}
+      renderCustomTemplatesList();
+    }
+
+    function saveCurrentSheetToLibrary() {
+      const activeSheet = document.querySelector('.a4-sheet:not([style*="display: none"])');
+      if (!activeSheet) {
+        showToast("No active sheet open to save!");
+        return;
+      }
+      const title = activeSheet.getAttribute('data-report-title') || 'Custom Clinical Report';
+      const isUploaded = activeSheet.id.startsWith('uploadedSheet_');
+      const type = isUploaded ? 'uploaded' : 'scratch';
+      
+      const templates = getSavedCustomTemplates();
+      const existingIdx = templates.findIndex(t => t.id === activeSheet.id);
+      
+      const sheetData = {
+        id: activeSheet.id,
+        title: title,
+        type: type,
+        savedAt: new Date().toISOString(),
+        html: activeSheet.innerHTML
+      };
+
+      if (existingIdx >= 0) {
+        templates[existingIdx] = sheetData;
+      } else {
+        templates.push(sheetData);
+      }
+      saveCustomTemplates(templates);
+      showToast(`💾 "${title}" saved to your Library!`);
+      switchReportCategory(type);
+    }
+
+    function renderCustomTemplatesList() {
+      const templates = getSavedCustomTemplates();
+      const scratchList = document.getElementById('scratchTemplatesListContainer');
+      const uploadedList = document.getElementById('uploadedTemplatesListContainer');
+      const scratchTemplates = templates.filter(t => t.type === 'scratch');
+      const uploadedTemplates = templates.filter(t => t.type === 'uploaded');
+
+      const countScratchEl = document.getElementById('countScratch');
+      const countUploadedEl = document.getElementById('countUploaded');
+      const lblScratchEl = document.getElementById('lblScratchCount');
+      const lblUploadedEl = document.getElementById('lblUploadedCount');
+
+      if (countScratchEl) countScratchEl.textContent = scratchTemplates.length;
+      if (countUploadedEl) countUploadedEl.textContent = uploadedTemplates.length;
+      if (lblScratchEl) lblScratchEl.textContent = `${scratchTemplates.length} Templates`;
+      if (lblUploadedEl) lblUploadedEl.textContent = `${uploadedTemplates.length} Reports`;
+
+      if (scratchList) {
+        if (scratchTemplates.length === 0) {
+          scratchList.innerHTML = `<div class="p-3 bg-[#050814] rounded-lg border border-slate-800 text-center text-slate-500 text-[10.5px]">No custom scratch templates yet. Click "+ Add New Custom Report" above to build from blank!</div>`;
+        } else {
+          scratchList.innerHTML = scratchTemplates.map(t => `
+            <div class="flex items-center justify-between p-2 rounded-lg bg-[#050814] border border-slate-800 hover:border-teal-700/60 transition">
+              <div class="flex items-center gap-2 truncate">
+                <span class="w-2 h-2 rounded-full bg-teal-400"></span>
+                <span class="text-[11px] font-semibold text-slate-200 truncate cursor-pointer hover:text-teal-300" onclick="focusSheet('${t.id}')">${t.title}</span>
+              </div>
+              <div class="flex items-center gap-1 shrink-0">
+                <button onclick="exportSingleTemplate('${t.id}')" title="Export JSON Template" class="text-teal-400 hover:text-teal-300 p-1 text-xs"><i class="fa-solid fa-file-export"></i></button>
+                <button onclick="deleteCustomTemplate('${t.id}')" title="Delete Template" class="text-rose-500 hover:text-rose-400 p-1 text-xs"><i class="fa-solid fa-trash-can"></i></button>
+              </div>
+            </div>
+          `).join('');
+        }
+      }
+
+      if (uploadedList) {
+        if (uploadedTemplates.length === 0) {
+          uploadedList.innerHTML = `<div class="p-3 bg-[#050814] rounded-lg border border-slate-800 text-center text-slate-500 text-[10.5px]">No uploaded reports yet. Upload a Word (.doc / .docx) file above!</div>`;
+        } else {
+          uploadedList.innerHTML = uploadedTemplates.map(t => `
+            <div class="flex items-center justify-between p-2 rounded-lg bg-[#050814] border border-slate-800 hover:border-blue-700/60 transition">
+              <div class="flex items-center gap-2 truncate">
+                <span class="w-2 h-2 rounded-full bg-blue-400"></span>
+                <span class="text-[11px] font-semibold text-slate-200 truncate cursor-pointer hover:text-blue-300" onclick="focusSheet('${t.id}')">${t.title}</span>
+              </div>
+              <div class="flex items-center gap-1 shrink-0">
+                <button onclick="exportSingleTemplate('${t.id}')" title="Export JSON Template" class="text-blue-400 hover:text-blue-300 p-1 text-xs"><i class="fa-solid fa-file-export"></i></button>
+                <button onclick="deleteCustomTemplate('${t.id}')" title="Delete Template" class="text-rose-500 hover:text-rose-400 p-1 text-xs"><i class="fa-solid fa-trash-can"></i></button>
+              </div>
+            </div>
+          `).join('');
+        }
+      }
+    }
+
+    function exportSingleTemplate(id) {
+      const templates = getSavedCustomTemplates();
+      const t = templates.find(item => item.id === id);
+      if (!t) return;
+      const json = JSON.stringify(t, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `LabX_Template_${t.title.replace(/[^a-zA-Z0-9]/g, '_')}.json`;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 300);
+      showToast(`Template "${t.title}" exported! Share this JSON to hardcode into software.`);
+    }
+
+    function deleteCustomTemplate(id) {
+      if (!confirm("Are you sure you want to delete this template from your library?")) return;
+      const templates = getSavedCustomTemplates().filter(t => t.id !== id);
+      saveCustomTemplates(templates);
+      const sheet = document.getElementById(id);
+      if (sheet) sheet.remove();
+      onReportCheckboxChange();
+      showToast("Template deleted from library");
+    }
+
+    function focusSheet(sheetId) {
+      const sheet = document.getElementById(sheetId);
+      if (sheet) {
+        sheet.style.display = 'flex';
+        sheet.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        setActiveSheet(sheetId);
+      }
+    }
+
+    // =========================================================================
+    // 2. INTERACTIVE DRAG & DROP & ROW REORDERING ENGINE
+    // =========================================================================
+    function initRowDragAndDrop() {
+      document.querySelectorAll('tbody tr:not(.group-header-row)').forEach(row => {
+        if (row.dataset.dragInit) return;
+        row.dataset.dragInit = "true";
+        row.setAttribute('draggable', 'true');
+
+        row.addEventListener('dragstart', (e) => {
+          if (e.target.isContentEditable || e.target.closest('[contenteditable="true"]')) {
+            e.preventDefault();
+            return;
+          }
+          e.dataTransfer.effectAllowed = 'move';
+          e.dataTransfer.setData('text/plain', '');
+          window._draggedRow = row;
+          row.classList.add('drag-row-active');
+        });
+
+        row.addEventListener('dragend', () => {
+          row.classList.remove('drag-row-active');
+          window._draggedRow = null;
+          document.querySelectorAll('tr.drag-over-top, tr.drag-over-bottom').forEach(r => {
+            r.classList.remove('drag-over-top', 'drag-over-bottom');
+          });
+          const tbody = row.closest('tbody');
+          if (tbody && window.LabXCustomStudio?.renumberTable) {
+            LabXCustomStudio.renumberTable(tbody);
+          }
+        });
+
+        row.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          if (!window._draggedRow || window._draggedRow === row) return;
+          if (window._draggedRow.closest('tbody') !== row.closest('tbody')) return;
+
+          const rect = row.getBoundingClientRect();
+          const mid = rect.top + rect.height / 2;
+          if (e.clientY < mid) {
+            row.classList.add('drag-over-top');
+            row.classList.remove('drag-over-bottom');
+          } else {
+            row.classList.add('drag-over-bottom');
+            row.classList.remove('drag-over-top');
+          }
+        });
+
+        row.addEventListener('dragleave', () => {
+          row.classList.remove('drag-over-top', 'drag-over-bottom');
+        });
+
+        row.addEventListener('drop', (e) => {
+          e.preventDefault();
+          row.classList.remove('drag-over-top', 'drag-over-bottom');
+          const dragged = window._draggedRow;
+          if (!dragged || dragged === row) return;
+          if (dragged.closest('tbody') !== row.closest('tbody')) return;
+
+          const rect = row.getBoundingClientRect();
+          const mid = rect.top + rect.height / 2;
+          const tbody = row.parentNode;
+          if (e.clientY < mid) {
+            tbody.insertBefore(dragged, row);
+          } else {
+            tbody.insertBefore(dragged, row.nextSibling);
+          }
+          if (window.LabXCustomStudio?.renumberTable) {
+            LabXCustomStudio.renumberTable(tbody);
+          }
+          showToast("Parameter Reordered");
+        });
+      });
+    }
+
+    function moveRowUp(btn) {
+      const row = btn.closest('tr');
+      if (!row) return;
+      const prev = row.previousElementSibling;
+      if (prev && !prev.classList.contains('group-header-row')) {
+        row.parentNode.insertBefore(row, prev);
+        const tbody = row.closest('tbody');
+        if (tbody && window.LabXCustomStudio?.renumberTable) LabXCustomStudio.renumberTable(tbody);
+        showToast("Row Moved Up");
+      }
+    }
+
+    function moveRowDown(btn) {
+      const row = btn.closest('tr');
+      if (!row) return;
+      const next = row.nextElementSibling;
+      if (next && !next.classList.contains('group-header-row')) {
+        row.parentNode.insertBefore(next, row);
+        const tbody = row.closest('tbody');
+        if (tbody && window.LabXCustomStudio?.renumberTable) LabXCustomStudio.renumberTable(tbody);
+        showToast("Row Moved Down");
+      }
+    }
+
+    // =========================================================================
+    // 3. PURE CLIENT-SIDE DOCX ZIP & XML TABLE EXTRACTION (100% READABLE)
+    // =========================================================================
+    async function extractFileFromZip(arrayBuffer, targetFileName) {
+      try {
+        const view = new DataView(arrayBuffer);
+        const bytes = new Uint8Array(arrayBuffer);
+        let offset = 0;
+
+        while (offset < bytes.length - 4) {
+          const sig = view.getUint32(offset, true);
+          if (sig === 0x04034b50) { // Local file header
+            const compMethod = view.getUint16(offset + 8, true);
+            const compSize = view.getUint32(offset + 18, true);
+            const nameLen = view.getUint16(offset + 26, true);
+            const extraLen = view.getUint16(offset + 28, true);
+
+            const nameBytes = bytes.subarray(offset + 30, offset + 30 + nameLen);
+            const fileName = new TextDecoder().decode(nameBytes);
+
+            const dataStart = offset + 30 + nameLen + extraLen;
+            const compData = bytes.subarray(dataStart, dataStart + compSize);
+
+            if (fileName === targetFileName || fileName.endsWith('/' + targetFileName) || fileName.endsWith(targetFileName)) {
+              if (compMethod === 0) {
+                return new TextDecoder().decode(compData);
+              } else if (compMethod === 8) {
+                const stream = new Response(compData).body.pipeThrough(new DecompressionStream('deflate-raw'));
+                const decompressed = await new Response(stream).arrayBuffer();
+                return new TextDecoder().decode(decompressed);
+              }
+            }
+            offset = dataStart + compSize;
+          } else {
+            offset++;
+          }
+        }
+      } catch(e) {
+        console.error("ZIP extract error:", e);
+      }
+      return null;
+    }
+
+    function parseDocxXml(xmlString) {
+      const rows = [];
+      const trMatches = xmlString.match(/<w:tr\b[^>]*>[\s\S]*?<\/w:tr>/g) || [];
+      for (const trXml of trMatches) {
+        const cells = [];
+        const tcMatches = trXml.match(/<w:tc\b[^>]*>[\s\S]*?<\/w:tc>/g) || [];
+        for (const tcXml of tcMatches) {
+          const textMatches = tcXml.match(/<w:t\b[^>]*>([^<]*)<\/w:t>/g) || [];
+          const cellText = textMatches.map(m => m.replace(/<[^>]+>/g, '')).join('').trim();
+          cells.push(cellText);
+        }
+        if (cells.some(c => c.length > 0)) {
+          rows.push(cells);
+        }
+      }
+      return rows;
+    }
+
+    // =========================================================================
+    // 4. DIRECT REPORT FILE UPLOADER (.DOC, .DOCX, .PDF)
     // =========================================================================
     function triggerReportFileUpload() {
       document.getElementById('inpReportFileUploader')?.click();
     }
 
-    function handleReportFileUpload(event) {
+    async function handleReportFileUpload(event) {
       const file = event.target.files?.[0];
       if (!file) return;
 
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          const buffer = e.target.result;
-          parseAndBuildReportFromFile(file.name, buffer);
-        } catch(err) {
-          console.error("Upload parse error:", err);
-          showToast("Error parsing file: " + err.message);
-        }
-      };
-
-      if (file.name.endsWith('.txt')) {
-        reader.readAsText(file);
-      } else {
-        reader.readAsArrayBuffer(file);
+      try {
+        const buffer = await file.arrayBuffer();
+        await parseAndBuildReportFromFile(file.name, buffer);
+      } catch(err) {
+        console.error("Upload parse error:", err);
+        showToast("Error reading file: " + err.message);
       }
       event.target.value = '';
     }
@@ -6631,7 +7014,6 @@
       const bytes = new Uint8Array(arrayBuffer);
       let text = '';
 
-      // 1. Standard 8-bit ASCII scan
       let current8 = '';
       for (let i = 0; i < bytes.length; i++) {
         const b = bytes[i];
@@ -6644,7 +7026,6 @@
       }
       if (current8.length >= 3) text += current8 + String.fromCharCode(10);
 
-      // 2. 16-bit UTF-16LE scan (for Word binary UCS-2 strings)
       let current16 = '';
       for (let i = 0; i < bytes.length - 1; i += 2) {
         const b1 = bytes[i];
@@ -6661,15 +7042,29 @@
       return text;
     }
 
-    function parseAndBuildReportFromFile(fileName, buffer) {
+    async function parseAndBuildReportFromFile(fileName, buffer) {
       let rawText = '';
-      if (typeof buffer === 'string') {
-        rawText = buffer;
-      } else {
-        rawText = extractTextFromBuffer(buffer);
+      let xmlTableRows = [];
+
+      // Check if .docx (ZIP format)
+      const u8 = new Uint8Array(buffer);
+      const isZip = u8.length > 4 && u8[0] === 0x50 && u8[1] === 0x4b;
+      
+      if (isZip) {
+        try {
+          const docXml = await extractFileFromZip(buffer, 'document.xml');
+          if (docXml) {
+            xmlTableRows = parseDocxXml(docXml);
+            rawText = docXml.replace(/<[^>]+>/g, ' ');
+          }
+        } catch(e) {
+          console.warn("Docx xml parse fallback:", e);
+        }
       }
 
-      console.log("Extracted text length:", rawText.length);
+      if (!rawText) {
+        rawText = extractTextFromBuffer(buffer);
+      }
 
       // Read current clinic settings
       const clinicName = document.getElementById('inpClinicName')?.value || 'KRISHNA COMPUTERIZED LABORATORY';
@@ -6692,12 +7087,12 @@
         fileName: fileName,
         patientName: '',
         sampleType: 'SERUM',
-        ageGender: '',
-        refBy: '',
-        collectedDate: '',
-        printedDate: '',
+        ageGender: `${patientAge} Y / ${patientGender}`,
+        refBy: patientRefBy,
+        collectedDate: patientDate,
+        printedDate: patientDate,
         reportTitle: fileName.replace(/\.[^/.]+$/, '').toUpperCase(),
-        method: 'TRI-DOT Visual Card Method',
+        method: 'Automated Clinical Analyzer',
         kitLot: 'NK120896',
         kitMfgLic: 'S-MB 1877',
         kitMfg: 'Aug. 19',
@@ -6710,7 +7105,7 @@
         refInterval: 'NON-REACTIVE'
       };
 
-      // Match Patient Name if present in document
+      // Match Patient Name if present
       const nameMatch = rawText.match(/(?:Name|Patient\s*Name)\s*:\s*[-:]?\s*([^,\n\r\t]+?)(?=\s+Sample|\s+Age|\s+Collected|\s+Ref|$)/i);
       if (nameMatch && nameMatch[1].trim().length > 1) {
         details.patientName = nameMatch[1].trim();
@@ -6721,11 +7116,7 @@
       if (sampleMatch) details.sampleType = sampleMatch[1].trim();
 
       const ageMatch = rawText.match(/Age\s*\/?\s*(?:Gender|Sex)?\s*:\s*[-:]?\s*([^,\n\r\t]+?)(?=\s+Collected|\s+Ref|$)/i);
-      if (ageMatch && ageMatch[1].trim().length > 1) {
-        details.ageGender = ageMatch[1].trim();
-      } else {
-        details.ageGender = `${patientAge} Y / ${patientGender}`;
-      }
+      if (ageMatch && ageMatch[1].trim().length > 1) details.ageGender = ageMatch[1].trim();
 
       const refMatch = rawText.match(/Ref\.?\s*(?:by|Dr\.?)?\s*:\s*[-:]?\s*([^,\n\r\t]+?)(?=\s+Printed|\s+Collected|$)/i);
       if (refMatch && refMatch[1].trim().length > 1) {
@@ -6733,39 +7124,103 @@
         patientRefBy = details.refBy;
       }
 
-      const collMatch = rawText.match(/(?:Collected|Date)\s*:\s*([0-9\/\-\.]+)/i);
-      if (collMatch) details.collectedDate = collMatch[1].trim();
-      else details.collectedDate = patientDate;
-
-      const printMatch = rawText.match(/Printed\s*:\s*([0-9\/\-\.]+)/i);
-      if (printMatch) details.printedDate = printMatch[1].trim();
-      else details.printedDate = details.collectedDate;
-
-      // Check if Card Test (HCV, HIV, HBsAg, Rapid Card Method)
+      // Check if Card Test (HCV, HIV, HBsAg, etc.)
       if (/HEPATITIS|HCV|HIV|HBsAg|TRI-DOT|CARD METHOD/i.test(rawText) && !/BIOCHEMISTRY|LIVER|KIDNEY|GLUCOSE|LIPID/i.test(fileName)) {
         details.isCardTest = true;
-        const hcvMatch = rawText.match(/HEPATITIS[^\n\r]*?(?=\s+REACTIVE|\s+NON-REACTIVE|$)/i);
-        details.investigation = hcvMatch ? hcvMatch[0].trim() : 'HEPATITIS-C-VIRUS (HCV) ANTIBODIES (T1 or T2)';
         details.reportTitle = 'HEPATITIS C VIRUS (HCV) - TRI-DOT CARD TEST';
+        details.investigation = 'HEPATITIS-C-VIRUS (HCV) ANTIBODIES (T1 or T2)';
+      }
 
-        if (/REACTIVE/i.test(rawText)) {
-          details.result = /NON-REACTIVE/i.test(rawText) && !/T1 or T2\s+REACTIVE/i.test(rawText) ? 'NON-REACTIVE' : 'REACTIVE';
+      const params = [];
+
+      // If XML Table rows exist from Word document, parse them directly with 100% precision
+      if (xmlTableRows && xmlTableRows.length > 0) {
+        for (const row of xmlTableRows) {
+          if (!row || row.length < 2) continue;
+          const first = (row[0] || '').trim();
+          const second = (row[1] || '').trim();
+          
+          // Skip header row
+          if (/^(Investigation|Parameter|Test\s*Name|Test)/i.test(first) && /^(Result|Observed|Value)/i.test(second)) {
+            continue;
+          }
+
+          if (first.length >= 2) {
+            let pName = first;
+            let pVal = second;
+            let pUnit = (row[2] || '').trim();
+            let pRef = (row[3] || '').trim();
+
+            if (row.length === 3) {
+              if (/\b(mg\/dL|g\/dL|gm%|U\/L|IU\/L|mmol\/L|%|cumm|fl|pg)\b/i.test(row[2])) {
+                pUnit = row[2].trim();
+              } else {
+                pRef = row[2].trim();
+              }
+            }
+
+            params.push({ name: pName, val: pVal, unit: pUnit, ref: pRef });
+          }
         }
+      }
 
-        const procMatch = rawText.match(/Procedure\s*:\s*([^\n\r\t]+?)(?=\s+Mfg|\s+LOT|$)/i);
-        if (procMatch) details.method = procMatch[1].trim();
+      // Fallback text parsing if xml rows were empty
+      if (params.length === 0) {
+        const noiseRegex = /^(bjbj|h_[0-9]|[a-z0-9]{1,4}|\[Content_Types\]|_rels|theme\/|word\/|Microsoft|Table|Page\s*\d+|Dr\.|Doctor|Pathologist|MBBS|MD|Reg\.?\s*No|End\s*of|Report|Date|Sample|Name|Age|Gender|Ref|Investigation|Result|Unit|Biological|Reference|Interval|Flag|Status|Method|Signature)($|\b)/i;
+        const dividerRegex = /^[-=_\.\s]{4,}$/;
+        const unitRegex = /\b(mg\/dL|g\/dL|gm\/dL|gm%|U\/L|IU\/L|mmol\/L|mEq\/L|µmol\/L|umol\/L|pg\/mL|ng\/mL|ug\/dL|mcg\/dL|%|cells\/cu\.mm|cells\/cumm|cumm|fl|pg|seconds|sec|ratio|mg\/24hrs|gm\/24hrs|mIU\/mL|ng\/dL|ug\/L|Qualitative)\b/i;
+        const qualResultRegex = /\b(REACTIVE|NON-REACTIVE|POSITIVE|NEGATIVE|TRACE|NIL|PRESENT|ABSENT|NORMAL|CLEAR|HAZY|CLOUDY|YELLOW|PALE YELLOW)\b/i;
 
-        const licMatch = rawText.match(/Mfg\.\s*Lic\.\s*No\.\s*([^\n\r\t]+?)(?=\s+LOT|$)/i);
-        if (licMatch) details.kitMfgLic = licMatch[1].trim();
+        const rawLines = rawText.split(/[\r\n]+/).map(s => s.trim()).filter(s => s.length > 0 && !dividerRegex.test(s));
 
-        const lotMatch = rawText.match(/LOT\.\s*([^\n\r\t]+?)(?=\s+Mfg|$)/i);
-        if (lotMatch) details.kitLot = lotMatch[1].trim();
+        for (let i = 0; i < rawLines.length; i++) {
+          const line = rawLines[i];
+          if (noiseRegex.test(line) && !line.includes(":") && !unitRegex.test(line)) continue;
 
-        const mfgMatch = rawText.match(/Mfg\.\s*([^\n\r\t]+?)(?=\s+Exp|$)/i);
-        if (mfgMatch) details.kitMfg = mfgMatch[1].trim();
+          const parts = line.split(/\t+|\s{2,}/).map(p => p.trim()).filter(Boolean);
+          if (parts.length >= 2) {
+            let pName = parts[0];
+            let pVal = parts[1];
+            let pUnit = "";
+            let pRef = "";
 
-        const expMatch = rawText.match(/Exp\.\s*([^\n\r\t\x00-\x1f\x0c]{1,30})/i);
-        if (expMatch) details.kitExp = expMatch[1].trim();
+            if (parts.length >= 4) {
+              pUnit = parts[2];
+              pRef = parts[3];
+            } else if (parts.length === 3) {
+              if (unitRegex.test(parts[2])) pUnit = parts[2];
+              else pRef = parts[2];
+            }
+
+            if (/^[<>]?\s*\d+(\.\d+)?$/.test(pVal) || qualResultRegex.test(pVal)) {
+              if (!noiseRegex.test(pName) && pName.length >= 2) {
+                params.push({ name: pName, val: pVal, unit: pUnit, ref: pRef });
+                continue;
+              }
+            }
+          }
+
+          // Single line regex fallback
+          const singleMatch = line.match(/^([A-Za-z0-9\s\/\-\(\)\.\,\:\+]+?)\s+([<>]?\s*\d+(?:\.\d+)?|\b(?:REACTIVE|NON-REACTIVE|POSITIVE|NEGATIVE|NORMAL|TRACE|NIL|PRESENT|ABSENT)\b)(?:\s+([a-zA-Z\/\%\.\^]+))?(?:\s+([<>]?\s*[\d\.\-\–\s]+.*))?$/);
+          if (singleMatch) {
+            const name = singleMatch[1].trim();
+            const val = singleMatch[2].trim();
+            const unit = (singleMatch[3] || "").trim();
+            const ref = (singleMatch[4] || "").trim();
+            if (!noiseRegex.test(name) && name.length >= 2) {
+              params.push({ name, val, unit, ref });
+            }
+          }
+        }
+      }
+
+      if (params.length === 0) {
+        params.push({
+          name: `${details.reportTitle} PARAMETER 1`,
+          val: '10.0',
+          unit: 'mg/dL',
+          ref: '5.0 - 15.0'
+        });
       }
 
       // Build unique sheet ID
@@ -6778,309 +7233,115 @@
       newSheet.style.display = 'flex';
 
       const tbodyId = 'tbody_' + newSheetId;
-      let bodyContentHtml = '';
 
-      if (details.isCardTest) {
-        const resultBadgeClass = details.result === 'REACTIVE' ? 'bg-rose-100 text-rose-700 border-rose-300' : 'bg-emerald-100 text-emerald-700 border-emerald-300';
-        const resultFlagClass = details.result === 'REACTIVE' ? 'text-rose-600' : 'text-emerald-600';
+      const rowsHtml = params.map((p, idx) => {
+        let flagText = 'NORMAL';
+        let flagClass = 'text-emerald-600';
+        let needleColor = 'text-emerald-600';
+        let needlePos = 50.0;
 
-        bodyContentHtml = `
-          <div class="overflow-x-auto my-2">
-            <table class="w-full text-left text-xs border-collapse">
-              <thead>
-                <tr class="border-b-2 border-slate-900 text-slate-800 text-[10.5px] uppercase font-bold tracking-wider">
-                  <th class="py-1 px-1 text-center no-print w-5 print-cb-col"></th>
-                  <th class="py-1 px-1 text-center w-6">#</th>
-                  <th class="py-1 px-1">INVESTIGATION</th>
-                  <th class="py-1 px-1 text-center">OBSERVED VALUE</th>
-                  <th class="py-1 px-1 text-center col-flag">FLAG</th>
-                  <th class="py-1 px-1 text-center w-20 col-gauge">STATUS</th>
-                  <th class="py-1 px-1 text-center col-unit">UNIT</th>
-                  <th class="py-1 px-1 text-right">BIOLOGICAL REF. INTERVAL</th>
-                  <th class="py-1 px-1 text-center no-print"></th>
-                </tr>
-              </thead>
-              <tbody id="${tbodyId}" class="divide-y divide-gray-200">
-                <tr class="group-header-row bg-slate-100/90 font-bold text-slate-800 border-y border-slate-300">
-                  <td class="py-0.5 px-1 text-center no-print print-cb-col"></td>
-                  <td colspan="7" class="py-0.5 px-2 uppercase tracking-wider text-[10px]">
-                    <div class="flex items-center justify-between">
-                      <span class="editable-field" contenteditable="true">SEROLOGY &amp; IMMUNOLOGY RAPID SCREENING</span>
-                      <button type="button" onclick="insertRowInGroup(this)" class="no-print text-[9.5px] px-1.5 py-0.5 bg-teal-600 hover:bg-teal-500 text-white rounded font-normal transition">
-                        <i class="fa-solid fa-plus text-[8px]"></i> Add Row to Group
-                      </button>
-                    </div>
-                  </td>
-                  <td class="py-0.5 px-1 text-center no-print">
-                    <button onclick="deleteRowWithUndo(this)" title="Delete Section" class="text-rose-500 hover:text-rose-700 text-[10px]"><i class="fa-solid fa-trash-can"></i></button>
-                  </td>
-                </tr>
-                <tr class="hover:bg-slate-50 transition border-b border-gray-200">
-                  <td class="py-1 px-1 text-center no-print w-5 print-cb-col">
-                    <input type="checkbox" checked onchange="toggleRowPrint(this)" class="accent-teal-600 w-3 h-3 cursor-pointer rounded">
-                  </td>
-                  <td class="py-1 px-1 text-center text-gray-500 font-mono text-[10px] w-6 row-num">1</td>
-                  <td class="py-1 px-1 font-semibold text-gray-900 leading-tight">
-                    <span class="editable-field font-bold text-gray-900" contenteditable="true">${details.investigation || 'HEPATITIS-C-VIRUS (HCV) ANTIBODIES'}</span>
-                    <div class="text-[9px] text-gray-500 font-normal">Method: ${details.method}</div>
-                  </td>
-                  <td class="py-1 px-1 text-center font-bold font-mono">
-                    <span class="editable-field px-2.5 py-0.5 rounded ${resultBadgeClass} border font-bold text-xs inline-block" contenteditable="true">${details.result}</span>
-                  </td>
-                  <td class="py-1 px-1 text-center font-bold text-[10px] col-flag">
-                    <span class="editable-field ${resultFlagClass}" contenteditable="true">${details.flag}</span>
-                  </td>
-                  <td class="py-1 px-1 text-center w-20 col-gauge">
-                    <span class="text-[9px] ${resultFlagClass} font-bold bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200">${details.result}</span>
-                  </td>
-                  <td class="py-1 px-1 text-center text-gray-500 text-[10px] col-unit">
-                    <span class="editable-field" contenteditable="true">${details.unit}</span>
-                  </td>
-                  <td class="py-1 px-1 text-right text-gray-700 font-mono text-[10px]">
-                    <span class="editable-field font-semibold text-emerald-700" contenteditable="true">${details.refInterval}</span>
-                  </td>
-                  <td class="py-1 px-1 text-center no-print">
-                    <button onclick="deleteRowWithUndo(this)" title="Delete Parameter (Undo available)" class="text-rose-500 hover:text-rose-700 text-[10px] transition hover:scale-110">
-                      <i class="fa-solid fa-trash-can"></i>
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <!-- ASSAY PROCEDURE & DIAGNOSTIC CARD VALIDATION -->
-          <div class="mt-4 p-3 bg-slate-50 border border-slate-300 rounded-lg text-[10.5px] text-slate-800 space-y-2">
-            <div class="flex items-center justify-between border-b border-slate-200 pb-1.5">
-              <span class="font-bold text-xs uppercase flex items-center gap-1.5 text-slate-900">
-                <i class="fa-solid fa-vial-circle-check text-teal-600"></i> Assay Procedure &amp; Diagnostic Card Kit Details
-              </span>
-              <span class="text-[9.5px] bg-teal-100 text-teal-800 border border-teal-300 px-2 py-0.5 rounded font-mono font-bold">
-                IVD Rapid Screening Card
-              </span>
-            </div>
-
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[10px] pt-1">
-              <div class="bg-white p-2 rounded border border-slate-200">
-                <div class="text-slate-400 font-mono text-[9px] uppercase">Procedure Method</div>
-                <div class="font-bold text-slate-800"><span class="editable-field" contenteditable="true">${details.method}</span></div>
-              </div>
-              <div class="bg-white p-2 rounded border border-slate-200">
-                <div class="text-slate-400 font-mono text-[9px] uppercase">Mfg. Lic. No.</div>
-                <div class="font-bold text-slate-800"><span class="editable-field" contenteditable="true">${details.kitMfgLic}</span></div>
-              </div>
-              <div class="bg-white p-2 rounded border border-slate-200">
-                <div class="text-slate-400 font-mono text-[9px] uppercase">Kit LOT / Batch No.</div>
-                <div class="font-bold text-slate-800 font-mono"><span class="editable-field" contenteditable="true">${details.kitLot}</span></div>
-              </div>
-              <div class="bg-white p-2 rounded border border-slate-200">
-                <div class="text-slate-400 font-mono text-[9px] uppercase">Mfg. / Exp. Date</div>
-                <div class="font-bold text-slate-800"><span class="editable-field" contenteditable="true">${details.kitMfg} / ${details.kitExp}</span></div>
-              </div>
-            </div>
-
-            <div class="p-2.5 bg-amber-50/80 border border-amber-200 rounded text-[9.5px] text-amber-900 space-y-1">
-              <div class="font-bold flex items-center gap-1 text-amber-800">
-                <i class="fa-solid fa-triangle-exclamation"></i> Clinical Interpretation &amp; Diagnostic Guidance:
-              </div>
-              <ul class="list-disc pl-4 space-y-0.5">
-                <li><strong>${details.result}</strong> result indicates detection of antibodies against targeted antigens.</li>
-                <li>All reactive screening immunoassays must be confirmed by quantitative molecular RT-PCR testing.</li>
-                <li>Internal quality control dot was verified acceptable at time of readout.</li>
-              </ul>
-            </div>
-          </div>
-        `;
-      } else {
-        // Multi-parameter clinical table parsing (Biochemistry, KFT, LFT, Lipid, etc.)
-        const noiseRegex = /^(bjbj|h_[0-9]|[a-z0-9]{1,4}|\[Content_Types\]|_rels|theme\/|word\/|Microsoft|Table|Page\s*\d+|Dr\.|Doctor|Pathologist|MBBS|MD|Reg\.?\s*No|End\s*of|Report|Date|Sample|Name|Age|Gender|Ref|Investigation|Result|Unit|Biological|Reference|Interval|Flag|Status|Method|Signature)($|\b)/i;
-        const dividerRegex = /^[-=_.\s]{4,}$/;
-        const unitRegex = /\b(mg\/dL|g\/dL|gm\/dL|gm%|U\/L|IU\/L|mmol\/L|mEq\/L|µmol\/L|umol\/L|pg\/mL|ng\/mL|ug\/dL|mcg\/dL|%|cells\/cu\.mm|cells\/cumm|cumm|fl|pg|seconds|sec|ratio|mg\/24hrs|gm\/24hrs|mIU\/mL|ng\/dL|ug\/L|Qualitative)\b/i;
-        const qualResultRegex = /\b(REACTIVE|NON-REACTIVE|POSITIVE|NEGATIVE|TRACE|NIL|PRESENT|ABSENT|NORMAL|CLEAR|HAZY|CLOUDY|YELLOW|PALE YELLOW)\b/i;
-
-        const rawLines = rawText.split(/[\r\n]+/).map(s => s.trim()).filter(s => s.length > 0 && !dividerRegex.test(s));
-        const params = [];
-
-        for (let i = 0; i < rawLines.length; i++) {
-          const line = rawLines[i];
-          if (noiseRegex.test(line) && !line.includes(":") && !unitRegex.test(line)) {
-            continue;
-          }
-
-          // Try Tab or multi-space separation
-          const parts = line.split(/\t+|\s{2,}/).map(p => p.trim()).filter(Boolean);
-          if (parts.length >= 2) {
-            let pName = parts[0];
-            let pVal = parts[1];
-            let pUnit = "";
-            let pRef = "";
-
-            if (parts.length >= 4) {
-              pUnit = parts[2];
-              pRef = parts[3];
-            } else if (parts.length === 3) {
-              if (unitRegex.test(parts[2])) {
-                pUnit = parts[2];
-              } else {
-                pRef = parts[2];
-              }
-            }
-
-            if (/^[<>]?\s*\d+(\.\d+)?$/.test(pVal) || qualResultRegex.test(pVal)) {
-              if (!noiseRegex.test(pName) && pName.length >= 2) {
-                params.push({ name: pName, val: pVal, unit: pUnit, ref: pRef });
-                continue;
-              }
-            }
-          }
-
-          // Try sequential adjacent lines: Line i is Name, Line i+1 is Value
-          if (parts.length < 2 && i + 1 < rawLines.length) {
-            const nextLine = rawLines[i + 1];
-            const nextMatch = nextLine.match(/^([<>]?\s*\d+(?:\.\d+)?|\b(?:REACTIVE|NON-REACTIVE|POSITIVE|NEGATIVE|NORMAL|TRACE|NIL|PRESENT|ABSENT)\b)(?:\s+([a-zA-Z\/\%\.\^]+))?(?:\s+([<>]?\s*[\d\.\-\–\s]+.*))?$/);
-            if (nextMatch && !noiseRegex.test(line) && line.length >= 3 && line.length < 60) {
-              params.push({
-                name: line,
-                val: nextMatch[1].trim(),
-                unit: (nextMatch[2] || "").trim(),
-                ref: (nextMatch[3] || "").trim()
-              });
-              i++;
-              continue;
-            }
-          }
-
-          // Try single line regex: "NAME [spaces] VALUE [spaces] UNIT [spaces] REF"
-          const singleMatch = line.match(/^([A-Za-z0-9\s\/\-\(\)\.\,\:\+]+?)\s+([<>]?\s*\d+(?:\.\d+)?|\b(?:REACTIVE|NON-REACTIVE|POSITIVE|NEGATIVE|NORMAL|TRACE|NIL|PRESENT|ABSENT)\b)(?:\s+([a-zA-Z\/\%\.\^]+))?(?:\s+([<>]?\s*[\d\.\-\–\s]+.*))?$/);
-          if (singleMatch) {
-            const name = singleMatch[1].trim();
-            const val = singleMatch[2].trim();
-            const unit = (singleMatch[3] || "").trim();
-            const ref = (singleMatch[4] || "").trim();
-            if (!noiseRegex.test(name) && name.length >= 2) {
-              params.push({ name, val, unit, ref });
-              continue;
-            }
+        const rangeMatch = (p.ref || '').match(/(\d+(?:\.\d+)?)\s*(?:-|–|to)\s*(\d+(?:\.\d+)?)/);
+        const fval = parseFloat(p.val);
+        if (rangeMatch && !isNaN(fval)) {
+          const low = parseFloat(rangeMatch[1]);
+          const high = parseFloat(rangeMatch[2]);
+          if (fval < low) {
+            flagText = 'LOW';
+            flagClass = 'text-amber-600 font-bold';
+            needleColor = 'text-amber-600';
+            needlePos = 18.0;
+          } else if (fval > high) {
+            flagText = 'HIGH';
+            flagClass = 'text-rose-600 font-bold';
+            needleColor = 'text-rose-600';
+            needlePos = 82.0;
           }
         }
 
-        // If no params detected from strict regex, fallback
-        if (params.length === 0) {
-          params.push({
-            name: `${details.reportTitle} PARAMETER 1`,
-            val: '10.0',
-            unit: 'mg/dL',
-            ref: '5.0 - 15.0'
-          });
-        }
-
-        const rowsHtml = params.map((p, idx) => {
-          let flagText = 'NORMAL';
-          let flagClass = 'text-emerald-600';
-          let needleColor = 'text-emerald-600';
-          let needlePos = 50.0;
-
-          const rangeMatch = (p.ref || '').match(/(\d+(?:\.\d+)?)\s*(?:-|–|to)\s*(\d+(?:\.\d+)?)/);
-          const fval = parseFloat(p.val);
-          if (rangeMatch && !isNaN(fval)) {
-            const low = parseFloat(rangeMatch[1]);
-            const high = parseFloat(rangeMatch[2]);
-            if (fval < low) {
-              flagText = 'LOW';
-              flagClass = 'text-amber-600 font-bold';
-              needleColor = 'text-amber-600';
-              needlePos = 18.0;
-            } else if (fval > high) {
-              flagText = 'HIGH';
-              flagClass = 'text-rose-600 font-bold';
-              needleColor = 'text-rose-600';
-              needlePos = 82.0;
-            }
-          }
-
-          return `
-            <tr class="hover:bg-slate-50 transition border-b border-gray-200">
-              <td class="py-1 px-1 text-center no-print w-5 print-cb-col">
-                <input type="checkbox" checked onchange="toggleRowPrint(this)" class="accent-teal-600 w-3 h-3 cursor-pointer rounded">
-              </td>
-              <td class="py-1 px-1 text-center text-gray-500 font-mono text-[10px] w-6 row-num-cell">${idx + 1}</td>
-              <td class="py-1 px-1 font-bold text-gray-900 leading-tight">
-                <span class="editable-field font-bold text-gray-900" contenteditable="true">${p.name}</span>
-              </td>
-              <td class="py-1 px-1 text-center font-bold font-mono">
-                <span class="editable-field param-val px-2 py-0.5 rounded font-bold text-xs inline-block" contenteditable="true" onblur="recheckFlagsAndGauges()">${p.val}</span>
-              </td>
-              <td class="py-1 px-1 text-center font-bold text-[10px] col-flag flag-cell">
-                <span class="editable-field ${flagClass}" contenteditable="true">${flagText}</span>
-              </td>
-              <td class="py-1 px-1 text-center w-20 col-gauge">
-                <div class="visual-gauge-container w-20 mx-auto select-none">
-                  <div class="gauge-bar h-1 w-full rounded-full flex overflow-hidden bg-gray-200">
-                    <div class="gauge-low bg-amber-400" style="width: 25%;"></div>
-                    <div class="gauge-normal bg-emerald-500" style="width: 50%;"></div>
-                    <div class="gauge-high bg-rose-500" style="width: 25%;"></div>
-                  </div>
-                  <div class="gauge-needle-wrap relative h-2.5 w-full">
-                    <div class="gauge-needle absolute text-[7.5px] -translate-x-1/2 font-bold ${needleColor} transition-all duration-300" style="left: ${needlePos}%;">▼</div>
-                  </div>
+        return `
+          <tr class="hover:bg-slate-50 transition border-b border-gray-200">
+            <td class="py-1 px-1 text-center no-print w-5 print-cb-col">
+              <input type="checkbox" checked onchange="toggleRowPrint(this)" class="accent-teal-600 w-3 h-3 cursor-pointer rounded">
+            </td>
+            <td class="py-1 px-1 text-center text-gray-500 font-mono text-[10px] w-6 row-num-cell">${idx + 1}</td>
+            <td class="py-1 px-1 font-bold text-gray-900 leading-tight">
+              <span class="editable-field font-bold text-gray-900" contenteditable="true">${p.name}</span>
+            </td>
+            <td class="py-1 px-1 text-center font-bold font-mono">
+              <span class="editable-field param-val px-2 py-0.5 rounded font-bold text-xs inline-block" contenteditable="true" onblur="recheckFlagsAndGauges()">${p.val}</span>
+            </td>
+            <td class="py-1 px-1 text-center font-bold text-[10px] col-flag flag-cell">
+              <span class="editable-field ${flagClass}" contenteditable="true">${flagText}</span>
+            </td>
+            <td class="py-1 px-1 text-center w-20 col-gauge">
+              <div class="visual-gauge-container w-20 mx-auto select-none">
+                <div class="gauge-bar h-1 w-full rounded-full flex overflow-hidden bg-gray-200">
+                  <div class="gauge-low bg-amber-400" style="width: 25%;"></div>
+                  <div class="gauge-normal bg-emerald-500" style="width: 50%;"></div>
+                  <div class="gauge-high bg-rose-500" style="width: 25%;"></div>
                 </div>
-              </td>
-              <td class="py-1 px-1 text-center text-gray-500 text-[10px] col-unit">
-                <span class="editable-field" contenteditable="true">${p.unit || ''}</span>
-              </td>
-              <td class="py-1 px-1 text-right text-gray-700 font-mono text-[10px]">
-                <span class="editable-field font-semibold text-gray-600" contenteditable="true">${p.ref || ''}</span>
-              </td>
-              <td class="py-1 px-1 text-center no-print">
-                <button onclick="deleteRowWithUndo(this)" title="Delete Parameter (Undo available)" class="text-rose-500 hover:text-rose-700 text-[10px] transition hover:scale-110">
-                  <i class="fa-solid fa-trash-can"></i>
-                </button>
-              </td>
-            </tr>
-          `;
-        }).join('');
-
-        bodyContentHtml = `
-          <div class="overflow-x-auto my-2">
-            <table class="w-full text-left text-xs border-collapse" data-numbering-mode="continuous">
-              <thead>
-                <tr class="border-b-2 border-slate-900 text-slate-800 text-[10.5px] uppercase font-bold tracking-wider">
-                  <th class="py-1 px-1 text-center no-print w-5 print-cb-col"></th>
-                  <th class="py-1 px-1 text-center w-6">#</th>
-                  <th class="py-1 px-1">INVESTIGATION</th>
-                  <th class="py-1 px-1 text-center">OBSERVED VALUE</th>
-                  <th class="py-1 px-1 text-center col-flag">FLAG</th>
-                  <th class="py-1 px-1 text-center w-20 col-gauge">RANGE</th>
-                  <th class="py-1 px-1 text-center col-unit">UNIT</th>
-                  <th class="py-1 px-1 text-right">BIOLOGICAL REF. INTERVAL</th>
-                  <th class="py-1 px-1 text-center no-print"></th>
-                </tr>
-              </thead>
-              <tbody id="${tbodyId}" class="divide-y divide-gray-200">
-                <tr class="group-header-row bg-slate-100/90 font-bold text-slate-800 border-y border-slate-300">
-                  <td class="py-0.5 px-1 text-center no-print print-cb-col"></td>
-                  <td colspan="7" class="py-0.5 px-2 uppercase tracking-wider text-[10px]">
-                    <div class="flex items-center justify-between">
-                      <span class="editable-field" contenteditable="true">CLINICAL PARAMETERS / BIOCHEMISTRY (${params.length} PARAMETERS)</span>
-                      <button type="button" onclick="insertRowInGroup(this)" class="no-print text-[9.5px] px-1.5 py-0.5 bg-teal-600 hover:bg-teal-500 text-white rounded font-normal transition">
-                        <i class="fa-solid fa-plus text-[8px]"></i> Add Row to Group
-                      </button>
-                    </div>
-                  </td>
-                  <td class="py-0.5 px-1 text-center no-print">
-                    <button onclick="deleteRowWithUndo(this)" title="Delete Section" class="text-rose-500 hover:text-rose-700 text-[10px]"><i class="fa-solid fa-trash-can"></i></button>
-                  </td>
-                </tr>
-                ${rowsHtml}
-              </tbody>
-            </table>
-          </div>
+                <div class="gauge-needle-wrap relative h-2.5 w-full">
+                  <div class="gauge-needle absolute text-[7.5px] -translate-x-1/2 font-bold ${needleColor} transition-all duration-300" style="left: ${needlePos}%;">▼</div>
+                </div>
+              </div>
+            </td>
+            <td class="py-1 px-1 text-center text-gray-500 text-[10px] col-unit">
+              <span class="editable-field" contenteditable="true">${p.unit || ''}</span>
+            </td>
+            <td class="py-1 px-1 text-right text-gray-700 font-mono text-[10px]">
+              <span class="editable-field font-semibold text-gray-600" contenteditable="true">${p.ref || ''}</span>
+            </td>
+            <td class="py-1 px-1 text-center no-print whitespace-nowrap">
+              <button onclick="moveRowUp(this)" title="Move Parameter Up" class="text-slate-400 hover:text-teal-600 text-[10px] mr-1">▲</button>
+              <button onclick="moveRowDown(this)" title="Move Parameter Down" class="text-slate-400 hover:text-teal-600 text-[10px] mr-1">▼</button>
+              <button onclick="deleteRowWithUndo(this)" title="Delete Parameter (Undo available)" class="text-rose-500 hover:text-rose-700 text-[10px] transition hover:scale-110">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </td>
+          </tr>
         `;
-      }
+      }).join('');
+
+      const bodyContentHtml = `
+        <div class="overflow-x-auto my-2">
+          <table class="w-full text-left text-xs border-collapse" data-numbering-mode="continuous">
+            <thead>
+              <tr class="border-b-2 border-slate-900 text-slate-800 text-[10px] uppercase font-bold tracking-wider whitespace-nowrap align-middle">
+                <th class="py-1 px-1 text-center no-print w-5 print-cb-col"></th>
+                <th class="py-1 px-1 text-center w-6">#</th>
+                <th class="py-1 px-1">INVESTIGATION</th>
+                <th class="py-1 px-1 text-center">OBSERVED VALUE</th>
+                <th class="py-1 px-1 text-center col-flag">FLAG</th>
+                <th class="py-1 px-1 text-center w-20 col-gauge">RANGE GAUGE</th>
+                <th class="py-1 px-1 text-center col-unit">UNIT</th>
+                <th class="py-1 px-1 text-right">BIOLOGICAL REF. INTERVAL</th>
+                <th class="py-1 px-1 text-center no-print w-14">ACTION</th>
+              </tr>
+            </thead>
+            <tbody id="${tbodyId}" class="divide-y divide-gray-200">
+              <tr class="group-header-row bg-slate-100/90 font-bold text-slate-800 border-y border-slate-300">
+                <td class="py-0.5 px-1 text-center no-print print-cb-col"></td>
+                <td colspan="7" class="py-0.5 px-2 uppercase tracking-wider text-[10px]">
+                  <div class="flex items-center justify-between">
+                    <span class="editable-field" contenteditable="true">CLINICAL PARAMETERS / BIOCHEMISTRY (${params.length} PARAMETERS)</span>
+                    <button type="button" onclick="insertRowInGroup(this)" class="no-print text-[9.5px] px-1.5 py-0.5 bg-teal-600 hover:bg-teal-500 text-white rounded font-normal transition">
+                      <i class="fa-solid fa-plus text-[8px]"></i> Add Row to Group
+                    </button>
+                  </div>
+                </td>
+                <td class="py-0.5 px-1 text-center no-print">
+                  <button onclick="deleteRowWithUndo(this)" title="Delete Section" class="text-rose-500 hover:text-rose-700 text-[10px]"><i class="fa-solid fa-trash-can"></i></button>
+                </td>
+              </tr>
+              ${rowsHtml}
+            </tbody>
+          </table>
+        </div>
+      `;
 
       newSheet.innerHTML = `
         <div class="page-content-wrapper">
-          <!-- 1. CLINIC HEADER SPACE (RESPECTS 40MM PREPRINTED OR DIGITAL HEADER) -->
+          <!-- 1. CLINIC HEADER SPACE -->
           <div class="clinic-header-space">
             <div class="preprinted-spacer w-full relative">
               <div class="no-print absolute inset-0 border border-dashed border-gray-300 rounded flex flex-col items-center justify-center text-gray-400 text-xs">
@@ -7106,7 +7367,7 @@
 
           <div class="w-full mt-2"><div class="border-t-2 border-black w-full"></div><div class="border-t border-black w-full mt-[2px]"></div></div>
 
-          <!-- 2. PATIENT DEMOGRAPHICS (DYNAMICALLY BOUND) -->
+          <!-- 2. PATIENT DEMOGRAPHICS -->
           <section class="mt-2.5 text-[12px] leading-tight text-black">
             <div class="grid grid-cols-2 gap-x-6">
               <div class="space-y-1">
@@ -7164,9 +7425,6 @@
       const container = document.getElementById('sheetsContainer');
       container.appendChild(newSheet);
 
-      // Add to Report Modules Drawer
-      addReportModuleCheckbox(newSheetId, details.reportTitle, true);
-
       // Focus and scroll
       setActiveSheet(newSheetId);
       newSheet.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -7177,15 +7435,12 @@
       if (typeof syncMasterDoctorData === 'function') syncMasterDoctorData();
       if (typeof syncMasterDmltData === 'function') syncMasterDmltData();
       if (typeof recheckFlagsAndGauges === 'function') recheckFlagsAndGauges();
-      if (typeof letterheadMode !== 'undefined') {
-        const isPre = letterheadMode === 'preprinted';
-        newSheet.querySelectorAll('.preprinted-spacer').forEach(el => el.classList.toggle('hidden', !isPre));
-        newSheet.querySelectorAll('.digital-header-block').forEach(el => el.classList.toggle('hidden', isPre));
-      }
+      if (typeof initRowDragAndDrop === 'function') initRowDragAndDrop();
 
-      // Save to storage
-      LabXStorageEngine.save();
-      showToast(`🎉 Imported "${details.reportTitle}" successfully!`);
+      // Automatically add to Uploaded list in library
+      saveCurrentSheetToLibrary();
+      switchReportCategory('uploaded');
+      showToast(`🎉 Imported "${details.reportTitle}" (${params.length} tests) successfully!`);
     }
 
     function addReportModuleCheckbox(sheetId, title, checked = true) {
@@ -7226,7 +7481,7 @@
       });
     }
 
-    function selectAllReports(shouldSelect) {
+        function selectAllReports(shouldSelect) {
       document.querySelectorAll('.report-checkbox').forEach(cb => {
         cb.checked = shouldSelect;
       });
@@ -7601,7 +7856,11 @@
         </td>
         <td class="py-0.5 px-1 text-center text-gray-600 font-mono text-[10px] col-unit"><span class="editable-field" contenteditable="true">-</span></td>
         <td class="py-0.5 px-1 text-right text-gray-700 font-mono text-[10px]"><span class="editable-field" contenteditable="true">0 - 100</span></td>
-        <td class="py-0.5 px-1 text-center no-print"><button onclick="deleteRowWithUndo(this)" title="Delete Parameter (Undo available)" class="text-rose-500 hover:text-rose-700 text-[10px] transition hover:scale-110"><i class="fa-solid fa-trash-can"></i></button></td>
+        <td class="py-0.5 px-1 text-center no-print whitespace-nowrap">
+          <button onclick="moveRowUp(this)" title="Move Up" class="text-slate-400 hover:text-teal-600 text-[10px] mr-1">▲</button>
+          <button onclick="moveRowDown(this)" title="Move Down" class="text-slate-400 hover:text-teal-600 text-[10px] mr-1">▼</button>
+          <button onclick="deleteRowWithUndo(this)" title="Delete Parameter (Undo available)" class="text-rose-500 hover:text-rose-700 text-[10px] transition hover:scale-110"><i class="fa-solid fa-trash-can"></i></button>
+        </td>
       `;
 
       if (targetNode) tbody.insertBefore(newTr, targetNode);
@@ -7609,6 +7868,7 @@
 
       LabXCustomStudio.renumberTable(tbody);
       recheckFlagsAndGauges();
+      initRowDragAndDrop();
       showToast("Parameter Added to Group");
     }
 
@@ -7892,7 +8152,11 @@
                   </td>
                   <td class="py-0.5 px-1 text-center text-gray-600 font-mono text-[10px] col-unit"><span class="editable-field" contenteditable="true">-</span></td>
                   <td class="py-0.5 px-1 text-right text-gray-700 font-mono text-[10px]"><span class="editable-field" contenteditable="true">0 - 100</span></td>
-                  <td class="py-0.5 px-1 text-center no-print"><button onclick="deleteRowWithUndo(this)" title="Delete Parameter (Undo available)" class="text-rose-500 hover:text-rose-700 text-[10px]"><i class="fa-solid fa-trash-can"></i></button></td>
+                  <td class="py-0.5 px-1 text-center no-print whitespace-nowrap">
+                    <button onclick="moveRowUp(this)" title="Move Up" class="text-slate-400 hover:text-teal-600 text-[10px] mr-1">▲</button>
+                    <button onclick="moveRowDown(this)" title="Move Down" class="text-slate-400 hover:text-teal-600 text-[10px] mr-1">▼</button>
+                    <button onclick="deleteRowWithUndo(this)" title="Delete Parameter (Undo available)" class="text-rose-500 hover:text-rose-700 text-[10px]"><i class="fa-solid fa-trash-can"></i></button>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -7958,6 +8222,9 @@
         setActiveSheet(newSheetId);
         recheckFlagsAndGauges();
         buildImpressionChecklist();
+        initRowDragAndDrop();
+        saveCurrentSheetToLibrary();
+        switchReportCategory('scratch');
         showToast(`Page ${nextPageNum} Added to ${title}`);
       },
 
@@ -7986,7 +8253,11 @@
           </td>
           <td class="py-0.5 px-1 text-center text-gray-600 font-mono text-[10px] col-unit"><span class="editable-field" contenteditable="true">-</span></td>
           <td class="py-0.5 px-1 text-right text-gray-700 font-mono text-[10px]"><span class="editable-field" contenteditable="true">0 - 100</span></td>
-          <td class="py-0.5 px-1 text-center no-print"><button onclick="deleteRowWithUndo(this)" title="Delete Parameter (Undo available)" class="text-rose-500 hover:text-rose-700 text-[10px] transition hover:scale-110"><i class="fa-solid fa-trash-can"></i></button></td>
+          <td class="py-0.5 px-1 text-center no-print whitespace-nowrap">
+            <button onclick="moveRowUp(this)" title="Move Up" class="text-slate-400 hover:text-teal-600 text-[10px] mr-1">▲</button>
+            <button onclick="moveRowDown(this)" title="Move Down" class="text-slate-400 hover:text-teal-600 text-[10px] mr-1">▼</button>
+            <button onclick="deleteRowWithUndo(this)" title="Delete Parameter (Undo available)" class="text-rose-500 hover:text-rose-700 text-[10px] transition hover:scale-110"><i class="fa-solid fa-trash-can"></i></button>
+          </td>
         `;
 
         // If user was focused on an existing row, insert right below it
@@ -7998,6 +8269,8 @@
         }
 
         this.renumberTable(tbody);
+        recheckFlagsAndGauges();
+        initRowDragAndDrop();
         recheckFlagsAndGauges();
       },
 
@@ -8087,6 +8360,8 @@
       syncMasterPatientData();
       onReportCheckboxChange();
       recheckFlags();
+      initRowDragAndDrop();
+      renderCustomTemplatesList();
 
       // Check for updates after 3 seconds in background (Only triggers popup if latest > current)
       setTimeout(() => checkForUpdates(false), 3000);

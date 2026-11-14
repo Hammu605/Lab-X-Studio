@@ -94,28 +94,37 @@ jobs:
       - name: List Release Files
         run: ls -lh release-dist
 
+      - name: Clean Old Release Assets
+        run: |
+          for asset in $(gh release view latest --json assets --jq '.assets[].name' 2>/dev/null || true); do
+            echo "Removing old asset $asset..."
+            gh release delete-asset latest "$asset" -y || true
+          done
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Create Continuous Release (Windows .exe & Linux .AppImage)
         uses: softprops/action-gh-release@v2
         with:
           tag_name: latest
-          name: "Lab X Studio v1.5.1 (Windows & Linux Ultra-Lite)"
+          name: "Lab X Studio v1.0.0 (Official Stable Release)"
           body: |
-            ## Lab X Studio v1.5.1 — Cross-Platform Release (Windows & Linux)
+            ## Lab X Studio v1.0.0 — Official Cross-Platform Release (Windows & Linux)
 
             ### 📦 Download Links:
-            - **⚡ Linux Ultra-Lite Installer (Recommended for Kali Linux / Debian / Ubuntu)**: `Lab-X-Studio-Linux-Lite-1.5.1.deb` (**Only ~48 KB!** Instant install with Desktop shortcut via `sudo dpkg -i`)
-            - **⚡ Linux Ultra-Lite Portable**: `Lab-X-Studio-Linux-Portable-1.5.1.tar.gz` (**Only ~67 KB!** Extract and run `./run.sh` anywhere without installing)
-            - **Linux Self-Contained AppImage**: `Lab-X-Studio-1.5.1.AppImage` (Bundled standalone runtime)
-            - **Windows Installer**: `Lab-X-Studio-Setup-1.5.1.exe` (Complete Windows installation with Desktop shortcut)
-            - **Windows Portable**: `Lab-X-Studio-Portable-1.5.1.exe` (Standalone portable execution without installation)
+            - **⚡ Linux Ultra-Lite Installer (Recommended for Kali Linux / Debian / Ubuntu)**: `Lab-X-Studio-Linux-Lite-1.0.0.deb` (**Only ~48 KB!** Auto-maximizes to screen, instant install with Desktop shortcut via `sudo dpkg -i`)
+            - **⚡ Linux Ultra-Lite Portable**: `Lab-X-Studio-Linux-Portable-1.0.0.tar.gz` (**Only ~67 KB!** Extract and run `./run.sh` anywhere without installing)
+            - **Linux Self-Contained AppImage**: `Lab-X-Studio-1.0.0.AppImage` (Bundled standalone runtime)
+            - **Windows Installer**: `Lab-X-Studio-Setup-1.0.0.exe` (Complete Windows installation with Desktop shortcut)
+            - **Windows Portable**: `Lab-X-Studio-Portable-1.0.0.exe` (Standalone portable execution without installation)
 
-            ### 🚀 What's New & Fixed in v1.5.1:
-            - **Ultra-Lightweight Linux Package**: Reduced Linux package size from 104 MB down to **48 KB** (over 2,000x smaller!) using native system app window engine.
-            - **Fixed Startup Freeze & Hang**: Eliminated infinite recursion loop on checkbox toggles and page load. App starts instantly and buttons remain responsive.
-            - **Comprehensive Multi-Parameter DOC/DOCX Parser**: Uploading clinical biochemistry files now accurately extracts all 10–20+ parameters (investigation, observed value, unit, reference interval, and range gauge) instead of stopping at 1.
-            - **Dynamic Clinic Header Inheritance**: Uploaded custom reports now inherit the user's active laboratory name, address, and doctor/technician signature stamps.
-            - **40mm Top Letterhead Spacer**: Restored the 40mm preprinted letterhead spacer on all custom and uploaded sheets.
-            - **Dual-Boot Ready**: Tested and packaged for seamless operation on Windows and Kali Linux from shared partitions.
+            ### 🚀 What's New & Included in v1.0.0:
+            - **Screen Work-Area Auto-Maximize**: Perfectly fits Kali Linux & Windows screens without window overflow.
+            - **3 Report Categories**: Pre-Default, Scratch, and Uploaded reports with Save-to-Library integration.
+            - **Interactive Drag & Drop Parameter Reordering**: Move test rows up/down with drag & drop or 1-click arrow buttons.
+            - **Clean Horizontal Header Alignment**: Test parameters, observed values, flags, units, and ranges aligned on a single row.
+            - **Deep Word DOCX/DOC Parser**: 100% accurate client-side XML table extraction.
+            - **Ultra-Lightweight Linux Package**: Lightning-fast 48 KB native debian package.
 
             Automatically compiled by GitHub Actions.
           files: release-dist/*
