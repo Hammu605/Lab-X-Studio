@@ -5113,38 +5113,6 @@
     </div>
   </div>
 
-  <!-- DELETE TEMPLATE CONFIRMATION MODAL -->
-  <div id="deleteConfirmModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
-    <div class="bg-[#0b1020] border border-rose-500/50 rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-4">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-rose-500/20 text-rose-400 border border-rose-500/40 flex items-center justify-center">
-            <i class="fa-solid fa-triangle-exclamation text-base"></i>
-          </div>
-          <div>
-            <h3 class="text-sm font-bold text-white">Delete Report Template</h3>
-            <p class="text-[11px] text-slate-400">Confirmation (हटाने की पुष्टि)</p>
-          </div>
-        </div>
-        <button type="button" onclick="closeDeleteConfirmModal(false)" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-sm"></i></button>
-      </div>
-
-      <div class="space-y-2">
-        <p class="text-xs text-slate-200 font-medium">Are you sure you want to permanently delete this report template from your library?</p>
-        <div id="deleteConfirmTemplateTitle" class="p-2.5 bg-[#050814] border border-slate-700/80 rounded-xl text-teal-300 font-bold text-xs truncate"></div>
-        <p class="text-[11px] text-rose-400 font-medium">यह टेम्पलेट आपकी लाइब्रेरी और वर्कस्पेस से हमेशा के लिए हट जाएगी।</p>
-      </div>
-
-      <div class="flex items-center justify-end gap-2.5 pt-2">
-        <button type="button" onclick="closeDeleteConfirmModal(false)" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition">
-          Cancel (रद्द करें)
-        </button>
-        <button type="button" onclick="closeDeleteConfirmModal(true)" class="px-5 py-2 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-bold text-xs flex items-center gap-1.5 transition shadow">
-          <i class="fa-solid fa-trash-can"></i> Yes, Delete (हटाएं)
-        </button>
-      </div>
-    </div>
-  </div>
 
   <!-- TOAST NOTIFICATION -->
   <div id="toastNotification" class="fixed bottom-10 right-10 bg-slate-900/95 border border-teal-500/40 text-teal-300 text-xs px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2 pointer-events-none transition-all duration-300 opacity-0 translate-y-3 z-50">
@@ -5254,36 +5222,7 @@
       const val = inputEl ? inputEl.value.trim() : '';
       closeCustomPrompt(val);
     }
-
-    // Custom In-App Delete Confirmation Modal Engine
-    let deleteConfirmResolve = null;
-
-    function showDeleteConfirmModal(title) {
-      return new Promise((resolve) => {
-        deleteConfirmResolve = resolve;
-        const modal = document.getElementById('deleteConfirmModal');
-        const titleEl = document.getElementById('deleteConfirmTemplateTitle');
-        if (titleEl) titleEl.textContent = title || 'Selected Template';
-        if (modal) {
-          modal.classList.remove('hidden');
-          modal.classList.add('flex');
-        }
-      });
-    }
-
-    function closeDeleteConfirmModal(confirmed) {
-      const modal = document.getElementById('deleteConfirmModal');
-      if (modal) {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-      }
-      if (deleteConfirmResolve) {
-        deleteConfirmResolve(!!confirmed);
-        deleteConfirmResolve = null;
-      }
-    }
-
-    // Enter & Escape key handlers for custom in-app prompt & delete confirm modal
+    // Enter & Escape key handlers for custom in-app prompt
     document.addEventListener('keydown', (e) => {
       const modal = document.getElementById('customPromptModal');
       if (modal && !modal.classList.contains('hidden')) {
@@ -5293,18 +5232,6 @@
         } else if (e.key === 'Escape') {
           e.preventDefault();
           closeCustomPrompt(null);
-        }
-        return;
-      }
-
-      const delModal = document.getElementById('deleteConfirmModal');
-      if (delModal && !delModal.classList.contains('hidden')) {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          closeDeleteConfirmModal(true);
-        } else if (e.key === 'Escape') {
-          e.preventDefault();
-          closeDeleteConfirmModal(false);
         }
       }
     });
@@ -7177,19 +7104,20 @@
     }
 
     function onCustomTemplateCheckboxChange(sheetId, cb) {
-      if (cb.checked) {
-        let sheet = document.getElementById(sheetId);
-        if (!sheet) {
-          sheet = restoreCustomTemplateToDom(sheetId);
-        }
-        if (sheet) {
-          sheet.style.display = 'flex';
+      const isChecked = cb.checked;
+      document.querySelectorAll(`.report-checkbox[data-sheet="${sheetId}"]`).forEach(el => {
+        el.checked = isChecked;
+      });
+      let sheet = document.getElementById(sheetId);
+      if (!sheet && isChecked) {
+        sheet = restoreCustomTemplateToDom(sheetId);
+      }
+      if (sheet) {
+        sheet.style.display = isChecked ? 'flex' : 'none';
+        if (isChecked) {
           setActiveSheet(sheetId);
           sheet.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-      } else {
-        const sheet = document.getElementById(sheetId);
-        if (sheet) sheet.style.display = 'none';
       }
       onReportCheckboxChange();
     }
@@ -7210,13 +7138,12 @@
       showToast(`Template "${t.title}" exported! Share this JSON to hardcode into software.`);
     }
 
-    async function deleteCustomTemplate(id) {
+    function deleteCustomTemplate(id) {
       const templates = getSavedCustomTemplates();
       const t = templates.find(item => item.id === id);
-      const title = t ? t.title : 'Selected Template';
+      const title = t ? t.title : 'Template';
 
-      const confirmed = await showDeleteConfirmModal(title);
-      if (!confirmed) return;
+      if (!confirm(`Are you sure you want to delete "${title}" from your library?`)) return;
 
       const remaining = templates.filter(item => item.id !== id);
       saveCustomTemplates(remaining);
