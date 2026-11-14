@@ -111,7 +111,7 @@ function createWindow() {
             dialog.showMessageBox(mainWindow, {
               type: 'info',
               title: 'About Lab X Studio',
-              message: 'Lab X Studio v1.0.0\nProfessional Diagnostic Studio & LIS\nDesigned for Krishna Computerized Laboratory.',
+              message: 'Lab X Studio v1.1.2\nProfessional Diagnostic Studio & LIS\nDesigned for Krishna Computerized Laboratory.',
               buttons: ['OK']
             });
           }
@@ -172,6 +172,82 @@ ipcMain.handle('load-patient-records', async () => {
     return [];
   } catch (err) {
     return [];
+  }
+});
+
+ipcMain.handle('open-external', async (event, url) => {
+  try {
+    if (url && (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('mailto:') || url.startsWith('tel:'))) {
+      await shell.openExternal(url);
+      return { success: true };
+    }
+    return { success: false, error: 'Invalid URL' };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+});
+
+ipcMain.handle('launch-installer', async (event, filename) => {
+  try {
+    const downloadsPath = app.getPath('downloads');
+    let installerPath = null;
+    if (filename) {
+      const directPath = path.join(downloadsPath, filename);
+      if (fs.existsSync(directPath)) {
+        installerPath = directPath;
+      }
+    }
+    if (!installerPath && fs.existsSync(downloadsPath)) {
+      const files = fs.readdirSync(downloadsPath);
+      const matches = files
+        .filter(f => (f.toLowerCase().includes('lab-x') || f.toLowerCase().includes('labx')) && (f.endsWith('.exe') || f.endsWith('.deb') || f.endsWith('.AppImage')))
+        .map(f => {
+          try {
+            return {
+              name: f,
+              path: path.join(downloadsPath, f),
+              time: fs.statSync(path.join(downloadsPath, f)).mtimeMs
+            };
+          } catch(e) {
+            return null;
+          }
+        })
+        .filter(Boolean)
+        .sort((a, b) => b.time - a.time);
+
+      if (matches.length > 0) {
+        installerPath = matches[0].path;
+      }
+    }
+
+    if (installerPath) {
+      shell.openPath(installerPath);
+      // Wait 1500ms to allow installer process to initialize, then exit cleanly
+      setTimeout(() => {
+        app.quit();
+      }, 1500);
+      return { success: true, path: installerPath };
+    } else {
+      if (fs.existsSync(downloadsPath)) {
+        shell.openPath(downloadsPath);
+      }
+      return { success: false, error: 'Installer not found in Downloads. Opened folder.' };
+    }
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+});
+
+ipcMain.handle('open-downloads', async () => {
+  try {
+    const downloadsPath = app.getPath('downloads');
+    if (fs.existsSync(downloadsPath)) {
+      shell.openPath(downloadsPath);
+      return { success: true };
+    }
+    return { success: false, error: 'Downloads folder not found' };
+  } catch (err) {
+    return { success: false, error: err.message };
   }
 });
 
