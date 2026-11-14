@@ -8,7 +8,7 @@ INDEX_HTML = os.path.join(ROOT_DIR, 'index.html')
 DIST_DIR = os.path.join(ROOT_DIR, 'dist-electron')
 os.makedirs(DIST_DIR, exist_ok=True)
 
-VERSION = "1.0.0"
+VERSION = "1.1.0"
 PKG_NAME = "lab-x-studio-lite"
 WORK_DIR = os.path.join(DIST_DIR, "deb_work")
 shutil.rmtree(WORK_DIR, ignore_errors=True)

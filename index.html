@@ -444,9 +444,9 @@
       </button>
 
       <!-- Save Patient -->
-      <button onclick="savePatientRecord()" class="h-8 px-3 rounded-lg bg-teal-900/60 hover:bg-teal-800 text-teal-200 border border-teal-600/50 text-[11px] font-semibold flex items-center gap-1.5 transition active:scale-95 shadow-sm" title="Save to History Vault (Ctrl + S)">
-        <i class="fa-solid fa-floppy-disk text-xs"></i>
-        <span>Save</span>
+      <button onclick="savePatientRecord()" class="h-8 px-3 rounded-lg bg-teal-900/80 hover:bg-teal-800 text-teal-200 border border-teal-600/50 flex flex-col items-center justify-center transition active:scale-95 shadow-sm" title="Save to History Vault (Ctrl + S)">
+        <span class="flex items-center gap-1.5 font-bold text-[11px] leading-tight"><i class="fa-solid fa-floppy-disk text-xs text-teal-300"></i> <span>Save Report</span></span>
+        <span class="text-[8px] text-teal-300/80 leading-none">Save patient data &amp; values</span>
       </button>
 
       <!-- WhatsApp Share -->
@@ -635,6 +635,12 @@
           <span id="activeCountBadge" class="text-[10px] bg-teal-950 text-teal-300 border border-teal-700/60 px-2 py-0.5 rounded-full font-semibold">3 Active</span>
         </div>
 
+        <!-- Universal Search Bar for Report Modules -->
+        <div class="relative mb-2">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-xs text-slate-500"></i>
+          <input type="text" id="inpSearchReports" oninput="filterReportModulesList(this.value)" placeholder="Search all tests (CBC, LFT, Scratch, Uploaded)..." class="w-full bg-[#050814] border border-slate-700 rounded-lg pl-8 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-teal-500 font-medium">
+        </div>
+
         <!-- 3 SEGMENT CATEGORY BUTTONS -->
         <div class="grid grid-cols-3 gap-1 bg-[#050814] p-1 rounded-xl border border-slate-800 text-[10.5px] font-bold mb-3 select-none">
           <button id="btnCat_predefault" type="button" onclick="switchReportCategory('predefault')" class="py-1.5 px-1 rounded-lg text-center transition bg-teal-600 text-white shadow flex flex-col items-center justify-center gap-0.5">
@@ -653,12 +659,6 @@
 
         <!-- CATEGORY 1: PRE-DEFAULT BUILT-IN HARDCODED TESTS -->
         <div id="secCat_predefault" class="space-y-3">
-          <!-- Search Bar for Report Modules -->
-          <div class="relative mb-2">
-            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-xs text-slate-500"></i>
-            <input type="text" id="inpSearchReports" oninput="filterReportModulesList(this.value)" placeholder="Search report name or number (e.g. 1, cbc, lft, lipid)..." class="w-full bg-[#050814] border border-slate-700 rounded-lg pl-8 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-teal-500 font-medium">
-          </div>
-
           <!-- Quick Select / Deselect All -->
           <div class="flex items-center justify-between mb-1 text-[10.5px] px-1 font-mono">
             <button type="button" onclick="selectAllReports(true)" class="text-teal-400 hover:text-teal-300 font-semibold underline">Select All (12)</button>
@@ -748,6 +748,11 @@
             <i class="fa-solid fa-file-circle-plus text-sm"></i> Add New Custom Report (From Scratch)
           </button>
 
+          <button type="button" onclick="saveCurrentSheetToLibrary()" class="w-full py-2 bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 border border-emerald-600/50 rounded-lg text-xs font-bold shadow transition flex flex-col items-center justify-center gap-0.5">
+            <span class="flex items-center gap-1.5 font-bold"><i class="fa-solid fa-bookmark text-emerald-400"></i> Save Active Sheet to Library</span>
+            <span class="text-[9px] text-emerald-300/80 font-normal">Save as reusable custom template</span>
+          </button>
+
           <div class="text-[10px] font-mono text-slate-400 flex items-center justify-between px-1">
             <span>MY SCRATCH TEMPLATES:</span>
             <span id="lblScratchCount" class="text-teal-400 font-bold">0 Templates</span>
@@ -765,8 +770,9 @@
           </button>
           <input type="file" id="inpReportFileUploader" accept=".doc,.docx,.pdf,.txt" onchange="handleReportFileUpload(event)" class="hidden">
 
-          <button type="button" onclick="saveCurrentSheetToLibrary()" class="w-full py-2 bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 border border-emerald-600/50 rounded-lg text-xs font-bold shadow transition flex items-center justify-center gap-1.5">
-            <i class="fa-solid fa-floppy-disk text-xs"></i> Save Active Sheet to Library
+          <button type="button" onclick="saveCurrentSheetToLibrary()" class="w-full py-2 bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 border border-emerald-600/50 rounded-lg text-xs font-bold shadow transition flex flex-col items-center justify-center gap-0.5">
+            <span class="flex items-center gap-1.5 font-bold"><i class="fa-solid fa-bookmark text-emerald-400"></i> Save Active Sheet to Library</span>
+            <span class="text-[9px] text-emerald-300/80 font-normal">Save as reusable custom template</span>
           </button>
 
           <div class="text-[10px] font-mono text-slate-400 flex items-center justify-between px-1">
@@ -782,11 +788,13 @@
         <!-- COMMON FOOTER: BACKUP & RESTORE -->
         <div class="pt-2 border-t border-slate-800 space-y-2">
           <div class="flex items-center justify-between text-[10.5px] px-1 font-mono text-slate-400">
-            <button type="button" onclick="exportDataBackupFile()" class="text-teal-400 hover:text-teal-300 font-semibold flex items-center gap-1 transition">
-              <i class="fa-solid fa-floppy-disk text-[10px]"></i> Save Backup
+            <button type="button" onclick="exportDataBackupFile()" class="text-teal-400 hover:text-teal-300 font-semibold flex flex-col items-start transition" title="Export full backup JSON file">
+              <span class="flex items-center gap-1"><i class="fa-solid fa-download text-[10px]"></i> Save Backup</span>
+              <span class="text-[8.5px] text-slate-500 font-normal">Export .json file</span>
             </button>
-            <button type="button" onclick="document.getElementById('inpRestoreBackupFile').click()" class="text-amber-400 hover:text-amber-300 font-semibold flex items-center gap-1 transition">
-              <i class="fa-solid fa-upload text-[10px]"></i> Restore Backup
+            <button type="button" onclick="document.getElementById('inpRestoreBackupFile').click()" class="text-amber-400 hover:text-amber-300 font-semibold flex flex-col items-end transition" title="Restore from previously saved backup JSON">
+              <span class="flex items-center gap-1"><i class="fa-solid fa-upload text-[10px]"></i> Restore Backup</span>
+              <span class="text-[8.5px] text-slate-500 font-normal">Import .json file</span>
             </button>
             <input type="file" id="inpRestoreBackupFile" accept=".json" onchange="importDataBackupFile(event)" class="hidden">
           </div>
@@ -1140,8 +1148,9 @@
           </button>
 
           <!-- Save / Export Backup Button -->
-          <button type="button" onclick="exportDataBackupFile()" class="px-2.5 py-1 bg-teal-700 hover:bg-teal-600 text-white rounded text-[11px] font-bold flex items-center gap-1 shadow transition active:scale-95" title="Export Backup File to Computer (.json)">
-            <i class="fa-solid fa-floppy-disk"></i> <span>Save Backup</span>
+          <button type="button" onclick="exportDataBackupFile()" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded text-xs flex flex-col items-center justify-center transition active:scale-95 shadow" title="Export full backup file (.json) to computer">
+            <span class="flex items-center gap-1 font-bold text-[11px]"><i class="fa-solid fa-file-arrow-down text-teal-400"></i> Export Backup</span>
+            <span class="text-[8.5px] text-slate-400 font-normal">Download database JSON</span>
           </button>
         </div>
       </div>
@@ -1156,15 +1165,6 @@
             <button id="btnFormatItalic" type="button" onmousedown="event.preventDefault()" onclick="applyFormat('italic')" class="w-7 h-7 rounded bg-slate-800 text-slate-300 hover:text-white italic font-serif flex items-center justify-center transition border border-slate-700" title="Italic (Ctrl+I)">I</button>
             <button id="btnFormatUnderline" type="button" onmousedown="event.preventDefault()" onclick="applyFormat('underline')" class="w-7 h-7 rounded bg-slate-800 text-slate-300 hover:text-white underline flex items-center justify-center transition border border-slate-700" title="Underline (Ctrl+U)">U</button>
             <button id="btnFormatStrike" type="button" onmousedown="event.preventDefault()" onclick="applyFormat('strikeThrough')" class="w-7 h-7 rounded bg-slate-800 text-slate-300 hover:text-white line-through text-[10px] flex items-center justify-center transition border border-slate-700" title="Strikethrough">S</button>
-          </div>
-
-          <div class="h-4 w-px bg-slate-700 mx-0.5"></div>
-
-          <!-- Size -->
-          <div class="flex items-center gap-0.5">
-            <button type="button" onmousedown="event.preventDefault()" onclick="applyFontSize('10px')" class="px-1.5 py-0.5 text-[9.5px] bg-slate-800 hover:bg-slate-700 rounded border border-slate-700 text-slate-300">10</button>
-            <button type="button" onmousedown="event.preventDefault()" onclick="applyFontSize('11px')" class="px-1.5 py-0.5 text-[10.5px] bg-slate-800 hover:bg-slate-700 rounded border border-slate-700 text-teal-300 font-bold">11</button>
-            <button type="button" onmousedown="event.preventDefault()" onclick="applyFontSize('13px')" class="px-1.5 py-0.5 text-[11px] bg-slate-800 hover:bg-slate-700 rounded border border-slate-700 text-white font-bold">13</button>
           </div>
 
           <div class="h-4 w-px bg-slate-700 mx-0.5"></div>
@@ -1299,7 +1299,7 @@
                 <th class="py-1 px-1 text-center no-print w-5 print-cb-col">
                   <input type="checkbox" checked onchange="toggleAllRowsInTable(this)" title="Toggle all tests in table" class="accent-teal-600 w-3.5 h-3.5 cursor-pointer rounded">
                 </th>
-                <th class="py-1 px-1 font-bold text-center w-5 col-header-num"><span class="editable-field" contenteditable="true">#</span></th>
+                <th class="py-1 px-1 font-bold text-center w-8 col-header-num whitespace-nowrap"><div class="inline-flex items-center justify-center gap-1"><span class="editable-field" contenteditable="true">#</span><button type="button" onclick="openTableHeaderAddMenu(this, event)" class="no-print w-3.5 h-3.5 rounded bg-teal-100 hover:bg-teal-200 text-teal-800 text-[9px] font-bold inline-flex items-center justify-center border border-teal-300 shadow-sm transition active:scale-95" title="Add Row or Header to this Table">+</button></div></th>
                 <th class="py-1 px-1 font-bold col-header-param"><span class="editable-field" contenteditable="true">INVESTIGATION PARAMETER</span></th>
                 <th class="py-1 px-1 font-bold text-center col-header-result"><span class="editable-field" contenteditable="true">OBSERVED VALUE</span></th>
                 <th class="py-1 px-1 font-bold text-center col-header-flag col-flag"><span class="editable-field" contenteditable="true">FLAG</span></th>
@@ -2328,7 +2328,7 @@
                 <th class="py-1 px-1 text-center no-print w-5 print-cb-col">
                   <input type="checkbox" checked onchange="toggleAllRowsInTable(this)" title="Toggle all tests in table" class="accent-teal-600 w-3.5 h-3.5 cursor-pointer rounded">
                 </th>
-                <th class="py-1 px-1 font-bold text-center w-5 col-header-num"><span class="editable-field" contenteditable="true">#</span></th>
+                <th class="py-1 px-1 font-bold text-center w-8 col-header-num whitespace-nowrap"><div class="inline-flex items-center justify-center gap-1"><span class="editable-field" contenteditable="true">#</span><button type="button" onclick="openTableHeaderAddMenu(this, event)" class="no-print w-3.5 h-3.5 rounded bg-teal-100 hover:bg-teal-200 text-teal-800 text-[9px] font-bold inline-flex items-center justify-center border border-teal-300 shadow-sm transition active:scale-95" title="Add Row or Header to this Table">+</button></div></th>
                 <th class="py-1 px-1 font-bold col-header-param"><span class="editable-field" contenteditable="true">INVESTIGATION PARAMETER</span></th>
                 <th class="py-1 px-1 font-bold text-center col-header-result"><span class="editable-field" contenteditable="true">OBSERVED VALUE</span></th>
                 <th class="py-1 px-1 font-bold text-center col-header-flag col-flag"><span class="editable-field" contenteditable="true">FLAG</span></th>
@@ -2756,7 +2756,7 @@
                 <th class="py-1 px-1 text-center no-print w-5 print-cb-col">
                   <input type="checkbox" checked onchange="toggleAllRowsInTable(this)" title="Toggle all tests in table" class="accent-teal-600 w-3.5 h-3.5 cursor-pointer rounded">
                 </th>
-                <th class="py-1 px-1 font-bold text-center w-5 col-header-num"><span class="editable-field" contenteditable="true">#</span></th>
+                <th class="py-1 px-1 font-bold text-center w-8 col-header-num whitespace-nowrap"><div class="inline-flex items-center justify-center gap-1"><span class="editable-field" contenteditable="true">#</span><button type="button" onclick="openTableHeaderAddMenu(this, event)" class="no-print w-3.5 h-3.5 rounded bg-teal-100 hover:bg-teal-200 text-teal-800 text-[9px] font-bold inline-flex items-center justify-center border border-teal-300 shadow-sm transition active:scale-95" title="Add Row or Header to this Table">+</button></div></th>
                 <th class="py-1 px-1 font-bold col-header-param"><span class="editable-field" contenteditable="true">INVESTIGATION PARAMETER</span></th>
                 <th class="py-1 px-1 font-bold text-center col-header-result"><span class="editable-field" contenteditable="true">OBSERVED VALUE</span></th>
                 <th class="py-1 px-1 font-bold text-center col-header-flag col-flag"><span class="editable-field" contenteditable="true">FLAG</span></th>
@@ -3178,7 +3178,7 @@
                 <th class="py-1 px-1 text-center no-print w-5 print-cb-col">
                   <input type="checkbox" checked onchange="toggleAllRowsInTable(this)" title="Toggle all tests in table" class="accent-teal-600 w-3.5 h-3.5 cursor-pointer rounded">
                 </th>
-                <th class="py-1 px-1 font-bold text-center w-5 col-header-num"><span class="editable-field" contenteditable="true">#</span></th>
+                <th class="py-1 px-1 font-bold text-center w-8 col-header-num whitespace-nowrap"><div class="inline-flex items-center justify-center gap-1"><span class="editable-field" contenteditable="true">#</span><button type="button" onclick="openTableHeaderAddMenu(this, event)" class="no-print w-3.5 h-3.5 rounded bg-teal-100 hover:bg-teal-200 text-teal-800 text-[9px] font-bold inline-flex items-center justify-center border border-teal-300 shadow-sm transition active:scale-95" title="Add Row or Header to this Table">+</button></div></th>
                 <th class="py-1 px-1 font-bold col-header-param"><span class="editable-field" contenteditable="true">INVESTIGATION PARAMETER</span></th>
                 <th class="py-1 px-1 font-bold text-center col-header-result"><span class="editable-field" contenteditable="true">OBSERVED VALUE</span></th>
                 <th class="py-1 px-1 font-bold text-center col-header-flag col-flag"><span class="editable-field" contenteditable="true">FLAG</span></th>
@@ -3364,7 +3364,7 @@
                 <th class="py-1 px-1 text-center no-print w-5 print-cb-col">
                   <input type="checkbox" checked onchange="toggleAllRowsInTable(this)" title="Toggle all tests in table" class="accent-teal-600 w-3.5 h-3.5 cursor-pointer rounded">
                 </th>
-                <th class="py-1 px-1 font-bold text-center w-5 col-header-num"><span class="editable-field" contenteditable="true">#</span></th>
+                <th class="py-1 px-1 font-bold text-center w-8 col-header-num whitespace-nowrap"><div class="inline-flex items-center justify-center gap-1"><span class="editable-field" contenteditable="true">#</span><button type="button" onclick="openTableHeaderAddMenu(this, event)" class="no-print w-3.5 h-3.5 rounded bg-teal-100 hover:bg-teal-200 text-teal-800 text-[9px] font-bold inline-flex items-center justify-center border border-teal-300 shadow-sm transition active:scale-95" title="Add Row or Header to this Table">+</button></div></th>
                 <th class="py-1 px-1 font-bold col-header-param"><span class="editable-field" contenteditable="true">INVESTIGATION PARAMETER</span></th>
                 <th class="py-1 px-1 font-bold text-center col-header-result"><span class="editable-field" contenteditable="true">OBSERVED VALUE</span></th>
                 <th class="py-1 px-1 font-bold text-center col-header-flag col-flag"><span class="editable-field" contenteditable="true">FLAG</span></th>
@@ -3500,7 +3500,7 @@
                 <th class="py-1 px-1 text-center no-print w-5 print-cb-col">
                   <input type="checkbox" checked onchange="toggleAllRowsInTable(this)" title="Toggle all tests in table" class="accent-teal-600 w-3.5 h-3.5 cursor-pointer rounded">
                 </th>
-                <th class="py-1 px-1 font-bold text-center w-5 col-header-num"><span class="editable-field" contenteditable="true">#</span></th>
+                <th class="py-1 px-1 font-bold text-center w-8 col-header-num whitespace-nowrap"><div class="inline-flex items-center justify-center gap-1"><span class="editable-field" contenteditable="true">#</span><button type="button" onclick="openTableHeaderAddMenu(this, event)" class="no-print w-3.5 h-3.5 rounded bg-teal-100 hover:bg-teal-200 text-teal-800 text-[9px] font-bold inline-flex items-center justify-center border border-teal-300 shadow-sm transition active:scale-95" title="Add Row or Header to this Table">+</button></div></th>
                 <th class="py-1 px-1 font-bold col-header-param"><span class="editable-field" contenteditable="true">INVESTIGATION PARAMETER</span></th>
                 <th class="py-1 px-1 font-bold text-center col-header-result"><span class="editable-field" contenteditable="true">OBSERVED VALUE</span></th>
                 <th class="py-1 px-1 font-bold text-center col-header-flag col-flag"><span class="editable-field" contenteditable="true">FLAG</span></th>
@@ -3688,7 +3688,7 @@
                 <th class="py-1 px-1 text-center no-print w-5 print-cb-col">
                   <input type="checkbox" checked onchange="toggleAllRowsInTable(this)" title="Toggle all tests in table" class="accent-teal-600 w-3.5 h-3.5 cursor-pointer rounded">
                 </th>
-                <th class="py-1 px-1 font-bold text-center w-5 col-header-num"><span class="editable-field" contenteditable="true">#</span></th>
+                <th class="py-1 px-1 font-bold text-center w-8 col-header-num whitespace-nowrap"><div class="inline-flex items-center justify-center gap-1"><span class="editable-field" contenteditable="true">#</span><button type="button" onclick="openTableHeaderAddMenu(this, event)" class="no-print w-3.5 h-3.5 rounded bg-teal-100 hover:bg-teal-200 text-teal-800 text-[9px] font-bold inline-flex items-center justify-center border border-teal-300 shadow-sm transition active:scale-95" title="Add Row or Header to this Table">+</button></div></th>
                 <th class="py-1 px-1 font-bold col-header-param"><span class="editable-field" contenteditable="true">INVESTIGATION PARAMETER</span></th>
                 <th class="py-1 px-1 font-bold text-center col-header-result"><span class="editable-field" contenteditable="true">OBSERVED VALUE</span></th>
                 <th class="py-1 px-1 font-bold text-center col-header-flag col-flag"><span class="editable-field" contenteditable="true">FLAG</span></th>
@@ -3897,7 +3897,7 @@
                 <th class="py-1 px-1 text-center no-print w-5 print-cb-col">
                   <input type="checkbox" checked onchange="toggleAllRowsInTable(this)" title="Toggle all tests in table" class="accent-teal-600 w-3.5 h-3.5 cursor-pointer rounded">
                 </th>
-                <th class="py-1 px-1 font-bold text-center w-5 col-header-num"><span class="editable-field" contenteditable="true">#</span></th>
+                <th class="py-1 px-1 font-bold text-center w-8 col-header-num whitespace-nowrap"><div class="inline-flex items-center justify-center gap-1"><span class="editable-field" contenteditable="true">#</span><button type="button" onclick="openTableHeaderAddMenu(this, event)" class="no-print w-3.5 h-3.5 rounded bg-teal-100 hover:bg-teal-200 text-teal-800 text-[9px] font-bold inline-flex items-center justify-center border border-teal-300 shadow-sm transition active:scale-95" title="Add Row or Header to this Table">+</button></div></th>
                 <th class="py-1 px-1 font-bold col-header-param"><span class="editable-field" contenteditable="true">INVESTIGATION PARAMETER</span></th>
                 <th class="py-1 px-1 font-bold text-center col-header-result"><span class="editable-field" contenteditable="true">OBSERVED VALUE</span></th>
                 <th class="py-1 px-1 font-bold text-center col-header-flag col-flag"><span class="editable-field" contenteditable="true">FLAG</span></th>
@@ -4135,7 +4135,7 @@
                 <th class="py-1 px-1 text-center no-print w-5 print-cb-col">
                   <input type="checkbox" checked onchange="toggleAllRowsInTable(this)" title="Toggle all tests in table" class="accent-teal-600 w-3.5 h-3.5 cursor-pointer rounded">
                 </th>
-                <th class="py-1 px-1 font-bold text-center w-5 col-header-num"><span class="editable-field" contenteditable="true">#</span></th>
+                <th class="py-1 px-1 font-bold text-center w-8 col-header-num whitespace-nowrap"><div class="inline-flex items-center justify-center gap-1"><span class="editable-field" contenteditable="true">#</span><button type="button" onclick="openTableHeaderAddMenu(this, event)" class="no-print w-3.5 h-3.5 rounded bg-teal-100 hover:bg-teal-200 text-teal-800 text-[9px] font-bold inline-flex items-center justify-center border border-teal-300 shadow-sm transition active:scale-95" title="Add Row or Header to this Table">+</button></div></th>
                 <th class="py-1 px-1 font-bold col-header-param"><span class="editable-field" contenteditable="true">INVESTIGATION PARAMETER</span></th>
                 <th class="py-1 px-1 font-bold text-center col-header-result"><span class="editable-field" contenteditable="true">OBSERVED VALUE</span></th>
                 <th class="py-1 px-1 font-bold text-center col-header-flag col-flag"><span class="editable-field" contenteditable="true">FLAG</span></th>
@@ -4464,7 +4464,7 @@
                 <th class="py-1 px-1 text-center no-print w-5 print-cb-col">
                   <input type="checkbox" checked onchange="toggleAllRowsInTable(this)" title="Toggle all tests in table" class="accent-teal-600 w-3.5 h-3.5 cursor-pointer rounded">
                 </th>
-                <th class="py-1 px-1 font-bold text-center w-5 col-header-num"><span class="editable-field" contenteditable="true">#</span></th>
+                <th class="py-1 px-1 font-bold text-center w-8 col-header-num whitespace-nowrap"><div class="inline-flex items-center justify-center gap-1"><span class="editable-field" contenteditable="true">#</span><button type="button" onclick="openTableHeaderAddMenu(this, event)" class="no-print w-3.5 h-3.5 rounded bg-teal-100 hover:bg-teal-200 text-teal-800 text-[9px] font-bold inline-flex items-center justify-center border border-teal-300 shadow-sm transition active:scale-95" title="Add Row or Header to this Table">+</button></div></th>
                 <th class="py-1 px-1 font-bold col-header-param"><span class="editable-field" contenteditable="true">INVESTIGATION PARAMETER</span></th>
                 <th class="py-1 px-1 font-bold text-center col-header-result"><span class="editable-field" contenteditable="true">OBSERVED VALUE</span></th>
                 <th class="py-1 px-1 font-bold text-center col-header-flag col-flag"><span class="editable-field" contenteditable="true">FLAG</span></th>
@@ -4619,7 +4619,7 @@
                 <th class="py-1 px-1 text-center no-print w-5 print-cb-col">
                   <input type="checkbox" checked onchange="toggleAllRowsInTable(this)" title="Toggle all tests in table" class="accent-teal-600 w-3.5 h-3.5 cursor-pointer rounded">
                 </th>
-                <th class="py-1 px-1 font-bold text-center w-5 col-header-num"><span class="editable-field" contenteditable="true">#</span></th>
+                <th class="py-1 px-1 font-bold text-center w-8 col-header-num whitespace-nowrap"><div class="inline-flex items-center justify-center gap-1"><span class="editable-field" contenteditable="true">#</span><button type="button" onclick="openTableHeaderAddMenu(this, event)" class="no-print w-3.5 h-3.5 rounded bg-teal-100 hover:bg-teal-200 text-teal-800 text-[9px] font-bold inline-flex items-center justify-center border border-teal-300 shadow-sm transition active:scale-95" title="Add Row or Header to this Table">+</button></div></th>
                 <th class="py-1 px-1 font-bold col-header-param"><span class="editable-field" contenteditable="true">INVESTIGATION PARAMETER</span></th>
                 <th class="py-1 px-1 font-bold text-center col-header-result"><span class="editable-field" contenteditable="true">OBSERVED VALUE</span></th>
                 <th class="py-1 px-1 font-bold text-center col-header-flag col-flag"><span class="editable-field" contenteditable="true">FLAG</span></th>
@@ -4785,7 +4785,7 @@
                 <th class="py-1 px-1 text-center no-print w-5 print-cb-col">
                   <input type="checkbox" checked onchange="toggleAllRowsInTable(this)" title="Toggle all tests in table" class="accent-teal-600 w-3.5 h-3.5 cursor-pointer rounded">
                 </th>
-                <th class="py-1 px-1 font-bold text-center w-5 col-header-num"><span class="editable-field" contenteditable="true">#</span></th>
+                <th class="py-1 px-1 font-bold text-center w-8 col-header-num whitespace-nowrap"><div class="inline-flex items-center justify-center gap-1"><span class="editable-field" contenteditable="true">#</span><button type="button" onclick="openTableHeaderAddMenu(this, event)" class="no-print w-3.5 h-3.5 rounded bg-teal-100 hover:bg-teal-200 text-teal-800 text-[9px] font-bold inline-flex items-center justify-center border border-teal-300 shadow-sm transition active:scale-95" title="Add Row or Header to this Table">+</button></div></th>
                 <th class="py-1 px-1 font-bold col-header-param"><span class="editable-field" contenteditable="true">INVESTIGATION PARAMETER</span></th>
                 <th class="py-1 px-1 font-bold text-center col-header-result"><span class="editable-field" contenteditable="true">OBSERVED VALUE</span></th>
                 <th class="py-1 px-1 font-bold text-center col-header-flag col-flag"><span class="editable-field" contenteditable="true">FLAG</span></th>
@@ -4991,7 +4991,10 @@
       </div>
 
       <div class="space-y-2 pt-1">
-        <a id="btnDownloadSetup" href="https://github.com/Hammu605/Lab-X-Studio/releases/tag/latest" target="_blank" onclick="event.preventDefault(); openExternalLink(this.href)" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition shadow">
+        <a id="btnDownloadLinux" href="https://github.com/Hammu605/Lab-X-Studio/releases/tag/latest" target="_blank" onclick="event.preventDefault(); openExternalLink(this.href)" class="w-full py-2.5 rounded-xl bg-purple-900/60 hover:bg-purple-800 text-purple-200 border border-purple-500/40 font-bold text-xs flex items-center justify-center gap-2 transition shadow">
+          <i class="fa-brands fa-linux text-base"></i> Download Linux Lite (.deb / ~48 KB)
+        </a>
+        <a id="btnDownloadSetup" href="https://github.com/Hammu605/Lab-X-Studio/releases/tag/latest" target="_blank" onclick="event.preventDefault(); openExternalLink(this.href)" class="w-full py-2 rounded-xl bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition shadow">
           <i class="fa-solid fa-download"></i> Download Windows Setup (.exe)
         </a>
         <a id="btnDownloadPortable" href="https://github.com/Hammu605/Lab-X-Studio/releases/tag/latest" target="_blank" onclick="event.preventDefault(); openExternalLink(this.href)" class="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs flex items-center justify-center gap-2 transition">
@@ -5042,7 +5045,7 @@
   <!-- 5. JAVASCRIPT WORKSTATION ENGINE -->
   <!-- ========================================== -->
   <script>
-    const APP_CURRENT_VERSION = "1.0.0";
+    const APP_CURRENT_VERSION = "1.1.0";
     let currentZoom = 1.0;
     let letterheadMode = 'preprinted'; // 'preprinted' or 'digital'
     let isLiveAutoCalcEnabled = true;
@@ -5483,6 +5486,7 @@
       else list.unshift(patient);
 
       setStoredPatients(list);
+      LabXStorageEngine.save();
       showToast(`Saved Record: ${patient.name} (${patient.id})`);
     }
 
@@ -6145,8 +6149,10 @@
           if (data.assets && data.assets.length > 0) {
             const setupAsset = data.assets.find(a => a.name.includes('Setup'));
             const portableAsset = data.assets.find(a => a.name.includes('Portable'));
-            if (setupAsset) document.getElementById('btnDownloadSetup').href = setupAsset.browser_download_url;
-            if (portableAsset) document.getElementById('btnDownloadPortable').href = portableAsset.browser_download_url;
+            const linuxDeb = data.assets.find(a => a.name.endsWith('.deb'));
+            if (setupAsset && document.getElementById('btnDownloadSetup')) document.getElementById('btnDownloadSetup').href = setupAsset.browser_download_url;
+            if (portableAsset && document.getElementById('btnDownloadPortable')) document.getElementById('btnDownloadPortable').href = portableAsset.browser_download_url;
+            if (linuxDeb && document.getElementById('btnDownloadLinux')) document.getElementById('btnDownloadLinux').href = linuxDeb.browser_download_url;
           }
 
           document.getElementById('updateBadgeBtn').classList.remove('hidden');
@@ -6528,12 +6534,14 @@
           });
 
           // Save custom/uploaded sheets
-          document.querySelectorAll('.a4-sheet[data-is-custom="true"]').forEach(sh => {
-            data.customSheets.push({
-              id: sh.id,
-              title: sh.getAttribute('data-report-title') || sh.id,
-              html: sh.outerHTML
-            });
+          document.querySelectorAll('.a4-sheet[data-is-custom="true"], .custom-report-sheet, article[id^="sheetCustom_"], article[id^="uploadedSheet_"]').forEach(sh => {
+            if (!data.customSheets.find(item => item.id === sh.id)) {
+              data.customSheets.push({
+                id: sh.id,
+                title: sh.getAttribute('data-report-title') || sh.id,
+                html: sh.outerHTML
+              });
+            }
           });
 
           localStorage.setItem(this.storageKey, JSON.stringify(data));
@@ -6568,6 +6576,26 @@
                   if (sheetEl) {
                     container.appendChild(sheetEl);
                     addReportModuleCheckbox(cs.id, cs.title, false);
+                  }
+                }
+              }
+            });
+          }
+
+          // Also restore custom templates from library if not in DOM
+          const libTemplates = getSavedCustomTemplates();
+          if (Array.isArray(libTemplates)) {
+            libTemplates.forEach(t => {
+              if (!document.getElementById(t.id) && t.html) {
+                const container = document.getElementById('sheetsContainer');
+                if (container) {
+                  const div = document.createElement('div');
+                  div.innerHTML = t.html;
+                  const sheetEl = div.firstElementChild;
+                  if (sheetEl) {
+                    sheetEl.style.display = 'none';
+                    container.appendChild(sheetEl);
+                    addReportModuleCheckbox(t.id, t.title, false);
                   }
                 }
               }
@@ -6760,13 +6788,14 @@
           scratchList.innerHTML = `<div class="p-3 bg-[#050814] rounded-lg border border-slate-800 text-center text-slate-500 text-[10.5px]">No custom scratch templates yet. Click "+ Add New Custom Report" above to build from blank!</div>`;
         } else {
           scratchList.innerHTML = scratchTemplates.map(t => `
-            <div class="flex items-center justify-between p-2 rounded-lg bg-[#050814] border border-slate-800 hover:border-teal-700/60 transition">
-              <div class="flex items-center gap-2 truncate">
-                <span class="w-2 h-2 rounded-full bg-teal-400"></span>
+            <div class="flex items-center justify-between p-2 rounded-lg bg-[#050814] border border-slate-800 hover:border-teal-700/60 transition gap-2">
+              <div class="flex items-center gap-1.5 truncate">
+                <span class="w-2 h-2 rounded-full bg-teal-400 shrink-0"></span>
+                <span class="text-[9px] bg-teal-950 text-teal-300 border border-teal-700/60 px-1.5 py-0.5 rounded font-mono shrink-0">Scratch से बना हुआ</span>
                 <span class="text-[11px] font-semibold text-slate-200 truncate cursor-pointer hover:text-teal-300" onclick="focusSheet('${t.id}')">${t.title}</span>
               </div>
               <div class="flex items-center gap-1 shrink-0">
-                <button onclick="exportSingleTemplate('${t.id}')" title="Export JSON Template" class="text-teal-400 hover:text-teal-300 p-1 text-xs"><i class="fa-solid fa-file-export"></i></button>
+                <button onclick="exportSingleTemplate('${t.id}')" title="Export JSON Template" class="text-teal-400 hover:text-teal-300 px-2 py-0.5 rounded bg-slate-800 text-[10px] font-mono font-semibold flex items-center gap-1 border border-slate-700 shadow-sm transition active:scale-95"><i class="fa-solid fa-file-export text-[9.5px]"></i> <span>JSON</span></button>
                 <button onclick="deleteCustomTemplate('${t.id}')" title="Delete Template" class="text-rose-500 hover:text-rose-400 p-1 text-xs"><i class="fa-solid fa-trash-can"></i></button>
               </div>
             </div>
@@ -6779,13 +6808,14 @@
           uploadedList.innerHTML = `<div class="p-3 bg-[#050814] rounded-lg border border-slate-800 text-center text-slate-500 text-[10.5px]">No uploaded reports yet. Upload a Word (.doc / .docx) file above!</div>`;
         } else {
           uploadedList.innerHTML = uploadedTemplates.map(t => `
-            <div class="flex items-center justify-between p-2 rounded-lg bg-[#050814] border border-slate-800 hover:border-blue-700/60 transition">
-              <div class="flex items-center gap-2 truncate">
-                <span class="w-2 h-2 rounded-full bg-blue-400"></span>
+            <div class="flex items-center justify-between p-2 rounded-lg bg-[#050814] border border-slate-800 hover:border-blue-700/60 transition gap-2">
+              <div class="flex items-center gap-1.5 truncate">
+                <span class="w-2 h-2 rounded-full bg-blue-400 shrink-0"></span>
+                <span class="text-[9px] bg-blue-950 text-blue-300 border border-blue-700/60 px-1.5 py-0.5 rounded font-mono shrink-0">Upload से बना हुआ</span>
                 <span class="text-[11px] font-semibold text-slate-200 truncate cursor-pointer hover:text-blue-300" onclick="focusSheet('${t.id}')">${t.title}</span>
               </div>
               <div class="flex items-center gap-1 shrink-0">
-                <button onclick="exportSingleTemplate('${t.id}')" title="Export JSON Template" class="text-blue-400 hover:text-blue-300 p-1 text-xs"><i class="fa-solid fa-file-export"></i></button>
+                <button onclick="exportSingleTemplate('${t.id}')" title="Export JSON Template" class="text-blue-400 hover:text-blue-300 px-2 py-0.5 rounded bg-slate-800 text-[10px] font-mono font-semibold flex items-center gap-1 border border-slate-700 shadow-sm transition active:scale-95"><i class="fa-solid fa-file-export text-[9.5px]"></i> <span>JSON</span></button>
                 <button onclick="deleteCustomTemplate('${t.id}')" title="Delete Template" class="text-rose-500 hover:text-rose-400 p-1 text-xs"><i class="fa-solid fa-trash-can"></i></button>
               </div>
             </div>
@@ -7083,6 +7113,10 @@
       let patientLabNo = document.getElementById('inpLabNo')?.value || '485828168';
       let patientDate = document.getElementById('inpDate')?.value || 'Today';
 
+      const defaultTitle = fileName.replace(/\.[^/.]+$/, '').replace(/[_\-]+/g, ' ').toUpperCase();
+      const enteredTitle = prompt("Enter Report Title (e.g. URINE ROUTINE EXAMINATION, DENGUE SEROLOGY):", defaultTitle);
+      const chosenTitle = (enteredTitle && enteredTitle.trim()) ? enteredTitle.trim().toUpperCase() : defaultTitle;
+
       const details = {
         fileName: fileName,
         patientName: '',
@@ -7091,7 +7125,7 @@
         refBy: patientRefBy,
         collectedDate: patientDate,
         printedDate: patientDate,
-        reportTitle: fileName.replace(/\.[^/.]+$/, '').toUpperCase(),
+        reportTitle: chosenTitle,
         method: 'Automated Clinical Analyzer',
         kitLot: 'NK120896',
         kitMfgLic: 'S-MB 1877',
@@ -7308,7 +7342,7 @@
             <thead>
               <tr class="border-b-2 border-slate-900 text-slate-800 text-[10px] uppercase font-bold tracking-wider whitespace-nowrap align-middle">
                 <th class="py-1 px-1 text-center no-print w-5 print-cb-col"></th>
-                <th class="py-1 px-1 text-center w-6">#</th>
+                <th class="py-1 px-1 font-bold text-center w-8 col-header-num whitespace-nowrap"><div class="inline-flex items-center justify-center gap-1"><span class="editable-field" contenteditable="true">#</span><button type="button" onclick="openTableHeaderAddMenu(this, event)" class="no-print w-3.5 h-3.5 rounded bg-teal-100 hover:bg-teal-200 text-teal-800 text-[9px] font-bold inline-flex items-center justify-center border border-teal-300 shadow-sm transition active:scale-95" title="Add Row or Header to this Table">+</button></div></th>
                 <th class="py-1 px-1">INVESTIGATION</th>
                 <th class="py-1 px-1 text-center">OBSERVED VALUE</th>
                 <th class="py-1 px-1 text-center col-flag">FLAG</th>
@@ -7469,6 +7503,8 @@
     // ==========================================
     function filterReportModulesList(query) {
       const q = (query || '').toLowerCase().trim();
+      
+      // 1. Built-in predefault checkboxes
       const labels = document.querySelectorAll('#reportCheckboxesList label');
       labels.forEach(lbl => {
         const txt = lbl.textContent.toLowerCase();
@@ -7477,6 +7513,28 @@
           lbl.style.display = 'flex';
         } else {
           lbl.style.display = 'none';
+        }
+      });
+
+      // 2. Scratch templates
+      const scratchItems = document.querySelectorAll('#scratchTemplatesListContainer > div');
+      scratchItems.forEach(item => {
+        const txt = item.textContent.toLowerCase();
+        if (!q || txt.includes(q)) {
+          item.style.display = 'flex';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+
+      // 3. Uploaded clinical reports
+      const uploadedItems = document.querySelectorAll('#uploadedTemplatesListContainer > div');
+      uploadedItems.forEach(item => {
+        const txt = item.textContent.toLowerCase();
+        if (!q || txt.includes(q)) {
+          item.style.display = 'flex';
+        } else {
+          item.style.display = 'none';
         }
       });
     }
@@ -7625,42 +7683,200 @@
 
     // WordPad Formatter Functions
     function applyFormat(cmd) {
-      document.execCommand(cmd, false, null);
-      updateFormatButtonStates();
-    }
-
-    function applyFontSize(pxVal) {
-      const sel = window.getSelection();
-      if (!sel || sel.rangeCount === 0) return;
-      const range = sel.getRangeAt(0);
-
-      if (range.collapsed) {
-        const editable = (lastFocusedElement || sel.anchorNode?.parentElement)?.closest('.editable-field');
-        if (editable) editable.style.fontSize = pxVal;
-        return;
-      }
-
-      const span = document.createElement('span');
-      span.style.fontSize = pxVal;
       try {
-        span.appendChild(range.extractContents());
-        range.insertNode(span);
+        document.execCommand('styleWithCSS', false, true);
+        const sel = window.getSelection();
+        const hasSelection = sel && sel.rangeCount > 0 && !sel.isCollapsed && sel.toString().length > 0;
+
+        if (hasSelection) {
+          document.execCommand(cmd, false, null);
+        } else {
+          const target = (lastFocusedElement || sel?.anchorNode?.parentElement)?.closest('.editable-field');
+          if (target) {
+            if (cmd === 'bold') {
+              const isCurrentlyBold = target.style.fontWeight === 'bold' || target.classList.contains('font-bold');
+              target.style.fontWeight = isCurrentlyBold ? 'normal' : 'bold';
+              target.classList.toggle('font-bold', !isCurrentlyBold);
+            } else if (cmd === 'italic') {
+              const isCurrentlyItalic = target.style.fontStyle === 'italic' || target.classList.contains('italic');
+              target.style.fontStyle = isCurrentlyItalic ? 'normal' : 'italic';
+              target.classList.toggle('italic', !isCurrentlyItalic);
+            } else if (cmd === 'underline') {
+              const isCurrentlyUnderline = target.style.textDecoration?.includes('underline') || target.classList.contains('underline');
+              target.style.textDecoration = isCurrentlyUnderline ? 'none' : 'underline';
+              target.classList.toggle('underline', !isCurrentlyUnderline);
+            } else if (cmd === 'strikeThrough') {
+              const isStrike = target.style.textDecoration?.includes('line-through');
+              target.style.textDecoration = isStrike ? 'none' : 'line-through';
+            } else {
+              document.execCommand(cmd, false, null);
+            }
+          } else {
+            document.execCommand(cmd, false, null);
+          }
+        }
+        updateFormatButtonStates();
       } catch(e) {
-        document.execCommand('fontSize', false, '3');
+        console.warn("Format error:", e);
       }
     }
 
     function applyTextColor(hex) {
-      const sel = window.getSelection();
-      if (!sel || sel.rangeCount === 0) return;
-      const range = sel.getRangeAt(0);
+      try {
+        document.execCommand('styleWithCSS', false, true);
+        const sel = window.getSelection();
+        const hasSelection = sel && sel.rangeCount > 0 && !sel.isCollapsed && sel.toString().length > 0;
 
-      if (range.collapsed) {
-        const editable = (lastFocusedElement || sel.anchorNode?.parentElement)?.closest('.editable-field');
-        if (editable) editable.style.color = hex;
-        return;
+        if (hasSelection) {
+          document.execCommand('foreColor', false, hex);
+        } else {
+          const target = (lastFocusedElement || sel?.anchorNode?.parentElement)?.closest('.editable-field');
+          if (target) {
+            target.style.color = hex;
+          }
+        }
+      } catch(e) {
+        console.warn("Color apply error:", e);
       }
-      document.execCommand('foreColor', false, hex);
+    }
+
+    // =========================================================================
+    // TABLE HEADER QUICK-ADD MENU SYSTEM (FOR # COLUMN '+' BUTTON)
+    // =========================================================================
+    function openTableHeaderAddMenu(btn, event) {
+      if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+      }
+      const existing = document.getElementById('tableHeaderQuickMenu');
+      if (existing) {
+        const wasSame = existing._targetBtn === btn;
+        existing.remove();
+        if (wasSame) return;
+      }
+
+      const menu = document.createElement('div');
+      menu.id = 'tableHeaderQuickMenu';
+      menu.className = 'fixed z-50 bg-[#0b1020] border border-teal-500/60 rounded-xl shadow-2xl p-1.5 text-xs text-white min-w-[220px] space-y-1 select-none';
+      
+      const rect = btn.getBoundingClientRect();
+      menu.style.left = `${Math.min(window.innerWidth - 235, Math.max(10, rect.left))}px`;
+      menu.style.top = `${rect.bottom + 6}px`;
+
+      menu.innerHTML = `
+        <div class="px-2 py-1 text-[9.5px] font-mono text-teal-400 uppercase tracking-wider border-b border-slate-800 flex items-center justify-between">
+          <span><i class="fa-solid fa-circle-plus mr-1"></i> Add to this Table</span>
+          <button type="button" onclick="this.closest('#tableHeaderQuickMenu').remove()" class="text-slate-400 hover:text-white">&times;</button>
+        </div>
+        <button type="button" class="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-teal-600/20 hover:text-teal-300 text-slate-200 flex items-center gap-2 transition" onclick="menuActionAddRow(this)">
+          <i class="fa-solid fa-plus text-teal-400 w-4 text-center"></i>
+          <div>
+            <div class="font-semibold text-[11px]">+ Add Parameter Row</div>
+            <div class="text-[8.5px] text-slate-400">Insert test row with observed value</div>
+          </div>
+        </button>
+        <button type="button" class="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-indigo-600/20 hover:text-indigo-300 text-slate-200 flex items-center gap-2 transition" onclick="menuActionAddGroup(this)">
+          <i class="fa-solid fa-folder-plus text-indigo-400 w-4 text-center"></i>
+          <div>
+            <div class="font-semibold text-[11px]">+ Add Section Header</div>
+            <div class="text-[8.5px] text-slate-400">Insert group divider line</div>
+          </div>
+        </button>
+        <button type="button" class="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-slate-700/50 hover:text-slate-200 text-slate-300 flex items-center gap-2 transition" onclick="menuActionAddSubHeader(this)">
+          <i class="fa-solid fa-table-cells text-cyan-400 w-4 text-center"></i>
+          <div>
+            <div class="font-semibold text-[11px]">+ Add Sub-Header Bar</div>
+            <div class="text-[8.5px] text-slate-400">Insert column title bar</div>
+          </div>
+        </button>
+        <button type="button" class="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-blue-600/20 hover:text-blue-300 text-slate-200 flex items-center gap-2 transition" onclick="menuActionAddNoteBox(this)">
+          <i class="fa-solid fa-comment-dots text-blue-400 w-4 text-center"></i>
+          <div>
+            <div class="font-semibold text-[11px]">+ Add Note / Text Box</div>
+            <div class="text-[8.5px] text-slate-400">Insert custom notes line</div>
+          </div>
+        </button>
+      `;
+
+      menu._targetBtn = btn;
+      document.body.appendChild(menu);
+
+      const closeListener = (e) => {
+        if (!menu.contains(e.target) && e.target !== btn) {
+          menu.remove();
+          document.removeEventListener('click', closeListener);
+        }
+      };
+      setTimeout(() => document.addEventListener('click', closeListener), 10);
+    }
+
+    function menuActionAddRow(menuItem) {
+      const menu = menuItem.closest('#tableHeaderQuickMenu');
+      const btn = menu?._targetBtn;
+      menu?.remove();
+      if (!btn) return;
+      const table = btn.closest('table');
+      const tbody = table?.querySelector('tbody');
+      if (tbody) {
+        if (tbody.id && typeof addCustomRow === 'function') {
+          addCustomRow(tbody.id);
+        } else {
+          LabXCustomStudio.addRowToTbody(tbody);
+        }
+        showToast("Added new Parameter Row to table");
+      }
+    }
+
+    function menuActionAddGroup(menuItem) {
+      const menu = menuItem.closest('#tableHeaderQuickMenu');
+      const btn = menu?._targetBtn;
+      menu?.remove();
+      if (!btn) return;
+      const table = btn.closest('table');
+      const tbody = table?.querySelector('tbody');
+      if (tbody) {
+        LabXCustomStudio.addGroupHeader(tbody);
+        showToast("Added Section / Group Header");
+      }
+    }
+
+    function menuActionAddSubHeader(menuItem) {
+      const menu = menuItem.closest('#tableHeaderQuickMenu');
+      const btn = menu?._targetBtn;
+      menu?.remove();
+      if (!btn) return;
+      const table = btn.closest('table');
+      const tbody = table?.querySelector('tbody');
+      if (!tbody) return;
+
+      const tr = document.createElement('tr');
+      tr.className = "sub-header-row bg-slate-200/90 font-bold text-[10px] text-slate-800 border-y border-slate-400";
+      tr.innerHTML = `
+        <td class="py-0.5 px-1 text-center no-print print-cb-col"></td>
+        <td class="py-0.5 px-1 text-center font-bold col-header-num"><span class="editable-field" contenteditable="true">#</span></td>
+        <td class="py-0.5 px-1 font-bold col-header-param"><span class="editable-field" contenteditable="true">INVESTIGATION PARAMETER</span></td>
+        <td class="py-0.5 px-1 font-bold text-center col-header-result"><span class="editable-field" contenteditable="true">OBSERVED VALUE</span></td>
+        <td class="py-0.5 px-1 font-bold text-center col-header-flag col-flag"><span class="editable-field" contenteditable="true">FLAG</span></td>
+        <td class="py-0.5 px-1 font-bold text-center w-20 col-header-graph col-gauge"><span class="editable-field" contenteditable="true">RANGE GAUGE</span></td>
+        <td class="py-0.5 px-1 font-bold text-center col-header-unit col-unit"><span class="editable-field" contenteditable="true">UNIT</span></td>
+        <td class="py-0.5 px-1 font-bold text-right col-header-ref"><span class="editable-field" contenteditable="true">BIOLOGICAL REF. INTERVAL</span></td>
+        <td class="py-0.5 px-1 text-center no-print"><button onclick="deleteRowWithUndo(this)" class="text-rose-500 hover:text-rose-700 text-[10px]"><i class="fa-solid fa-trash-can"></i></button></td>
+      `;
+      tbody.appendChild(tr);
+      showToast("Added Column Sub-Header Bar");
+    }
+
+    function menuActionAddNoteBox(menuItem) {
+      const menu = menuItem.closest('#tableHeaderQuickMenu');
+      const btn = menu?._targetBtn;
+      menu?.remove();
+      if (!btn) return;
+      const table = btn.closest('table');
+      const tbody = table?.querySelector('tbody');
+      if (tbody) {
+        addCustomTextBox(tbody.id);
+        showToast("Added Custom Note Box");
+      }
     }
 
     function updateFormatButtonStates() {
@@ -7917,6 +8133,7 @@
         article.setAttribute('data-report-title', cleanTitle);
         article.setAttribute('data-report-group', reportGroupId);
         article.setAttribute('data-page-index', '1');
+        article.setAttribute('data-is-custom', 'true');
         article.style.display = 'flex';
 
         article.innerHTML = `
@@ -7975,7 +8192,7 @@
                   <th class="py-1 px-1 text-center no-print w-5 print-cb-col">
                     <input type="checkbox" checked onchange="toggleAllRowsInTable(this)" class="accent-teal-600 w-3.5 h-3.5 cursor-pointer rounded">
                   </th>
-                  <th class="py-1 px-1 font-bold text-center w-5 col-header-num"><span class="editable-field" contenteditable="true">#</span></th>
+                  <th class="py-1 px-1 font-bold text-center w-8 col-header-num whitespace-nowrap"><div class="inline-flex items-center justify-center gap-1"><span class="editable-field" contenteditable="true">#</span><button type="button" onclick="openTableHeaderAddMenu(this, event)" class="no-print w-3.5 h-3.5 rounded bg-teal-100 hover:bg-teal-200 text-teal-800 text-[9px] font-bold inline-flex items-center justify-center border border-teal-300 shadow-sm transition active:scale-95" title="Add Row or Header to this Table">+</button></div></th>
                   <th class="py-1 px-1 font-bold col-header-param"><span class="editable-field" contenteditable="true">INVESTIGATION PARAMETER</span></th>
                   <th class="py-1 px-1 font-bold text-center col-header-result"><span class="editable-field" contenteditable="true">OBSERVED VALUE</span></th>
                   <th class="py-1 px-1 font-bold text-center col-header-flag col-flag"><span class="editable-field" contenteditable="true">FLAG</span></th>
@@ -8068,6 +8285,8 @@
         recheckFlagsAndGauges();
         buildImpressionChecklist();
         showToast(`Custom Report Created: ${cleanTitle}`);
+        saveCurrentSheetToLibrary();
+        switchReportCategory('scratch');
       },
 
       addConnectedPageFromSheet(currentSheet) {
@@ -8086,6 +8305,7 @@
         article.setAttribute('data-report-title', `${title} (Page ${nextPageNum})`);
         article.setAttribute('data-report-group', reportGroup);
         article.setAttribute('data-page-index', `${nextPageNum}`);
+        article.setAttribute('data-is-custom', 'true');
         article.style.display = 'flex';
 
         article.innerHTML = `
@@ -8119,7 +8339,7 @@
                   <th class="py-1 px-1 text-center no-print w-5 print-cb-col">
                     <input type="checkbox" checked onchange="toggleAllRowsInTable(this)" class="accent-teal-600 w-3.5 h-3.5 cursor-pointer rounded">
                   </th>
-                  <th class="py-1 px-1 font-bold text-center w-5 col-header-num"><span class="editable-field" contenteditable="true">#</span></th>
+                  <th class="py-1 px-1 font-bold text-center w-8 col-header-num whitespace-nowrap"><div class="inline-flex items-center justify-center gap-1"><span class="editable-field" contenteditable="true">#</span><button type="button" onclick="openTableHeaderAddMenu(this, event)" class="no-print w-3.5 h-3.5 rounded bg-teal-100 hover:bg-teal-200 text-teal-800 text-[9px] font-bold inline-flex items-center justify-center border border-teal-300 shadow-sm transition active:scale-95" title="Add Row or Header to this Table">+</button></div></th>
                   <th class="py-1 px-1 font-bold col-header-param"><span class="editable-field" contenteditable="true">INVESTIGATION PARAMETER</span></th>
                   <th class="py-1 px-1 font-bold text-center col-header-result"><span class="editable-field" contenteditable="true">OBSERVED VALUE</span></th>
                   <th class="py-1 px-1 font-bold text-center col-header-flag col-flag"><span class="editable-field" contenteditable="true">FLAG</span></th>

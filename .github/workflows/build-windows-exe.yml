@@ -107,24 +107,24 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: latest
-          name: "Lab X Studio v1.0.0 (Official Stable Release)"
+          name: "Lab X Studio v1.1.0 (Official Stable Release)"
           body: |
-            ## Lab X Studio v1.0.0 — Official Cross-Platform Release (Windows & Linux)
+            ## Lab X Studio v1.1.0 — Official Cross-Platform Release (Windows & Linux)
 
             ### 📦 Download Links:
-            - **⚡ Linux Ultra-Lite Installer (Recommended for Kali Linux / Debian / Ubuntu)**: `Lab-X-Studio-Linux-Lite-1.0.0.deb` (**Only ~48 KB!** Auto-maximizes to screen, instant install with Desktop shortcut via `sudo dpkg -i`)
-            - **⚡ Linux Ultra-Lite Portable**: `Lab-X-Studio-Linux-Portable-1.0.0.tar.gz` (**Only ~67 KB!** Extract and run `./run.sh` anywhere without installing)
-            - **Linux Self-Contained AppImage**: `Lab-X-Studio-1.0.0.AppImage` (Bundled standalone runtime)
-            - **Windows Installer**: `Lab-X-Studio-Setup-1.0.0.exe` (Complete Windows installation with Desktop shortcut)
-            - **Windows Portable**: `Lab-X-Studio-Portable-1.0.0.exe` (Standalone portable execution without installation)
+            - **⚡ Linux Ultra-Lite Installer (Recommended for Kali Linux / Debian / Ubuntu)**: `Lab-X-Studio-Linux-Lite-1.1.0.deb` (**Only ~48 KB!** Auto-maximizes to screen, instant install with Desktop shortcut via `sudo dpkg -i`)
+            - **⚡ Linux Ultra-Lite Portable**: `Lab-X-Studio-Linux-Portable-1.1.0.tar.gz` (**Only ~67 KB!** Extract and run `./run.sh` anywhere without installing)
+            - **Linux Self-Contained AppImage**: `Lab-X-Studio-1.1.0.AppImage` (Bundled standalone runtime)
+            - **Windows Installer**: `Lab-X-Studio-Setup-1.1.0.exe` (Complete Windows installation with Desktop shortcut)
+            - **Windows Portable**: `Lab-X-Studio-Portable-1.1.0.exe` (Standalone portable execution without installation)
 
-            ### 🚀 What's New & Included in v1.0.0:
-            - **Screen Work-Area Auto-Maximize**: Perfectly fits Kali Linux & Windows screens without window overflow.
-            - **3 Report Categories**: Pre-Default, Scratch, and Uploaded reports with Save-to-Library integration.
-            - **Interactive Drag & Drop Parameter Reordering**: Move test rows up/down with drag & drop or 1-click arrow buttons.
-            - **Clean Horizontal Header Alignment**: Test parameters, observed values, flags, units, and ranges aligned on a single row.
-            - **Deep Word DOCX/DOC Parser**: 100% accurate client-side XML table extraction.
-            - **Ultra-Lightweight Linux Package**: Lightning-fast 48 KB native debian package.
+            ### 🚀 What's New in v1.1.0:
+            - **Table # Column Quick-Add Button**: Direct `+` icon on every table header to insert Parameter Rows, Section Headers, Sub-Header Bars, or Notes with 1 click.
+            - **Save Buttons Clarified with Subtitles**: Transparent, clear English subtitles on every Save button (Save Report, Save to Library, Export Backup) so there is zero confusion.
+            - **Dedicated Scratch & Upload Sections**: Distinct sections with badges (`Scratch से बना हुआ`, `Upload से बना हुआ`), prompt for report title on creation/upload, and instant `[Export JSON]` button for every template.
+            - **Universal Report Search**: Instant real-time search across Pre-Default, Scratch, and Uploaded clinical modules simultaneously.
+            - **Rock-Solid WordPad Formatter**: Reliable Bold, Italic, Underline, and Color formatting on selected text or active cells.
+            - **Full Restart & Reload Persistence**: Every custom report, template, patient record, and table modification reloads seamlessly upon app restart.
 
             Automatically compiled by GitHub Actions.
           files: release-dist/*
