@@ -2,7 +2,7 @@ name: Build Cross-Platform PC Release (Windows .exe & Linux .AppImage)
 
 on:
   push:
-    branches: [ master, main, beta ]
+    branches: [ master, main, beta, testing ]
   workflow_dispatch:
 
 permissions:
@@ -94,43 +94,55 @@ jobs:
       - name: List Release Files
         run: ls -lh release-dist
 
+      - name: Configure Release Metadata
+        id: meta
+        run: |
+          if [ "${{ github.ref_name }}" = "testing" ]; then
+            echo "tag=v1.1.3-beta" >> $GITHUB_OUTPUT
+            echo "title=Lab X Studio v1.1.3-beta (Testing Release - Firebase Sync)" >> $GITHUB_OUTPUT
+            echo "prerelease=true" >> $GITHUB_OUTPUT
+            echo "make_latest=false" >> $GITHUB_OUTPUT
+          else
+            echo "tag=latest" >> $GITHUB_OUTPUT
+            echo "title=Lab X Studio v1.1.2 (Official Stable Release)" >> $GITHUB_OUTPUT
+            echo "prerelease=false" >> $GITHUB_OUTPUT
+            echo "make_latest=true" >> $GITHUB_OUTPUT
+          fi
+
       - name: Clean Old Release Assets
         run: |
-          for asset in $(gh release view latest --json assets --jq '.assets[].name' 2>/dev/null || true); do
-            echo "Removing old asset $asset..."
-            gh release delete-asset latest "$asset" -y || true
+          TAG="${{ steps.meta.outputs.tag }}"
+          for asset in $(gh release view "$TAG" --json assets --jq '.assets[].name' 2>/dev/null || true); do
+            echo "Removing old asset $asset from release $TAG..."
+            gh release delete-asset "$TAG" "$asset" -y || true
           done
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Create Continuous Release (Windows .exe & Linux .AppImage)
+      - name: Create Continuous Release (Windows .exe & Linux Packages)
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: latest
-          name: "Lab X Studio v1.1.2 (Official Stable Release)"
+          tag_name: ${{ steps.meta.outputs.tag }}
+          name: ${{ steps.meta.outputs.title }}
           body: |
-            ## Lab X Studio v1.1.2 — Official Cross-Platform Release (Windows & Linux)
+            ## ${{ steps.meta.outputs.title }}
 
             ### 📦 Download Links:
-            - **⚡ Linux Ultra-Lite Installer (Recommended for Kali Linux / Debian / Ubuntu)**: `Lab-X-Studio-Linux-Lite-1.1.2.deb` (**Only ~48 KB!** Auto-maximizes to screen, instant install with Desktop shortcut via `sudo dpkg -i`)
-            - **⚡ Linux Ultra-Lite Portable**: `Lab-X-Studio-Linux-Portable-1.1.2.tar.gz` (**Only ~67 KB!** Extract and run `./run.sh` anywhere without installing)
-            - **Linux Self-Contained AppImage**: `Lab-X-Studio-1.1.2.AppImage` (Bundled standalone runtime)
-            - **Windows Installer**: `Lab-X-Studio-Setup-1.1.2.exe` (Complete Windows installation with Desktop shortcut)
-            - **Windows Portable**: `Lab-X-Studio-Portable-1.1.2.exe` (Standalone portable execution without installation)
+            - **⚡ Linux Ultra-Lite Installer (Recommended for Kali Linux / Debian / Ubuntu)**: `Lab-X-Studio-Linux-Lite-1.1.3-beta.deb` (Instant install with Desktop shortcut via `sudo dpkg -i`)
+            - **⚡ Linux Ultra-Lite Portable**: `Lab-X-Studio-Linux-Portable-1.1.3-beta.tar.gz` (Extract and run `./run.sh` anywhere without installing)
+            - **Windows Installer**: `Lab-X-Studio-Setup-1.1.3-beta.exe` (Complete Windows installation with Desktop shortcut)
+            - **Windows Portable**: `Lab-X-Studio-Portable-1.1.3-beta.exe` (Standalone portable execution without installation)
+            - **Linux Self-Contained AppImage**: `Lab-X-Studio-1.1.3-beta.AppImage`
 
-            ### 🚀 What's New in v1.1.2:
-            - **1-Click Update & Restart Launcher**: After downloading Windows Setup `.exe`, clicking the button automatically launches the installer from Downloads and cleanly closes the old running version so Windows NSIS can update without file-lock issues.
-            - **Independent Pre-default Test Checkboxes**: Fixed CBC unchecking bug so users can freely check or uncheck CBC or any test without forced rechecking.
-            - **Custom Template Checkboxes & DOM Restoration**: Added clean checkboxes to every custom Scratch & Uploaded report; clicking or toggling restores and displays sheets seamlessly on canvas and print layouts.
-            - **Strict Scratch vs. Uploaded Classification**: Fixed uploaded reports being categorized under scratch by strictly scoping the active sheet ID and type.
-            - **Removed Hindi Badge Boxes**: Replaced badges with clean, minimal layout `[Checkbox] [Report Name] [JSON Export] [Delete]`.
-            - **Delete Confirmation Modal**: Custom styled modal protects custom templates from accidental deletion.
-            - **Complete Clinic & DMLT Signatures on Scratch Reports**: Scratch reports created from blank or multi-page now include the 3-column DMLT staff signature and bottom clinic footer line (`Electronic Diagnostic Report • KRISHNA COMPUTERIZED LABORATORY • End of Report`).
-            - **WordPad Typography Font Sizes (10, 11, 13) & Robust Formatting**: Full support for font size buttons (10, 11, 13), Bold, Italic, Underline, and custom colors on selected text or focused editable cells.
+            ### 🚀 Highlights in v1.1.3-beta:
+            - **Firebase Firestore Multi-PC Live Sync**: Real-time patient records & custom templates cloud backup and synchronization across multiple lab computers.
+            - **Offline-First Hybrid Engine**: Works 100% offline seamlessly using local database vault with zero lag; syncs automatically as soon as internet is restored.
+            - **Live Public QR Code Verification**: Standard scannable QR stamp embedded on all report sheets, linking to `https://lab-x-studio.web.app/verify.html` for instant smartphone verification.
+            - **Cloud Sync Status Badge**: Live visual indicator in top header bar showing connection state (🟢 Cloud Live, 🟡 Offline Vault, 🔄 Syncing).
 
-            Automatically compiled by GitHub Actions.
+            Automatically compiled by GitHub Actions from `${{ github.ref_name }}` branch.
           files: release-dist/*
-          prerelease: false
-          make_latest: true
+          prerelease: ${{ steps.meta.outputs.prerelease == 'true' }}
+          make_latest: ${{ steps.meta.outputs.make_latest }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

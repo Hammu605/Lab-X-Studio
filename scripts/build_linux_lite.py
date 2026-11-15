@@ -5,10 +5,11 @@ import subprocess
 
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 INDEX_HTML = os.path.join(ROOT_DIR, 'index.html')
+QRCODE_JS = os.path.join(ROOT_DIR, 'qrcode.min.js')
 DIST_DIR = os.path.join(ROOT_DIR, 'dist-electron')
 os.makedirs(DIST_DIR, exist_ok=True)
 
-VERSION = "1.1.2"
+VERSION = "1.1.3-beta"
 PKG_NAME = "lab-x-studio-lite"
 WORK_DIR = os.path.join(DIST_DIR, "deb_work")
 shutil.rmtree(WORK_DIR, ignore_errors=True)
@@ -114,8 +115,10 @@ with open(f"{WORK_DIR}/usr/share/icons/hicolor/scalable/apps/lab-x-studio.svg", 
 with open(f"{WORK_DIR}/usr/share/lab-x-studio/icon.svg", "w", encoding="utf-8") as f:
     f.write(svg_icon)
 
-# 7. Copy production index.html
+# 7. Copy production index.html & assets
 shutil.copy(INDEX_HTML, f"{WORK_DIR}/usr/share/lab-x-studio/index.html")
+if os.path.exists(QRCODE_JS):
+    shutil.copy(QRCODE_JS, f"{WORK_DIR}/usr/share/lab-x-studio/qrcode.min.js")
 
 # Ensure proper permissions for all files and directories
 for root, dirs, files in os.walk(WORK_DIR):
@@ -163,6 +166,8 @@ os.chmod(port_sh_path, 0o755)
 out_tar = os.path.join(DIST_DIR, f"Lab-X-Studio-Linux-Portable-{VERSION}.tar.gz")
 with tarfile.open(out_tar, "w:gz") as tar:
     tar.add(INDEX_HTML, arcname="Lab-X-Studio/index.html")
+    if os.path.exists(QRCODE_JS):
+        tar.add(QRCODE_JS, arcname="Lab-X-Studio/qrcode.min.js")
     tar.add(port_sh_path, arcname="Lab-X-Studio/run.sh")
     tar.add(f"{WORK_DIR}/usr/share/lab-x-studio/icon.svg", arcname="Lab-X-Studio/icon.svg")
     tar.add(f"{WORK_DIR}/usr/share/applications/lab-x-studio.desktop", arcname="Lab-X-Studio/lab-x-studio.desktop")
