@@ -138,6 +138,40 @@
 
     .preprinted-spacer {
       height: var(--print-spacer-height);
+      min-height: var(--print-spacer-height);
+      box-sizing: border-box;
+    }
+
+    /* Parameter Row Dividing Lines Toggle & Ultra-Compact Single-Page Mode */
+    body.hide-row-dividers .divide-y > * + *,
+    body.hide-row-dividers table tbody tr,
+    body.hide-row-dividers table tbody td {
+      border-top-width: 0 !important;
+      border-bottom-width: 0 !important;
+      border-color: transparent !important;
+    }
+    body.hide-row-dividers table tbody td,
+    body.hide-row-dividers table thead th {
+      padding-top: 0.5px !important;
+      padding-bottom: 0.5px !important;
+      line-height: 1.15 !important;
+    }
+    body.hide-row-dividers .group-header-row td {
+      padding-top: 1.5px !important;
+      padding-bottom: 1.5px !important;
+    }
+    body.hide-row-dividers .visual-gauge-container {
+      height: 6px !important;
+    }
+    body.hide-row-dividers .gauge-bar {
+      height: 3px !important;
+    }
+    body.hide-row-dividers .gauge-needle-wrap {
+      height: 4px !important;
+    }
+    body.hide-row-dividers .gauge-needle {
+      font-size: 6.5px !important;
+      top: -3px !important;
     }
 
     /* Editable Field */
@@ -283,7 +317,7 @@
       .no-print, #topRibbonBar, #leftNavRail, #dockDrawerPanel, #rightPageNavigator, #shareModal, #toastNotification, #updateModal, #customPromptModal {
         display: none !important;
       }
-      div, main, #mainContentArea, #sheetsContainer {
+      main, #mainContentArea, #sheetsContainer {
         overflow: visible !important;
         height: auto !important;
         max-height: none !important;
@@ -292,21 +326,59 @@
         background: transparent !important;
         width: 100% !important;
       }
+      .preprinted-spacer {
+        display: block !important;
+        height: var(--print-spacer-height) !important;
+        min-height: var(--print-spacer-height) !important;
+        max-height: var(--print-spacer-height) !important;
+        visibility: visible !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-sizing: border-box !important;
+      }
+      .preprinted-spacer.hidden {
+        display: none !important;
+      }
+      .digital-header-block.hidden {
+        display: none !important;
+      }
       .a4-sheet {
         margin: 0 !important;
         padding: var(--print-top-margin) var(--print-side-margin) var(--print-bottom-margin) var(--print-side-margin) !important;
         box-shadow: none !important;
-        width: 100% !important;
+        width: 210mm !important;
+        max-width: 210mm !important;
         min-height: 297mm !important;
+        max-height: 297mm !important;
+        height: 297mm !important;
+        box-sizing: border-box !important;
         transform: none !important;
         page-break-after: always !important;
         break-after: page !important;
         page-break-inside: avoid !important;
         break-inside: avoid !important;
+        overflow: hidden !important;
       }
       .a4-sheet:last-of-type {
         page-break-after: auto !important;
         break-after: auto !important;
+      }
+      body.hide-row-dividers .divide-y > * + *,
+      body.hide-row-dividers table tbody tr,
+      body.hide-row-dividers table tbody td {
+        border-top-width: 0 !important;
+        border-bottom-width: 0 !important;
+        border-color: transparent !important;
+      }
+      body.hide-row-dividers table tbody td,
+      body.hide-row-dividers table thead th {
+        padding-top: 0.5px !important;
+        padding-bottom: 0.5px !important;
+        line-height: 1.15 !important;
+      }
+      body.hide-row-dividers .group-header-row td {
+        padding-top: 1.5px !important;
+        padding-bottom: 1.5px !important;
       }
       .editable-field {
         border-bottom: none !important;
@@ -1138,6 +1210,17 @@
                 </div>
                 <input type="range" id="rngBottomMargin" min="4" max="25" value="8" oninput="updatePrintMargins()" class="w-full accent-teal-500 mt-1 cursor-pointer">
               </div>
+            </div>
+            <!-- Parameter Row Dividing Lines Toggle -->
+            <div class="pt-2 border-t border-slate-800 flex items-center justify-between">
+              <div>
+                <div class="text-[11px] font-bold text-slate-200">Parameter Row Dividing Lines</div>
+                <div class="text-[8.5px] text-slate-400">Turn OFF to hide lines &amp; fit max parameters on 1 A4 page</div>
+              </div>
+              <label class="switch-ui cursor-pointer">
+                <input type="checkbox" id="chkTableRowDividers" checked onchange="toggleTableRowDividers(this.checked)">
+                <span class="slider"></span>
+              </label>
             </div>
           </div>
 
@@ -5428,6 +5511,17 @@
       document.documentElement.style.setProperty('--print-bottom-margin', `${bottomMargin}mm`);
     }
 
+    function toggleTableRowDividers(showDividers) {
+      if (showDividers) {
+        document.body.classList.remove('hide-row-dividers');
+      } else {
+        document.body.classList.add('hide-row-dividers');
+      }
+      localStorage.setItem('labx_row_dividers', showDividers ? 'true' : 'false');
+      const chk = document.getElementById('chkTableRowDividers');
+      if (chk) chk.checked = !!showDividers;
+    }
+
     function savePrintMargins() {
       const config = {
         spacerHeight: document.getElementById('rngSpacerHeight').value,
@@ -5435,7 +5529,7 @@
         bottomMargin: document.getElementById('rngBottomMargin').value
       };
       localStorage.setItem('labx_margins_config', JSON.stringify(config));
-      showToast('Page Margins Saved as Permanent Default!');
+      showToast('Page Margins & Layout Saved as Permanent Default!');
     }
 
     function loadPrintMargins() {
@@ -5452,6 +5546,13 @@
           document.getElementById('rngBottomMargin').value = 8;
         }
         updatePrintMargins();
+
+        const savedDividers = localStorage.getItem('labx_row_dividers');
+        if (savedDividers === 'false') {
+          toggleTableRowDividers(false);
+        } else {
+          toggleTableRowDividers(true);
+        }
       } catch (e) {
         updatePrintMargins();
       }
@@ -5687,8 +5788,35 @@
       renderHistoryVaultList(document.getElementById('vaultSearchInput')?.value || '');
     }
 
+    function getActiveReportSheetsData() {
+      const activeSheets = [];
+      document.querySelectorAll('.report-checkbox:checked').forEach(cb => {
+        const sid = cb.getAttribute('data-sheet');
+        const sheet = document.getElementById(sid);
+        if (sheet) {
+          const clone = sheet.cloneNode(true);
+          // Strip interactive editing elements from the stored report sheet
+          clone.querySelectorAll('.no-print, button, input[type="checkbox"]').forEach(el => el.remove());
+          clone.querySelectorAll('.editable-field').forEach(ef => {
+            ef.removeAttribute('contenteditable');
+          });
+          activeSheets.push({
+            id: sid,
+            title: sheet.getAttribute('data-report-title') || sheet.querySelector('h2')?.textContent?.trim() || sid,
+            html: clone.innerHTML
+          });
+        }
+      });
+      return activeSheets;
+    }
+
     function savePatientRecord() {
       const patientId = document.getElementById('inpPatientId').value.trim() || `PID-${Math.floor(1000 + Math.random() * 9000)}`;
+      const expireDate = new Date();
+      expireDate.setDate(expireDate.getDate() + 30); // 30-day automatic cloud expiration
+
+      const activeSheets = getActiveReportSheetsData();
+
       const patient = {
         id: patientId,
         name: document.getElementById('inpPatientName').value.trim(),
@@ -5700,13 +5828,21 @@
         date: document.getElementById('inpDate').value.trim(),
         specimen: document.getElementById('inpSpecimen').value.trim(),
         remarks: document.getElementById('inpDoctorRemarks').value.trim(),
-        updatedAt: new Date().toISOString()
+        clinicName: document.getElementById('inpClinicName')?.value?.trim() || 'KRISHNA COMPUTERIZED LABORATORY',
+        clinicAddress: document.getElementById('inpClinicAddress')?.value?.trim() || 'Shalini Surgical & Maternity Hospital, Medical Enclave, Chandigarh Road, Tohana (Fatehabad) • Tel: 93153-35197',
+        updatedAt: new Date().toISOString(),
+        expiresAt: expireDate.toISOString(),
+        sheets: activeSheets
       };
+
+      // Keep local vault compact and lightning fast (saving sheets to cloud)
+      const patientForLocal = { ...patient, sheetsSummary: activeSheets.map(s => s.title) };
+      delete patientForLocal.sheets;
 
       const list = getStoredPatients();
       const existingIdx = list.findIndex(p => p.id === patient.id || p.labNo === patient.labNo || (p.name.toLowerCase() === patient.name.toLowerCase() && p.mobile === patient.mobile));
-      if (existingIdx >= 0) list[existingIdx] = patient;
-      else list.unshift(patient);
+      if (existingIdx >= 0) list[existingIdx] = patientForLocal;
+      else list.unshift(patientForLocal);
 
       setStoredPatients(list);
       LabXStorageEngine.save();

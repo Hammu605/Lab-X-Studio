@@ -135,10 +135,12 @@ jobs:
             - **Linux Self-Contained AppImage**: `Lab-X-Studio-1.1.3-beta.AppImage`
 
             ### 🚀 Highlights in v1.1.3-beta:
-            - **Firebase Firestore Multi-PC Live Sync**: Real-time patient records & custom templates cloud backup and synchronization across multiple lab computers.
-            - **Offline-First Hybrid Engine**: Works 100% offline seamlessly using local database vault with zero lag; syncs automatically as soon as internet is restored.
-            - **Live Public QR Code Verification**: Standard scannable QR stamp embedded on all report sheets, linking to `https://lab-x-studio.web.app/verify.html` for instant smartphone verification.
-            - **Cloud Sync Status Badge**: Live visual indicator in top header bar showing connection state (🟢 Cloud Live, 🟡 Offline Vault, 🔄 Syncing).
+            - **Pre-Printed Pad Print Fix**: Fixed letterhead spacer collapse in print mode so patient details and test names always print cleanly below pre-printed clinic headers without overlapping.
+            - **Parameter Row Dividing Lines Toggle**: New switch in Settings (Page Margins & Print Layout) to turn row divider lines ON/OFF; when OFF, rows condense into ultra-compact mode so all 34 CBC parameters fit cleanly on a single A4 sheet.
+            - **Native Laptop / OS Printer Dialog**: Directly invokes Windows/Linux native system printer dialog for seamless physical printing.
+            - **Full Authentic A4 Sheet Online Verification**: QR code scan opens `https://lab-x-studio.web.app/verify.html` with the authentic full pathology report sheet (tables, flags, gauges) and 1-click "Download / Print PDF" button.
+            - **30-Day Auto-Expiration Retention**: Reports automatically expire from online QR viewing after 30 days to protect patient medical data privacy.
+            - **Firebase Firestore Multi-PC Live Sync**: Real-time cloud synchronization and 1-click disaster recovery across workstations.
 
             Automatically compiled by GitHub Actions from `${{ github.ref_name }}` branch.
           files: release-dist/*

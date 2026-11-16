@@ -129,8 +129,21 @@ function createWindow() {
 }
 
 // IPC Handlers
+ipcMain.handle('print-system', async () => {
+  return new Promise((resolve) => {
+    if (!mainWindow) return resolve({ success: false, errorType: 'no_window' });
+    mainWindow.webContents.print({
+      silent: false,
+      printBackground: true
+    }, (success, errorType) => {
+      resolve({ success, errorType });
+    });
+  });
+});
+
 ipcMain.handle('print-silent', async (event, options = {}) => {
   return new Promise((resolve) => {
+    if (!mainWindow) return resolve({ success: false, errorType: 'no_window' });
     mainWindow.webContents.print({
       silent: true,
       printBackground: true,

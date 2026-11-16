@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   <title>Electronic Clinical Report Verification — Krishna Computerized Laboratory</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -10,29 +10,162 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
-    body { font-family: 'Plus Jakarta Sans', sans-serif; }
-    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+    
+    :root {
+      --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+    body {
+      font-family: var(--font-sans);
+    }
+    .font-mono {
+      font-family: var(--font-mono);
+    }
+
+    /* Authentic Pathology Flag Styles */
+    .flag-high {
+      color: #dc2626 !important;
+      font-weight: 700 !important;
+    }
+    .flag-low {
+      color: #d97706 !important;
+      font-weight: 700 !important;
+    }
+    .flag-normal {
+      color: #16a34a !important;
+      font-weight: 500 !important;
+    }
+
+    /* Authentic Range Gauges */
+    .visual-gauge-container {
+      width: 74px;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .gauge-bar {
+      height: 4px;
+      border-radius: 9999px;
+      display: flex;
+      overflow: hidden;
+      background-color: #e2e8f0;
+    }
+    .gauge-low { width: 25%; background-color: #fbbf24; }
+    .gauge-normal { width: 50%; background-color: #10b981; }
+    .gauge-high { width: 25%; background-color: #f43f5e; }
+    .gauge-needle-wrap {
+      position: relative;
+      height: 7px;
+      width: 100%;
+    }
+    .gauge-needle {
+      position: absolute;
+      top: -2px;
+      font-size: 7px;
+      line-height: 1;
+      transform: translateX(-50%);
+    }
+
+    /* Pathology Table Layout */
+    .a4-paper-container table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+    }
+    .a4-paper-container table th {
+      padding: 4px 5px;
+      font-weight: 700;
+      border-bottom: 2px solid #0f172a;
+      text-transform: uppercase;
+      font-size: 10px;
+    }
+    .a4-paper-container table td {
+      padding: 3px 5px;
+      vertical-align: middle;
+    }
+
+    /* Widal Matrix Cells */
+    .widal-cell {
+      font-weight: 700;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    /* Print Specific Rules */
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 8mm 10mm 8mm 10mm;
+      }
+      body {
+        background: #ffffff !important;
+        color: #000000 !important;
+        padding: 0 !important;
+      }
+      .no-print, header, nav, #topRibbon, #viewTabs, footer, #stateLoading, #stateError, #expiredNotice {
+        display: none !important;
+      }
+      .a4-paper-container {
+        box-shadow: none !important;
+        border: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        page-break-after: always;
+        break-after: page;
+      }
+      .a4-paper-container:last-child {
+        page-break-after: auto;
+        break-after: auto;
+      }
+    }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between py-6 px-4 sm:px-6">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between p-3 sm:p-6 antialiased">
 
-  <main class="max-w-xl w-full mx-auto space-y-5">
-    <!-- Header / Lab Branding -->
-    <header class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl text-center relative overflow-hidden">
-      <div class="absolute -top-12 -right-12 w-32 h-32 bg-teal-500/10 rounded-full blur-2xl pointer-events-none"></div>
-      <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-teal-950 border border-teal-500/30 text-teal-400 mb-3 shadow-inner">
-        <i class="fa-solid fa-microscope text-2xl"></i>
+  <!-- TOP STICKY APP BAR (VERIFICATION & PDF DOWNLOAD) -->
+  <header id="topRibbon" class="sticky top-2 z-40 max-w-4xl w-full mx-auto bg-slate-900/95 backdrop-blur-md border border-teal-500/40 rounded-2xl p-3 sm:p-4 shadow-2xl flex flex-wrap items-center justify-between gap-3 mb-4">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-teal-950 border border-teal-500/40 flex items-center justify-center text-teal-400 text-lg shadow-inner flex-shrink-0">
+        <i class="fa-solid fa-microscope"></i>
       </div>
-      <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-white">KRISHNA COMPUTERIZED LABORATORY</h1>
-      <p class="text-xs text-slate-400 mt-1">Advanced Pathology, Hematology & Clinical Investigation Diagnostic Centre</p>
-      <div class="mt-3 inline-flex items-center gap-1.5 px-3 py-1 bg-slate-800/80 border border-slate-700/80 rounded-full text-[11px] font-mono text-teal-300">
-        <i class="fa-solid fa-shield-check text-teal-400"></i> Official Cloud EMR Verification Portal
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] font-mono font-bold uppercase tracking-wider text-emerald-400 bg-emerald-950/80 border border-emerald-700/60 px-2 py-0.5 rounded flex items-center gap-1">
+            <i class="fa-solid fa-circle-check text-[9px]"></i> Authentic Report
+          </span>
+          <span id="dispHeaderLabNo" class="text-xs font-mono font-bold text-teal-300"></span>
+        </div>
+        <h1 class="text-sm sm:text-base font-extrabold text-white tracking-tight leading-tight mt-0.5">KRISHNA COMPUTERIZED LABORATORY</h1>
       </div>
-    </header>
+    </div>
 
-    <!-- State 1: Verification Loading -->
-    <section id="stateLoading" class="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center shadow-lg">
+    <!-- Actions -->
+    <div class="flex items-center gap-2 ml-auto">
+      <!-- View Toggle -->
+      <div id="viewTabs" class="hidden sm:inline-flex bg-slate-950 border border-slate-800 rounded-lg p-0.5 text-xs font-semibold">
+        <button id="btnTabFullSheet" onclick="switchView('full')" class="px-2.5 py-1 rounded-md text-white bg-teal-700 transition">
+          <i class="fa-solid fa-file-lines mr-1"></i> Full A4 Sheet
+        </button>
+        <button id="btnTabSummary" onclick="switchView('summary')" class="px-2.5 py-1 rounded-md text-slate-400 hover:text-white transition">
+          <i class="fa-solid fa-id-card mr-1"></i> Summary
+        </button>
+      </div>
+
+      <!-- 1-Click PDF Download / Print Button -->
+      <button onclick="window.print()" class="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition shadow-lg shadow-emerald-950 active:scale-95 cursor-pointer" title="Download or print authentic A4 PDF report">
+        <i class="fa-solid fa-print text-sm sm:text-base"></i>
+        <span>Download / Print PDF</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT CONTAINER -->
+  <main class="max-w-4xl w-full mx-auto flex-1 flex flex-col items-center">
+
+    <!-- STATE 1: LOADING -->
+    <section id="stateLoading" class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center shadow-2xl my-8">
       <div class="inline-block animate-spin text-teal-400 text-3xl mb-3">
         <i class="fa-solid fa-circle-notch"></i>
       </div>
@@ -40,86 +173,31 @@
       <p class="text-xs text-slate-400 mt-1">Cross-referencing accession token with cryptographic laboratory records.</p>
     </section>
 
-    <!-- State 2: Authenticated & Verified Result -->
-    <section id="stateVerified" class="hidden bg-slate-900 border border-emerald-500/40 rounded-2xl p-6 shadow-2xl relative">
-      <div class="flex items-center gap-3 border-b border-slate-800 pb-4 mb-4">
-        <div class="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500/50 flex items-center justify-center text-emerald-400 text-2xl flex-shrink-0">
-          <i class="fa-solid fa-check"></i>
-        </div>
-        <div>
-          <div class="flex items-center gap-2">
-            <span class="text-xs font-mono font-bold uppercase tracking-wider text-emerald-400 bg-emerald-950/80 border border-emerald-700/60 px-2 py-0.5 rounded">
-              Authentic Report
-            </span>
-            <span class="text-[10px] text-slate-400 font-mono" id="dispVerifiedTime"></span>
-          </div>
-          <h2 class="text-base sm:text-lg font-bold text-white mt-0.5">Digitally Verified & Sealed</h2>
-        </div>
+    <!-- STATE 2: EXPIRED RECORD NOTICE (30-DAY RETENTION) -->
+    <section id="stateExpired" class="hidden max-w-lg w-full bg-slate-900 border border-amber-500/50 rounded-2xl p-6 text-center shadow-2xl my-6">
+      <div class="w-14 h-14 rounded-full bg-amber-500/20 border border-amber-500/50 flex items-center justify-center text-amber-400 text-2xl mx-auto mb-3">
+        <i class="fa-solid fa-clock-rotate-left"></i>
       </div>
-
-      <!-- Patient Record Card -->
-      <div class="space-y-3 bg-slate-950/60 border border-slate-800/80 rounded-xl p-4 text-xs">
-        <div class="flex justify-between items-center border-b border-slate-800/60 pb-2">
-          <span class="text-slate-400 font-medium">Patient Full Name:</span>
-          <span class="font-bold text-white text-sm" id="dispPatientName">—</span>
-        </div>
-
-        <div class="grid grid-cols-2 gap-3 border-b border-slate-800/60 pb-2">
-          <div>
-            <span class="text-slate-400 block text-[11px]">Patient ID (PID):</span>
-            <span class="font-mono font-semibold text-teal-300" id="dispPatientId">—</span>
-          </div>
-          <div>
-            <span class="text-slate-400 block text-[11px]">Lab Accession No:</span>
-            <span class="font-mono font-semibold text-teal-300" id="dispLabNo">—</span>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-3 border-b border-slate-800/60 pb-2">
-          <div>
-            <span class="text-slate-400 block text-[11px]">Age & Gender:</span>
-            <span class="font-semibold text-slate-200" id="dispAgeGender">—</span>
-          </div>
-          <div>
-            <span class="text-slate-400 block text-[11px]">Contact Mobile:</span>
-            <span class="font-mono text-slate-200" id="dispMobile">—</span>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-3 border-b border-slate-800/60 pb-2">
-          <div>
-            <span class="text-slate-400 block text-[11px]">Collection Date:</span>
-            <span class="font-semibold text-slate-200" id="dispDate">—</span>
-          </div>
-          <div>
-            <span class="text-slate-400 block text-[11px]">Referred By:</span>
-            <span class="font-semibold text-slate-200 truncate" id="dispRefBy">—</span>
-          </div>
-        </div>
-
-        <div>
-          <span class="text-slate-400 block text-[11px]">Specimen Analyzed:</span>
-          <span class="font-semibold text-slate-200" id="dispSpecimen">—</span>
-        </div>
-
-        <div id="dispRemarksContainer" class="hidden pt-1">
-          <span class="text-slate-400 block text-[11px]">Clinical Remarks / Advice:</span>
-          <p class="font-normal text-slate-300 italic text-[11px] mt-0.5 bg-slate-900 p-2 rounded border border-slate-800" id="dispRemarks"></p>
-        </div>
+      <span class="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-400 bg-amber-950 border border-amber-800/80 px-2 py-0.5 rounded">
+        Online Access Window Expired
+      </span>
+      <h2 class="text-base sm:text-lg font-bold text-white mt-2">Clinical QR Access Period Concluded</h2>
+      <p class="text-xs text-slate-300 mt-2 leading-relaxed">
+        In compliance with patient confidentiality and diagnostic retention standards, online QR verification links remain active for 30 days from test generation.
+      </p>
+      <div class="mt-4 p-3 bg-slate-950/80 rounded-xl border border-slate-800 text-[11px] text-slate-400 text-left space-y-1">
+        <p><span class="font-semibold text-slate-300">Lab Accession No:</span> <span id="expLabNo" class="font-mono text-teal-300"></span></p>
+        <p><span class="font-semibold text-slate-300">Patient Name:</span> <span id="expPatientName" class="text-slate-200"></span></p>
+        <p><span class="font-semibold text-slate-300">Expiration Timestamp:</span> <span id="expTimestamp" class="font-mono text-amber-300"></span></p>
       </div>
-
-      <!-- Security Stamp -->
-      <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-[10px] text-slate-400 font-mono">
-        <span class="flex items-center gap-1 text-emerald-400">
-          <i class="fa-solid fa-lock text-xs"></i> Cloud Hash Verified
-        </span>
-        <span id="dispCloudTimestamp"></span>
-      </div>
+      <p class="text-[10.5px] text-slate-500 mt-3">
+        Please refer to your physical printed report or contact lab reception directly for official duplicate records.
+      </p>
     </section>
 
-    <!-- State 3: Not Found / Error -->
-    <section id="stateError" class="hidden bg-slate-900 border border-amber-500/40 rounded-2xl p-6 shadow-xl text-center">
-      <div class="w-12 h-12 rounded-full bg-amber-500/20 border border-amber-500/50 flex items-center justify-center text-amber-400 text-2xl mx-auto mb-3">
+    <!-- STATE 3: ERROR / NOT FOUND -->
+    <section id="stateError" class="hidden max-w-lg w-full bg-slate-900 border border-rose-500/40 rounded-2xl p-6 shadow-xl text-center my-6">
+      <div class="w-12 h-12 rounded-full bg-rose-500/20 border border-rose-500/50 flex items-center justify-center text-rose-400 text-2xl mx-auto mb-3">
         <i class="fa-solid fa-triangle-exclamation"></i>
       </div>
       <h2 class="text-base font-bold text-white">Record Verification Notice</h2>
@@ -133,12 +211,103 @@
       </div>
     </section>
 
-    <!-- Action / Lab Contact Info -->
-    <footer class="text-center space-y-2 text-xs text-slate-500">
-      <p>Krishna Computerized Laboratory • Reg No. PMC-48291</p>
-      <p class="text-[10px]">For queries or emergency clinical verification, please contact lab reception directly.</p>
-    </footer>
+    <!-- STATE 4: AUTHENTICATED & VERIFIED REPORT VIEWS -->
+    <section id="stateVerified" class="hidden w-full space-y-4">
+
+      <!-- VIEW A: FULL AUTHENTIC A4 CLINICAL REPORT SHEETS -->
+      <div id="viewFullContainer" class="w-full space-y-6">
+        <!-- Rendered A4 Paper Sheets Container -->
+        <div id="renderedSheetsContainer" class="w-full flex flex-col items-center">
+          <!-- Dynamically populated sheets appear here -->
+        </div>
+      </div>
+
+      <!-- VIEW B: PATIENT SUMMARY CARD VIEW -->
+      <div id="viewSummaryContainer" class="hidden max-w-xl w-full mx-auto bg-slate-900 border border-emerald-500/40 rounded-2xl p-6 shadow-2xl relative">
+        <div class="flex items-center gap-3 border-b border-slate-800 pb-4 mb-4">
+          <div class="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500/50 flex items-center justify-center text-emerald-400 text-2xl flex-shrink-0">
+            <i class="fa-solid fa-check"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-mono font-bold uppercase tracking-wider text-emerald-400 bg-emerald-950/80 border border-emerald-700/60 px-2 py-0.5 rounded">
+                Authentic Cloud Record
+              </span>
+              <span class="text-[10px] text-slate-400 font-mono" id="dispVerifiedTime"></span>
+            </div>
+            <h2 class="text-base sm:text-lg font-bold text-white mt-0.5">Digitally Verified &amp; Sealed</h2>
+          </div>
+        </div>
+
+        <!-- Patient Demographics Summary -->
+        <div class="space-y-3 bg-slate-950/60 border border-slate-800/80 rounded-xl p-4 text-xs">
+          <div class="flex justify-between items-center border-b border-slate-800/60 pb-2">
+            <span class="text-slate-400 font-medium">Patient Full Name:</span>
+            <span class="font-bold text-white text-sm" id="dispPatientName">—</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 border-b border-slate-800/60 pb-2">
+            <div>
+              <span class="text-slate-400 block text-[11px]">Patient ID (PID):</span>
+              <span class="font-mono font-semibold text-teal-300" id="dispPatientId">—</span>
+            </div>
+            <div>
+              <span class="text-slate-400 block text-[11px]">Lab Accession No:</span>
+              <span class="font-mono font-semibold text-teal-300" id="dispLabNo">—</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 border-b border-slate-800/60 pb-2">
+            <div>
+              <span class="text-slate-400 block text-[11px]">Age &amp; Gender:</span>
+              <span class="font-semibold text-slate-200" id="dispAgeGender">—</span>
+            </div>
+            <div>
+              <span class="text-slate-400 block text-[11px]">Contact Mobile:</span>
+              <span class="font-mono text-slate-200" id="dispMobile">—</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 border-b border-slate-800/60 pb-2">
+            <div>
+              <span class="text-slate-400 block text-[11px]">Collection Date:</span>
+              <span class="font-semibold text-slate-200" id="dispDate">—</span>
+            </div>
+            <div>
+              <span class="text-slate-400 block text-[11px]">Referred By:</span>
+              <span class="font-semibold text-slate-200 truncate" id="dispRefBy">—</span>
+            </div>
+          </div>
+
+          <div>
+            <span class="text-slate-400 block text-[11px]">Specimen Analyzed:</span>
+            <span class="font-semibold text-slate-200" id="dispSpecimen">—</span>
+          </div>
+
+          <div id="dispRemarksContainer" class="hidden pt-1">
+            <span class="text-slate-400 block text-[11px]">Clinical Remarks / Advice:</span>
+            <p class="font-normal text-slate-300 italic text-[11px] mt-0.5 bg-slate-900 p-2 rounded border border-slate-800" id="dispRemarks"></p>
+          </div>
+        </div>
+
+        <!-- Security Stamp -->
+        <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-[10px] text-slate-400 font-mono">
+          <span class="flex items-center gap-1 text-emerald-400">
+            <i class="fa-solid fa-lock text-xs"></i> Cloud Hash Verified
+          </span>
+          <span id="dispCloudTimestamp"></span>
+        </div>
+      </div>
+
+    </section>
   </main>
+
+  <!-- FOOTER -->
+  <footer class="text-center space-y-1.5 text-xs text-slate-500 pt-6 no-print">
+    <p class="font-semibold text-slate-400">Krishna Computerized Laboratory • Reg No. PMC-48291</p>
+    <p class="text-[10px]">Shalini Surgical &amp; Maternity Hospital, Medical Enclave, Chandigarh Road, Tohana (Fatehabad) • Tel: 93153-35197</p>
+    <p class="text-[10px] text-teal-400/80 font-mono">Official Electronic Laboratory Report Cloud Registry</p>
+  </footer>
 
   <script>
     // Firebase Configuration
@@ -153,8 +322,8 @@
 
     // Parse URL Parameters
     const urlParams = new URLSearchParams(window.location.search);
-    const labNo = urlParams.get('lab') || urlParams.get('token') || '';
-    const pid = urlParams.get('pid') || '';
+    const labNo = (urlParams.get('lab') || urlParams.get('token') || '').trim();
+    const pid = (urlParams.get('pid') || '').trim();
 
     document.getElementById('debugToken').textContent = labNo || 'None specified';
     document.getElementById('debugPid').textContent = pid || 'None specified';
@@ -162,11 +331,149 @@
     function showState(state) {
       document.getElementById('stateLoading').classList.add('hidden');
       document.getElementById('stateVerified').classList.add('hidden');
+      document.getElementById('stateExpired').classList.add('hidden');
       document.getElementById('stateError').classList.add('hidden');
 
       if (state === 'verified') document.getElementById('stateVerified').classList.remove('hidden');
+      else if (state === 'expired') document.getElementById('stateExpired').classList.remove('hidden');
       else if (state === 'error') document.getElementById('stateError').classList.remove('hidden');
       else document.getElementById('stateLoading').classList.remove('hidden');
+    }
+
+    function switchView(mode) {
+      const full = document.getElementById('viewFullContainer');
+      const sum = document.getElementById('viewSummaryContainer');
+      const btnF = document.getElementById('btnTabFullSheet');
+      const btnS = document.getElementById('btnTabSummary');
+
+      if (mode === 'summary') {
+        full.classList.add('hidden');
+        sum.classList.remove('hidden');
+        if (btnS) btnS.className = "px-2.5 py-1 rounded-md text-white bg-teal-700 transition";
+        if (btnF) btnF.className = "px-2.5 py-1 rounded-md text-slate-400 hover:text-white transition";
+      } else {
+        sum.classList.add('hidden');
+        full.classList.remove('hidden');
+        if (btnF) btnF.className = "px-2.5 py-1 rounded-md text-white bg-teal-700 transition";
+        if (btnS) btnS.className = "px-2.5 py-1 rounded-md text-slate-400 hover:text-white transition";
+      }
+    }
+
+    function renderAuthenticA4Sheets(docData) {
+      const container = document.getElementById('renderedSheetsContainer');
+      container.innerHTML = '';
+
+      const sheets = Array.isArray(docData.sheets) && docData.sheets.length > 0 ? docData.sheets : null;
+
+      if (!sheets) {
+        // Fallback to summary card if no serialized sheet tables present
+        switchView('summary');
+        return;
+      }
+
+      const clinicName = docData.clinicName || 'KRISHNA COMPUTERIZED LABORATORY';
+      const clinicAddress = docData.clinicAddress || 'Shalini Surgical & Maternity Hospital, Medical Enclave, Chandigarh Road, Tohana (Fatehabad) • Tel: 93153-35197';
+
+      sheets.forEach((sheet, idx) => {
+        const paper = document.createElement('article');
+        paper.className = "a4-paper-container bg-white text-slate-900 max-w-[820px] w-full mx-auto my-4 shadow-2xl rounded-2xl p-6 sm:p-10 border border-slate-200 relative overflow-x-auto";
+        
+        // Official Letterhead Header
+        const headerHtml = `
+          <header class="border-b-2 border-teal-800 pb-3 mb-4">
+            <div class="flex items-center justify-between gap-3">
+              <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-xl bg-teal-800 text-white flex items-center justify-center font-bold text-2xl flex-shrink-0 shadow-md">
+                  <i class="fa-solid fa-microscope"></i>
+                </div>
+                <div>
+                  <h1 class="text-lg sm:text-xl font-black tracking-wide text-teal-900 uppercase">${clinicName}</h1>
+                  <p class="text-[10.5px] font-semibold text-slate-600">${clinicAddress}</p>
+                </div>
+              </div>
+              <div class="text-right hidden sm:block">
+                <span class="inline-flex items-center gap-1 text-[10px] font-mono font-bold text-emerald-700 bg-emerald-50 border border-emerald-300 px-2 py-0.5 rounded">
+                  <i class="fa-solid fa-shield-check text-emerald-600"></i> Verified Cloud Record
+                </span>
+                <p class="text-[10px] text-slate-500 font-mono mt-0.5">Acc: ${docData.labNo || labNo || '—'}</p>
+              </div>
+            </div>
+
+            <!-- Patient Demographics Bar -->
+            <div class="mt-3 pt-2 border-t border-slate-200 grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+              <div>
+                <span class="text-slate-500 text-[10px] block">Patient Name</span>
+                <span class="font-bold text-slate-900">${docData.name || 'Anonymous'}</span>
+              </div>
+              <div>
+                <span class="text-slate-500 text-[10px] block">Age / Gender</span>
+                <span class="font-semibold text-slate-800">${docData.age || '—'} / ${docData.gender || '—'}</span>
+              </div>
+              <div>
+                <span class="text-slate-500 text-[10px] block">Lab Accession No</span>
+                <span class="font-mono font-bold text-teal-800">${docData.labNo || labNo || '—'}</span>
+              </div>
+              <div>
+                <span class="text-slate-500 text-[10px] block">Report Date</span>
+                <span class="font-semibold text-slate-800">${docData.date || '—'}</span>
+              </div>
+              <div>
+                <span class="text-slate-500 text-[10px] block">Referred By</span>
+                <span class="font-semibold text-slate-800">${docData.refBy || 'Dr. SELF'}</span>
+              </div>
+              <div>
+                <span class="text-slate-500 text-[10px] block">Specimen</span>
+                <span class="font-semibold text-slate-800">${docData.specimen || 'BLOOD'}</span>
+              </div>
+              <div>
+                <span class="text-slate-500 text-[10px] block">Patient ID (PID)</span>
+                <span class="font-mono text-slate-700">${docData.id || pid || '—'}</span>
+              </div>
+              <div>
+                <span class="text-slate-500 text-[10px] block">Contact Mobile</span>
+                <span class="font-mono text-slate-700">${docData.mobile || '—'}</span>
+              </div>
+            </div>
+          </header>
+        `;
+
+        // Report Body (Contains tables and results)
+        let bodyHtml = sheet.html || '';
+
+        // Remove any inner preprinted spacer or duplicates from cloned HTML
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = bodyHtml;
+        tempDiv.querySelectorAll('.clinic-header-space, .preprinted-spacer, .no-print, button, input[type="checkbox"]').forEach(el => el.remove());
+        
+        // Doctor Signatures Footer
+        const footerHtml = `
+          <footer class="mt-6 pt-4 border-t-2 border-slate-300 flex items-end justify-between text-xs">
+            <div class="text-left space-y-0.5">
+              <span class="inline-block px-2 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono text-[9px] text-slate-600">
+                <i class="fa-solid fa-cloud-check text-teal-600 mr-1"></i> EMR Cloud Hash Verified
+              </span>
+              <p class="text-[9px] text-slate-500">This Report is Not Valid for Medico Legal Purpose.</p>
+              <p class="text-[9px] text-slate-500">All Subject to Tohana Jurisdiction only.</p>
+            </div>
+
+            <div class="flex items-center gap-6 text-center">
+              <div>
+                <div class="h-8 flex items-center justify-center font-serif italic text-teal-800 font-bold text-sm">Verified</div>
+                <div class="border-t border-slate-400 pt-0.5 font-bold text-[10.5px] text-slate-800">D.M.L.T.</div>
+                <div class="text-[9px] text-slate-500">Medical Technologist</div>
+              </div>
+              <div>
+                <div class="h-8 flex items-center justify-center font-serif italic text-teal-900 font-bold text-sm">Dr. M. Garg</div>
+                <div class="border-t border-slate-400 pt-0.5 font-bold text-[10.5px] text-slate-900">Dr. Manoj Garg</div>
+                <div class="text-[9px] text-slate-500 font-mono">MBBS, M.S. (Reg. KMC45011)</div>
+              </div>
+            </div>
+          </footer>
+        `;
+
+        paper.innerHTML = headerHtml + tempDiv.innerHTML + footerHtml;
+        container.appendChild(paper);
+      });
     }
 
     async function verifyReport() {
@@ -184,7 +491,7 @@
 
         let docData = null;
 
-        // Try direct lookup by PID
+        // Try lookup by PID
         if (pid) {
           const docSnap = await db.collection('patients').doc(pid).get();
           if (docSnap.exists) {
@@ -201,7 +508,20 @@
         }
 
         if (docData) {
-          // Populate fields
+          // Check Expiration (30-day Retention Policy)
+          if (docData.expiresAt) {
+            const expTime = new Date(docData.expiresAt).getTime();
+            if (!isNaN(expTime) && Date.now() > expTime) {
+              document.getElementById('expLabNo').textContent = docData.labNo || labNo || '—';
+              document.getElementById('expPatientName').textContent = docData.name || 'Patient';
+              document.getElementById('expTimestamp').textContent = new Date(expTime).toLocaleString();
+              showState('expired');
+              return;
+            }
+          }
+
+          // Populate Summary Bar & Card
+          document.getElementById('dispHeaderLabNo').textContent = docData.labNo || labNo || '—';
           document.getElementById('dispPatientName').textContent = docData.name || 'Anonymous Patient';
           document.getElementById('dispPatientId').textContent = docData.id || pid || 'N/A';
           document.getElementById('dispLabNo').textContent = docData.labNo || labNo || 'N/A';
@@ -218,6 +538,9 @@
 
           document.getElementById('dispVerifiedTime').textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
           document.getElementById('dispCloudTimestamp').textContent = `Record Timestamp: ${docData.updatedAt || 'Recent'}`;
+
+          // Render authentic A4 sheets
+          renderAuthenticA4Sheets(docData);
 
           showState('verified');
         } else {
